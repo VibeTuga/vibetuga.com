@@ -3,3 +3,5 @@ products/
 .impeccable.md
 .memory/
 inbox.md
+docs/design/
+.DS_Store

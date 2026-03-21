@@ -104,76 +104,12 @@ vibetuga-web/
 
 ---
 
-## Design System & Visual Identity
+## Design System
 
-Read .impeccable.md for design instructions
-
-### Design Philosophy
-
-VibeTuga is a **tech-forward** Portuguese community. The design should reflect:
-
-- **Hacker culture** — Terminal vibes, monospace accents, code as aesthetic
-- **Portuguese pride** — Subtle nods to Portugal without being folklorish
-- **Neon-on-dark** — Dark mode by default, with vibrant neon accents
-- **Motion** — Micro-animations, glitch effects, typing animations
-- **Community** — Discord avatars, activity feeds, social proof
-
-### Color Palette
-
-```css
-:root {
-  /* Base - Dark with depth */
-  --bg-primary: #0a0a0f;
-  --bg-secondary: #12121a;
-  --bg-elevated: #1a1a2e;
-  --bg-surface: #16213e;
-
-  /* Neon Accents - The visual DNA */
-  --neon-green: #00ff88; /* Primary — success, CTAs, active */
-  --neon-blue: #00d4ff; /* Secondary — links, info */
-  --neon-purple: #b44aff; /* Tertiary — badges, premium */
-  --neon-orange: #ff6b35; /* Alert, highlight, hot */
-  --neon-pink: #ff2d7b; /* Error, live, urgent */
-
-  /* Tuga Touch */
-  --tuga-green: #006847;
-  --tuga-red: #d52b1e;
-
-  /* Text */
-  --text-primary: #e4e4ef;
-  --text-secondary: #8888a0;
-  --text-tertiary: #55556a;
-
-  /* Glow Effects */
-  --glow-green: 0 0 20px rgba(0, 255, 136, 0.3);
-  --glow-blue: 0 0 20px rgba(0, 212, 255, 0.3);
-  --glow-purple: 0 0 20px rgba(180, 74, 255, 0.3);
-}
-```
-
-### Typography
-
-```css
-font-family: "Clash Display", "Cabinet Grotesk", sans-serif; /* Headings */
-font-family: "Satoshi", "General Sans", sans-serif; /* Body */
-font-family: "JetBrains Mono", "Fira Code", monospace; /* Code */
-```
-
-> **NOTE:** Explore alternatives during implementation. Heading candidates: **Basement Grotesque**, **Tusker Grotesk**, **Clash Display**. VibeTuga must have its own visual personality — never generic.
-
-### Special Effects & Key Components
-
-**Effects:** Glow borders on hover, scanline overlay on hero, typing animation for taglines, terminal-style code blocks, subtle particle background, glitch text on highlights.
-
-| Component    | Style                                                                |
-| ------------ | -------------------------------------------------------------------- |
-| Cards        | Border glow on hover, subtle glassmorphism, slightly rounded corners |
-| Buttons      | Neon outline with glow, filled for primary CTAs                      |
-| Navigation   | Sticky, translucent, with blur backdrop                              |
-| Code blocks  | Terminal-style with header (red/yellow/green dots)                   |
-| Badges       | Pill shape, neon colors, glow for rare badges                        |
-| Avatars      | Colored ring based on user level                                     |
-| Toast/Alerts | Lateral slide-in, neon accent border                                 |
+- All UI work MUST follow the design system defined in `./DESIGN.md`
+- Before creating any component, read DESIGN.md for color palette, typography, spacing, and component styling rules
+- Never hardcode colors or font sizes — always use the tokens defined in DESIGN.md
+- When in doubt about a visual decision, DESIGN.md is the authority
 
 ---
 
@@ -419,4 +355,4 @@ Skills in `.claude/skills/` invoked via slash commands:
 
 **Content & UX:** `/critique`, `/clarify`, `/onboard`, `/adapt`, `/distill`
 
-**Setup:** `/teach-impeccable`, `/theme-factory`, `/skill-creator`
+**Setup:** `/theme-factory`, `/skill-creator`
