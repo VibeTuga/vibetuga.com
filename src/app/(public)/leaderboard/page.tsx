@@ -238,11 +238,13 @@ export default async function LeaderboardPage() {
                   )}
                 </div>
 
-                <h3
-                  className={`font-headline ${config.isFirst ? "text-2xl font-black" : "text-xl font-bold"} ${config.textColor} mb-1`}
-                >
-                  {username}
-                </h3>
+                <Link href={`/profile/${user.id}`}>
+                  <h3
+                    className={`font-headline ${config.isFirst ? "text-2xl font-black" : "text-xl font-bold"} ${config.textColor} mb-1 hover:underline`}
+                  >
+                    {username}
+                  </h3>
+                </Link>
 
                 <div
                   className={`px-3 py-0.5 ${config.isFirst ? `${config.bgColor} ${config.onColor} font-bold` : `${config.bgColor}/10 ${config.textColor} border ${config.borderColor}/20`} text-[10px] font-label uppercase mb-4`}
@@ -287,7 +289,10 @@ export default async function LeaderboardPage() {
                       #{String(rank).padStart(2, "0")}
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
+                      <Link
+                        href={`/profile/${user.id}`}
+                        className="flex items-center gap-3 hover:text-primary transition-colors"
+                      >
                         {user.image ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
@@ -301,7 +306,7 @@ export default async function LeaderboardPage() {
                           </div>
                         )}
                         <span className="font-bold">{username}</span>
-                      </div>
+                      </Link>
                     </td>
                     <td className="px-6 py-4">
                       <span className="px-2 py-0.5 rounded-sm bg-surface-container-highest text-[10px] font-label text-white/60">
@@ -367,7 +372,7 @@ export default async function LeaderboardPage() {
                   </p>
                 </div>
                 <Link
-                  href="/dashboard"
+                  href={`/profile/${session.user.id}`}
                   className="bg-primary text-on-primary font-label text-[10px] font-bold uppercase px-4 py-2 hover:shadow-[0_0_15px_rgba(161,255,194,0.4)] transition-all"
                 >
                   Ver Perfil

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { LogOut, PenLine, Shield } from "lucide-react";
+import { LogOut, PenLine, Shield, User } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,6 +14,7 @@ import {
 import { signOutAction } from "@/app/actions/auth";
 
 export interface SessionUser {
+  id?: string | null;
   name?: string | null;
   image?: string | null;
   role: "admin" | "moderator" | "author" | "seller" | "member";
@@ -79,6 +80,17 @@ export function UserMenu({ user }: { user: SessionUser }) {
           </span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-white/10" />
+        {user.id && (
+          <DropdownMenuItem
+            asChild
+            className="cursor-pointer px-3 py-2 text-white/70 hover:text-white focus:bg-white/5 focus:text-white"
+          >
+            <Link href={`/profile/${user.id}`}>
+              <User className="size-4" />
+              Meu Perfil
+            </Link>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem
           asChild
           className="cursor-pointer px-3 py-2 text-white/70 hover:text-white focus:bg-white/5 focus:text-white"
@@ -139,6 +151,16 @@ export function MobileUserMenu({
           </span>
         </div>
       </div>
+      {user.id && (
+        <Link
+          href={`/profile/${user.id}`}
+          onClick={onNavigate}
+          className="flex items-center gap-2 py-2.5 text-sm text-white/60 hover:text-white transition-colors"
+        >
+          <User className="size-4" />
+          Meu Perfil
+        </Link>
+      )}
       <Link
         href="/dashboard/submit-post"
         onClick={onNavigate}

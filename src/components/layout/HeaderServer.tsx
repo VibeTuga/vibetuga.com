@@ -7,6 +7,7 @@ export async function HeaderServer() {
 
   const user: SessionUser | null = session?.user
     ? {
+        id: session.user.id,
         name: session.user.name,
         image: session.user.image,
         role: session.user.role,
