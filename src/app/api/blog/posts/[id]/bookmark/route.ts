@@ -1,10 +1,21 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { blogPostBookmarks } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { auth } from "@/lib/auth";
+import { rateLimit } from "@/lib/rate-limit";
 
-export async function POST(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+const limiter = rateLimit({ interval: 60 * 1000, limit: 30 });
+
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const ip = request.headers.get("x-forwarded-for") ?? "127.0.0.1";
+  if (!limiter.check(ip).success) {
+    return NextResponse.json(
+      { error: "Demasiados pedidos. Tenta novamente mais tarde." },
+      { status: 429 },
+    );
+  }
+
   const session = await auth();
 
   if (!session?.user) {

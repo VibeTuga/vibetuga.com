@@ -54,6 +54,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Title, slug, and content are required" }, { status: 400 });
     }
 
+    if (typeof title !== "string" || title.trim().length > 200) {
+      return NextResponse.json({ error: "Title must be at most 200 characters" }, { status: 400 });
+    }
+    if (typeof slug !== "string" || slug.trim().length > 200) {
+      return NextResponse.json({ error: "Slug must be at most 200 characters" }, { status: 400 });
+    }
+    if (excerpt && (typeof excerpt !== "string" || excerpt.trim().length > 500)) {
+      return NextResponse.json(
+        { error: "Excerpt must be at most 500 characters" },
+        { status: 400 },
+      );
+    }
+
     // Members can only submit community posts for review
     const isCommunitySubmission = postType === "community" && status === "pending_review";
     if (!isPrivileged && !isCommunitySubmission) {
@@ -70,10 +83,10 @@ export async function POST(request: Request) {
       .insert(blogPosts)
       .values({
         authorId: session.user.id,
-        title,
-        slug,
-        excerpt: excerpt || null,
-        content,
+        title: title.trim(),
+        slug: slug.trim(),
+        excerpt: excerpt?.trim() || null,
+        content: content.trim(),
         categoryId: categoryId || null,
         tags: tags || [],
         coverImage: coverImage || null,

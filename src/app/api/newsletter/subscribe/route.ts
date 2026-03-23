@@ -3,8 +3,20 @@ import { db } from "@/lib/db";
 import { newsletterSubscribers } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
+import { sendWelcomeEmail } from "@/lib/email";
+import { rateLimit } from "@/lib/rate-limit";
+
+const limiter = rateLimit({ interval: 60 * 1000, limit: 5 });
 
 export async function POST(req: NextRequest) {
+  const ip = req.headers.get("x-forwarded-for") ?? "127.0.0.1";
+  if (!limiter.check(ip).success) {
+    return NextResponse.json(
+      { error: "Demasiados pedidos. Tenta novamente mais tarde." },
+      { status: 429 },
+    );
+  }
+
   try {
     const body = await req.json();
     const { email, source = "website" } = body as { email?: string; source?: string };
@@ -50,6 +62,13 @@ export async function POST(req: NextRequest) {
       status: "active",
       source: source.trim().slice(0, 100),
     });
+
+    // Send welcome email — don't fail subscription if email fails
+    try {
+      await sendWelcomeEmail(normalizedEmail);
+    } catch (emailError) {
+      console.error("Welcome email failed:", emailError);
+    }
 
     return NextResponse.json({ success: true, message: "Subscrito com sucesso!" }, { status: 201 });
   } catch (error) {
