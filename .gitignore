@@ -5,3 +5,5 @@ products/
 inbox.md
 docs/design/
 .DS_Store
+# VibeTuga orchestrator files
+.env.local
