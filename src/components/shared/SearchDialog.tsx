@@ -28,7 +28,7 @@ export function SearchDialog() {
   const router = useRouter();
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  // Cmd+K shortcut
+  // Cmd+K shortcut + custom event from SearchTrigger
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
@@ -39,8 +39,15 @@ export function SearchDialog() {
         setOpen(false);
       }
     }
+    function onOpenSearch() {
+      setOpen(true);
+    }
     window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    window.addEventListener("open-search", onOpenSearch);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("open-search", onOpenSearch);
+    };
   }, []);
 
   // Focus input when opened
@@ -222,12 +229,8 @@ export function SearchDialog() {
 }
 
 export function SearchTrigger() {
-  const [, setOpen] = useState(false);
-
   function handleClick() {
-    // Dispatch Cmd+K
-    window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }));
-    setOpen(true);
+    window.dispatchEvent(new CustomEvent("open-search"));
   }
 
   return (

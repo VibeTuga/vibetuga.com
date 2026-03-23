@@ -25,9 +25,10 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
       .where(and(eq(blogComments.postId, postId), eq(blogComments.isApproved, true)))
       .orderBy(asc(blogComments.createdAt));
 
-    // Build threaded tree (max 3 levels)
+    // Build threaded tree (max 3 levels: root=0, reply=1, reply-to-reply=2)
     type Comment = (typeof allComments)[number] & { children: Comment[] };
     const commentMap = new Map<string, Comment>();
+    const depthMap = new Map<string, number>();
     const roots: Comment[] = [];
 
     for (const c of allComments) {
@@ -38,32 +39,23 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
       const node = commentMap.get(c.id)!;
       if (!c.parentId) {
         roots.push(node);
+        depthMap.set(c.id, 0);
       } else {
         const parent = commentMap.get(c.parentId);
         if (parent) {
-          // Max 3 levels: if parent already has a parentId and that parent also has a parentId,
-          // attach to grandparent instead
-          let target = parent;
-          let depth = 1;
-          let cursor = parent;
-          while (cursor.parentId && depth < 2) {
-            const ancestor = commentMap.get(cursor.parentId);
-            if (ancestor) {
-              target = ancestor;
-              cursor = ancestor;
-              depth++;
-            } else {
-              break;
-            }
-          }
-          if (depth >= 2 && cursor.parentId) {
-            // Already at max depth, attach to the deepest allowed parent
-            target.children.push(node);
-          } else {
+          const parentDepth = depthMap.get(c.parentId) ?? 0;
+          if (parentDepth < 2) {
+            // Attach to parent (depth 0 or 1)
             parent.children.push(node);
+            depthMap.set(c.id, parentDepth + 1);
+          } else {
+            // Max depth reached — attach to parent but don't increase depth
+            parent.children.push(node);
+            depthMap.set(c.id, parentDepth);
           }
         } else {
           roots.push(node);
+          depthMap.set(c.id, 0);
         }
       }
     }

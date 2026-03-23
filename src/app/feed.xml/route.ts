@@ -42,8 +42,8 @@ export async function GET() {
 
       return `    <item>
       <title>${escapeXml(post.title)}</title>
-      <link>${SITE_URL}/blog/${post.slug}</link>
-      <guid isPermaLink="true">${SITE_URL}/blog/${post.slug}</guid>
+      <link>${SITE_URL}/blog/${escapeXml(post.slug)}</link>
+      <guid isPermaLink="true">${SITE_URL}/blog/${escapeXml(post.slug)}</guid>
       <description>${escapeXml(post.excerpt || "")}</description>
       <pubDate>${pubDate}</pubDate>
       <author>${escapeXml(author)}</author>${

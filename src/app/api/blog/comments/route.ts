@@ -18,6 +18,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "postId and content are required" }, { status: 400 });
     }
 
+    if (content.trim().length > 5000) {
+      return NextResponse.json({ error: "Comment too long (max 5000 chars)" }, { status: 400 });
+    }
+
     const [comment] = await db
       .insert(blogComments)
       .values({
