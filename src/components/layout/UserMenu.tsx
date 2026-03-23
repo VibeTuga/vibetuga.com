@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { LogOut, PenLine, Shield, User } from "lucide-react";
+import { LayoutDashboard, LogOut, PenLine, Shield, User } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -95,6 +95,15 @@ export function UserMenu({ user }: { user: SessionUser }) {
           asChild
           className="cursor-pointer px-3 py-2 text-white/70 hover:text-white focus:bg-white/5 focus:text-white"
         >
+          <Link href="/dashboard/profile">
+            <LayoutDashboard className="size-4" />
+            Dashboard
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          asChild
+          className="cursor-pointer px-3 py-2 text-white/70 hover:text-white focus:bg-white/5 focus:text-white"
+        >
           <Link href="/dashboard/submit-post">
             <PenLine className="size-4" />
             Submeter Post
@@ -161,6 +170,14 @@ export function MobileUserMenu({
           Meu Perfil
         </Link>
       )}
+      <Link
+        href="/dashboard/profile"
+        onClick={onNavigate}
+        className="flex items-center gap-2 py-2.5 text-sm text-white/60 hover:text-white transition-colors"
+      >
+        <LayoutDashboard className="size-4" />
+        Dashboard
+      </Link>
       <Link
         href="/dashboard/submit-post"
         onClick={onNavigate}
