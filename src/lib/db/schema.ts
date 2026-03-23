@@ -107,6 +107,7 @@ export const users = pgTable("user", {
   level: integer("level").default(1).notNull(),
   streakDays: integer("streak_days").default(0).notNull(),
   isBanned: boolean("is_banned").default(false).notNull(),
+  isVerified: boolean("is_verified").default(false).notNull(),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
 });
@@ -130,6 +131,8 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   }),
   roleRequests: many(roleRequests, { relationName: "roleRequestUser" }),
   roleRequestsReviewed: many(roleRequests, { relationName: "roleRequestReviewer" }),
+  followers: many(userFollows, { relationName: "following" }),
+  following: many(userFollows, { relationName: "follower" }),
 }));
 
 // ─── NextAuth Required Tables ───────────────────────────────
@@ -667,5 +670,106 @@ export const roleRequestsRelations = relations(roleRequests, ({ one }) => ({
     fields: [roleRequests.reviewedBy],
     references: [users.id],
     relationName: "roleRequestReviewer",
+  }),
+}));
+
+// ─── Reports ─────────────────────────────────────────────────
+
+export const reportStatusEnum = pgEnum("report_status", ["pending", "resolved", "dismissed"]);
+
+export const reports = pgTable(
+  "report",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    reporterId: uuid("reporter_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    contentType: varchar("content_type", { length: 50 }).notNull(),
+    contentId: uuid("content_id").notNull(),
+    reason: varchar("reason", { length: 100 }).notNull(),
+    details: text("details"),
+    status: reportStatusEnum("status").default("pending").notNull(),
+    resolvedBy: uuid("resolved_by").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    resolvedNote: text("resolved_note"),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [
+    index("report_reporter_idx").on(t.reporterId),
+    index("report_content_idx").on(t.contentType, t.contentId),
+    index("report_status_idx").on(t.status),
+  ],
+);
+
+export const reportsRelations = relations(reports, ({ one }) => ({
+  reporter: one(users, {
+    fields: [reports.reporterId],
+    references: [users.id],
+    relationName: "reportReporter",
+  }),
+  resolver: one(users, {
+    fields: [reports.resolvedBy],
+    references: [users.id],
+    relationName: "reportResolver",
+  }),
+}));
+
+// ─── User Follows ────────────────────────────────────────────
+
+export const userFollows = pgTable(
+  "user_follow",
+  {
+    followerId: uuid("follower_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    followingId: uuid("following_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.followerId, t.followingId] })],
+);
+
+export const userFollowsRelations = relations(userFollows, ({ one }) => ({
+  follower: one(users, {
+    fields: [userFollows.followerId],
+    references: [users.id],
+    relationName: "follower",
+  }),
+  following: one(users, {
+    fields: [userFollows.followingId],
+    references: [users.id],
+    relationName: "following",
+  }),
+}));
+
+// ─── Admin Audit Log ─────────────────────────────────────────
+
+export const adminAuditLog = pgTable(
+  "admin_audit_log",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    actorId: uuid("actor_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    action: varchar("action", { length: 100 }).notNull(),
+    targetType: varchar("target_type", { length: 50 }).notNull(),
+    targetId: varchar("target_id", { length: 255 }).notNull(),
+    details: text("details"),
+    ipAddress: varchar("ip_address", { length: 45 }),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [
+    index("audit_log_actor_idx").on(t.actorId),
+    index("audit_log_created_idx").on(t.createdAt),
+    index("audit_log_action_idx").on(t.action),
+  ],
+);
+
+export const adminAuditLogRelations = relations(adminAuditLog, ({ one }) => ({
+  actor: one(users, {
+    fields: [adminAuditLog.actorId],
+    references: [users.id],
   }),
 }));

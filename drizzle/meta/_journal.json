@@ -50,6 +50,13 @@
       "when": 1774294454316,
       "tag": "0006_friendly_mentallo",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1774297450689,
+      "tag": "0007_lowly_terror",
+      "breakpoints": true
     }
   ]
 }
