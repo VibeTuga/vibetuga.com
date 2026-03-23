@@ -16,6 +16,9 @@ export const metadata: Metadata = {
     description:
       "O marketplace digital da comunidade VibeTuga. Skills, auto-runners, agent kits, prompt packs, templates e muito mais.",
   },
+  alternates: {
+    canonical: "https://vibetuga.com/store",
+  },
 };
 
 type SearchParams = Promise<{

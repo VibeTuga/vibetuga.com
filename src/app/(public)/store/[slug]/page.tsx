@@ -6,6 +6,7 @@ import { getProductBySlug } from "@/lib/db/queries/store";
 import { MarkdownContent } from "@/components/blog/MarkdownContent";
 import { BuyButton } from "@/components/store/BuyButton";
 import { ProductReviews } from "@/components/store/ProductReviews";
+import { getProductJsonLd } from "@/lib/jsonld";
 
 export const revalidate = 60;
 
@@ -66,6 +67,9 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
         images: [{ url: product.coverImage, width: 1200, height: 630 }],
       }),
     },
+    alternates: {
+      canonical: `https://vibetuga.com/store/${slug}`,
+    },
   };
 }
 
@@ -88,6 +92,10 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(getProductJsonLd(product)) }}
+      />
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 mb-8 text-xs font-mono text-white/40">
         <Link href="/store" className="hover:text-primary transition-colors">

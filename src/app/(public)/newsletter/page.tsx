@@ -10,6 +10,9 @@ export const metadata: Metadata = {
     description:
       "Recebe os melhores artigos, projetos da comunidade e dicas de vibe coding diretamente no teu email.",
   },
+  alternates: {
+    canonical: "https://vibetuga.com/newsletter",
+  },
 };
 
 export default function NewsletterPage() {

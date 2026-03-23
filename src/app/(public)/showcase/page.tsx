@@ -20,6 +20,9 @@ export const metadata: Metadata = {
     description:
       "Projetos construídos pela comunidade VibeTuga. Descobre o que a comunidade portuguesa de vibe coding está a construir.",
   },
+  alternates: {
+    canonical: "https://vibetuga.com/showcase",
+  },
 };
 
 type SearchParams = Promise<{
