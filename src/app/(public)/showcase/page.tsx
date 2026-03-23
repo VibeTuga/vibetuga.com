@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
 import { getApprovedProjects, getFeaturedProjects } from "@/lib/db/queries/showcase";
 import {
@@ -7,6 +8,8 @@ import {
   ShowcaseSearchInput,
   SubmitProjectFAB,
 } from "@/components/showcase/ShowcaseFilters";
+
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "Showcase | VibeTuga",
@@ -55,10 +58,13 @@ export default async function ShowcasePage({ searchParams }: { searchParams: Sea
             <div className="flex flex-col lg:flex-row">
               <div className="lg:w-2/3 h-[400px] overflow-hidden relative bg-surface-container-lowest">
                 {featuredProject.coverImage ? (
-                  <img
+                  <Image
                     src={featuredProject.coverImage}
                     alt={featuredProject.title}
-                    className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 66vw"
+                    className="object-cover grayscale hover:grayscale-0 transition-all duration-700"
+                    priority
                   />
                 ) : (
                   <div className="w-full h-full bg-gradient-to-br from-surface-container-highest via-surface-container to-surface-container-low" />
@@ -167,7 +173,7 @@ export default async function ShowcasePage({ searchParams }: { searchParams: Sea
           <Link
             key={project.id}
             href={`/showcase/${project.slug}`}
-            className="group bg-surface-container-low border border-white/5 hover:border-primary/50 transition-all duration-300 flex flex-col hover:scale-[1.02]"
+            className="group bg-surface-container-low border border-white/5 hover:border-primary/50 transition-all duration-300 flex flex-col hover:-translate-y-[4px] hover:shadow-[0_12px_32px_rgba(0,0,0,0.5)]"
           >
             {/* Cover Image */}
             <div className="relative h-48 overflow-hidden bg-surface-container-lowest">
@@ -175,7 +181,7 @@ export default async function ShowcasePage({ searchParams }: { searchParams: Sea
                 <img
                   src={project.coverImage}
                   alt={project.title}
-                  className="w-full h-full object-cover opacity-60 group-hover:opacity-90 transition-opacity"
+                  className="w-full h-full object-cover opacity-60 group-hover:opacity-90 transition-all duration-500 group-hover:scale-[1.04]"
                 />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-surface-container-highest to-surface-container opacity-60 group-hover:opacity-90 transition-opacity" />

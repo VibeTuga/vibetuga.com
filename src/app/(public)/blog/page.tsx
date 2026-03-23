@@ -7,6 +7,8 @@ import { BlogCard } from "@/components/blog/BlogCard";
 import { Pagination } from "@/components/blog/Pagination";
 import { SearchInput, SortSelect } from "@/components/blog/BlogFilters";
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: "Blog | VibeTuga",
   description:

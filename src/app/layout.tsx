@@ -6,6 +6,7 @@ import "./globals.css";
 const geist = Geist({
   subsets: ["latin"],
   variable: "--font-sans",
+  display: "swap",
 });
 
 const spaceGrotesk = Space_Grotesk({

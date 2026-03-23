@@ -1,5 +1,7 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import type { Metadata } from "next";
 import {
   getHomepageStats,
@@ -9,6 +11,8 @@ import {
 } from "@/lib/db/queries/homepage";
 import { getLevelName } from "@/lib/db/queries/profile";
 import { formatDatePT } from "@/lib/blog-utils";
+
+const AnimateIn = dynamic(() => import("@/components/shared/AnimateIn").then((m) => m.AnimateIn));
 
 export const metadata: Metadata = {
   title: "VibeTuga — Comunidade Portuguesa de Vibe Coding",
@@ -31,60 +35,45 @@ const POST_HOVER_COLORS = [
   "hover:border-secondary",
 ];
 
-export default async function HomePage() {
-  const [stats, featuredProjects, latestPosts, leaderboard] = await Promise.all([
-    getHomepageStats(),
-    getHomepageFeaturedProjects(),
-    getHomepageLatestPosts(),
-    getHomepageLeaderboard(),
-  ]);
+// ─── Static Hero Section (no data needed, renders immediately) ───────────────
 
-  const statsDisplay = [
-    { value: stats.totalMembers.toLocaleString("pt-PT"), label: "Membros", color: "text-primary" },
-    {
-      value: stats.totalProjects.toLocaleString("pt-PT"),
-      label: "Projetos",
-      color: "text-tertiary",
-    },
-    {
-      value: stats.totalPosts.toLocaleString("pt-PT"),
-      label: "Blog Posts",
-      color: "text-secondary",
-    },
-    { value: stats.totalXP.toLocaleString("pt-PT"), label: "XP Total", color: "text-white" },
-  ];
-
+function HeroSection() {
   return (
-    <>
-      {/* Hero Section */}
-      <section className="relative min-h-[80vh] flex flex-col items-center justify-center text-center px-6 overflow-hidden">
-        <img
-          src="/images/hero-bg.svg"
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 hero-gradient" />
-        <div className="relative z-10 max-w-4xl mx-auto">
+    <section className="relative min-h-[80vh] flex flex-col items-center justify-center text-center px-6 overflow-hidden">
+      <img
+        src="/images/hero-bg.svg"
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 w-full h-full object-cover"
+      />
+      <div className="absolute inset-0 hero-gradient" />
+      <div className="relative z-10 max-w-4xl mx-auto">
+        <AnimateIn delay={0.05} duration={0.4}>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 mb-8">
             <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
             <span className="font-label text-[10px] tracking-widest text-primary uppercase">
               System Online: v2.0.4
             </span>
           </div>
+        </AnimateIn>
 
+        <AnimateIn delay={0.15} duration={0.5}>
           <h1 className="font-headline text-5xl md:text-8xl font-black tracking-tighter mb-6 leading-none">
             Onde o código <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-tertiary">
               encontra a vibe
             </span>
           </h1>
+        </AnimateIn>
 
+        <AnimateIn delay={0.25} duration={0.5}>
           <p className="text-lg md:text-xl text-on-surface-variant max-w-2xl mx-auto mb-10 font-light">
             A comunidade portuguesa de vibe coding, AI tooling e desenvolvimento assistido por
             agentes.
           </p>
+        </AnimateIn>
 
+        <AnimateIn delay={0.35} duration={0.5}>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a
               href="https://discord.vibetuga.com"
@@ -101,57 +90,157 @@ export default async function HomePage() {
               Explora Projetos
             </Link>
           </div>
-        </div>
-      </section>
+        </AnimateIn>
+      </div>
+    </section>
+  );
+}
 
-      {/* Stats Bar */}
-      <section className="border-y border-outline-variant/10 bg-surface-container-low py-8">
-        <div className="max-w-[1440px] mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
-          {statsDisplay.map((stat) => (
-            <div key={stat.label} className="flex flex-col">
+// ─── Skeletons ───────────────────────────────────────────────────────────────
+
+function StatsSkeleton() {
+  return (
+    <section className="border-y border-outline-variant/10 bg-surface-container-low py-8">
+      <div className="max-w-[1440px] mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} className="flex flex-col gap-2">
+            <div className="h-8 w-24 bg-surface-container-high animate-pulse rounded-sm" />
+            <div className="h-3 w-16 bg-surface-container-high animate-pulse rounded-sm" />
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ProjectsSkeleton() {
+  return (
+    <section className="max-w-[1440px] mx-auto px-6 py-24">
+      <div className="h-8 w-48 bg-surface-container-high animate-pulse rounded-sm mb-12" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} className="bg-surface-container border border-white/5 p-4">
+            <div className="aspect-video mb-4 bg-surface-container-high animate-pulse" />
+            <div className="h-5 w-3/4 bg-surface-container-high animate-pulse mb-2 rounded-sm" />
+            <div className="h-4 w-1/2 bg-surface-container-high animate-pulse rounded-sm" />
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function LatestContentSkeleton() {
+  return (
+    <section className="max-w-[1440px] mx-auto px-6 py-24 border-t border-outline-variant/10">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        <div className="lg:col-span-2 space-y-6">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6 p-4">
+              <div className="aspect-video bg-surface-container-high animate-pulse" />
+              <div className="space-y-3">
+                <div className="h-3 w-16 bg-surface-container-high animate-pulse rounded-sm" />
+                <div className="h-6 w-3/4 bg-surface-container-high animate-pulse rounded-sm" />
+                <div className="h-4 w-1/2 bg-surface-container-high animate-pulse rounded-sm" />
+              </div>
+            </div>
+          ))}
+        </div>
+        <div>
+          <div className="h-8 w-32 bg-surface-container-high animate-pulse mb-8 rounded-sm" />
+          <div className="bg-surface-container border border-white/5">
+            {[0, 1, 2, 3, 4].map((i) => (
+              <div key={i} className="px-4 py-4 border-b border-white/5 flex items-center gap-3">
+                <div className="h-4 w-8 bg-surface-container-high animate-pulse rounded-sm" />
+                <div className="w-8 h-8 rounded-full bg-surface-container-high animate-pulse" />
+                <div className="h-4 w-24 bg-surface-container-high animate-pulse rounded-sm" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Async data sections (enable streaming SSR) ──────────────────────────────
+
+async function StatsSection() {
+  const stats = await getHomepageStats();
+  const statsDisplay = [
+    {
+      value: stats.totalMembers.toLocaleString("pt-PT"),
+      label: "Membros",
+      color: "text-primary",
+    },
+    {
+      value: stats.totalProjects.toLocaleString("pt-PT"),
+      label: "Projetos",
+      color: "text-tertiary",
+    },
+    {
+      value: stats.totalPosts.toLocaleString("pt-PT"),
+      label: "Blog Posts",
+      color: "text-secondary",
+    },
+    { value: stats.totalXP.toLocaleString("pt-PT"), label: "XP Total", color: "text-white" },
+  ];
+
+  return (
+    <section className="border-y border-outline-variant/10 bg-surface-container-low py-8">
+      <div className="max-w-[1440px] mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
+        {statsDisplay.map((stat, index) => (
+          <AnimateIn key={stat.label} delay={index * 0.08} duration={0.4}>
+            <div className="flex flex-col">
               <span className={`text-3xl font-mono font-bold ${stat.color}`}>{stat.value}</span>
               <span className="font-label text-[10px] tracking-widest text-on-surface-variant uppercase">
                 {stat.label}
               </span>
             </div>
-          ))}
-        </div>
-      </section>
+          </AnimateIn>
+        ))}
+      </div>
+    </section>
+  );
+}
 
-      {/* Featured Projects */}
-      <section className="max-w-[1440px] mx-auto px-6 py-24">
-        <div className="flex justify-between items-end mb-12">
-          <div>
-            <h2 className="font-headline text-3xl font-black uppercase tracking-tight mb-2">
-              Projetos em Destaque
-            </h2>
-            <p className="text-on-surface-variant text-sm">O que a comunidade está a construir.</p>
-          </div>
+async function FeaturedProjectsSection() {
+  const featuredProjects = await getHomepageFeaturedProjects();
+
+  return (
+    <section className="max-w-[1440px] mx-auto px-6 py-24">
+      <div className="flex justify-between items-end mb-12">
+        <div>
+          <h2 className="font-headline text-3xl font-black uppercase tracking-tight mb-2">
+            Projetos em Destaque
+          </h2>
+          <p className="text-on-surface-variant text-sm">O que a comunidade está a construir.</p>
+        </div>
+        <Link
+          href="/showcase"
+          className="text-primary text-xs font-bold uppercase tracking-widest border-b border-primary/20 pb-1 hover:border-primary transition-all"
+        >
+          Ver todos
+        </Link>
+      </div>
+
+      {featuredProjects.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 text-center border border-white/5 bg-surface-container">
+          <p className="text-on-surface-variant mb-4">Ainda não há projetos em destaque.</p>
           <Link
-            href="/showcase"
-            className="text-primary text-xs font-bold uppercase tracking-widest border-b border-primary/20 pb-1 hover:border-primary transition-all"
+            href="/dashboard/submit-project"
+            className="text-primary text-sm font-bold uppercase tracking-widest hover:underline"
           >
-            Ver todos
+            Submete o teu projeto →
           </Link>
         </div>
-
-        {featuredProjects.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center border border-white/5 bg-surface-container">
-            <p className="text-on-surface-variant mb-4">Ainda não há projetos em destaque.</p>
-            <Link
-              href="/dashboard/submit-project"
-              className="text-primary text-sm font-bold uppercase tracking-widest hover:underline"
-            >
-              Submete o teu projeto →
-            </Link>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredProjects.map((project, index) => (
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {featuredProjects.map((project, index) => (
+            <AnimateIn key={project.id} delay={index * 0.08} duration={0.45}>
               <Link
-                key={project.id}
                 href={`/showcase/${project.slug}`}
-                className="group bg-surface-container border border-white/5 p-4 transition-all hover:bg-surface-container-high hover:border-primary/30 block"
+                className="group bg-surface-container border border-white/5 p-4 transition-all hover:bg-surface-container-high hover:border-primary/30 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.4)] block"
               >
                 {/* Cover image */}
                 <div className="relative aspect-video mb-4 overflow-hidden bg-surface-container-lowest">
@@ -162,6 +251,7 @@ export default async function HomePage() {
                       fill
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                       className="object-cover opacity-60 group-hover:opacity-80 transition-opacity"
+                      loading="lazy"
                     />
                   ) : (
                     <img
@@ -214,48 +304,57 @@ export default async function HomePage() {
                   </div>
                 </div>
               </Link>
-            ))}
-          </div>
-        )}
-      </section>
+            </AnimateIn>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
 
-      {/* Latest Posts & Leaderboard Grid */}
-      <section className="max-w-[1440px] mx-auto px-6 py-24 border-t border-outline-variant/10">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          {/* Latest Posts (2/3 width) */}
-          <div className="lg:col-span-2">
-            <div className="flex justify-between items-center mb-10">
-              <h2 className="font-headline text-3xl font-black uppercase tracking-tight">
-                Últimos Posts
-              </h2>
-              <Link href="/blog" className="text-white/40 hover:text-white transition-colors">
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
+async function LatestContentSection() {
+  const [latestPosts, leaderboard] = await Promise.all([
+    getHomepageLatestPosts(),
+    getHomepageLeaderboard(),
+  ]);
+
+  return (
+    <section className="max-w-[1440px] mx-auto px-6 py-24 border-t border-outline-variant/10">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        {/* Latest Posts (2/3 width) */}
+        <div className="lg:col-span-2">
+          <div className="flex justify-between items-center mb-10">
+            <h2 className="font-headline text-3xl font-black uppercase tracking-tight">
+              Últimos Posts
+            </h2>
+            <Link href="/blog" className="text-white/40 hover:text-white transition-colors">
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </Link>
+          </div>
+
+          {latestPosts.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center border border-white/5 bg-surface-container">
+              <p className="text-on-surface-variant mb-4">Ainda não há posts publicados.</p>
+              <Link
+                href="/dashboard/submit-post"
+                className="text-primary text-sm font-bold uppercase tracking-widest hover:underline"
+              >
+                Escreve o primeiro post →
               </Link>
             </div>
-
-            {latestPosts.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 text-center border border-white/5 bg-surface-container">
-                <p className="text-on-surface-variant mb-4">Ainda não há posts publicados.</p>
-                <Link
-                  href="/dashboard/submit-post"
-                  className="text-primary text-sm font-bold uppercase tracking-widest hover:underline"
-                >
-                  Escreve o primeiro post →
-                </Link>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                {latestPosts.map((post, index) => (
+          ) : (
+            <div className="space-y-6">
+              {latestPosts.map((post, index) => (
+                <AnimateIn key={post.id} delay={index * 0.1} duration={0.4}>
                   <Link
-                    key={post.id}
                     href={`/blog/${post.slug}`}
                     className={`group grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6 p-4 hover:bg-surface-container-low transition-colors border-l-2 border-transparent ${POST_HOVER_COLORS[index % POST_HOVER_COLORS.length]} block`}
                   >
@@ -267,6 +366,7 @@ export default async function HomePage() {
                           fill
                           sizes="(max-width: 768px) 100vw, 200px"
                           className="object-cover opacity-60 group-hover:opacity-80 transition-opacity"
+                          loading="lazy"
                         />
                       ) : (
                         <img
@@ -310,12 +410,14 @@ export default async function HomePage() {
                       </div>
                     </div>
                   </Link>
-                ))}
-              </div>
-            )}
-          </div>
+                </AnimateIn>
+              ))}
+            </div>
+          )}
+        </div>
 
-          {/* Leaderboard Widget (1/3 width) */}
+        {/* Leaderboard Widget (1/3 width) */}
+        <AnimateIn delay={0.2} duration={0.5} direction="left">
           <div>
             <h2 className="font-headline text-2xl font-black uppercase tracking-tight mb-8">
               Leaderboard
@@ -417,8 +519,27 @@ export default async function HomePage() {
               </div>
             )}
           </div>
-        </div>
-      </section>
+        </AnimateIn>
+      </div>
+    </section>
+  );
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
+export default function HomePage() {
+  return (
+    <>
+      <HeroSection />
+      <Suspense fallback={<StatsSkeleton />}>
+        <StatsSection />
+      </Suspense>
+      <Suspense fallback={<ProjectsSkeleton />}>
+        <FeaturedProjectsSection />
+      </Suspense>
+      <Suspense fallback={<LatestContentSkeleton />}>
+        <LatestContentSection />
+      </Suspense>
     </>
   );
 }
