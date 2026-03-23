@@ -5,6 +5,7 @@ import { users, showcaseProjects } from "@/lib/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { AnimatedPodiumItem, AnimatedTableRow } from "@/components/leaderboard/AnimatedLeaderboard";
+import { VerifiedBadge } from "@/components/shared/VerifiedBadge";
 
 export const revalidate = 30;
 
@@ -112,6 +113,7 @@ export default async function LeaderboardPage() {
         image: users.image,
         xpPoints: users.xpPoints,
         level: users.level,
+        isVerified: users.isVerified,
         projectCount: sql<number>`cast(count(distinct ${showcaseProjects.id}) as int)`,
       })
       .from(users)
@@ -142,6 +144,7 @@ export default async function LeaderboardPage() {
           image: users.image,
           xpPoints: users.xpPoints,
           level: users.level,
+          isVerified: users.isVerified,
           projectCount: sql<number>`cast(count(distinct ${showcaseProjects.id}) as int)`,
         })
         .from(users)
@@ -259,9 +262,10 @@ export default async function LeaderboardPage() {
 
                 <Link href={`/profile/${user.id}`}>
                   <h3
-                    className={`font-headline ${config.isFirst ? "text-2xl font-black" : "text-xl font-bold"} ${config.textColor} mb-1 hover:underline`}
+                    className={`font-headline ${config.isFirst ? "text-2xl font-black" : "text-xl font-bold"} ${config.textColor} mb-1 hover:underline flex items-center gap-1.5 justify-center`}
                   >
                     {username}
+                    {user.isVerified && <VerifiedBadge />}
                   </h3>
                 </Link>
 
@@ -326,6 +330,7 @@ export default async function LeaderboardPage() {
                           </div>
                         )}
                         <span className="font-bold">{username}</span>
+                        {user.isVerified && <VerifiedBadge />}
                       </Link>
                     </td>
                     <td className="px-6 py-4">
