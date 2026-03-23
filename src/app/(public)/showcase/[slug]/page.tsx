@@ -7,6 +7,7 @@ import { ReportButton } from "@/components/shared/ReportButton";
 import { VoteButtons } from "@/components/showcase/VoteButtons";
 import { BarChart3 } from "lucide-react";
 import { auth } from "@/lib/auth";
+import { getProjectJsonLd } from "@/lib/jsonld";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -63,6 +64,10 @@ export default async function ShowcaseProjectPage({ params }: Props) {
 
   return (
     <div className="max-w-[1200px] mx-auto px-6 py-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(getProjectJsonLd(project)) }}
+      />
       {/* Breadcrumb */}
       <nav className="mb-8 flex items-center gap-2 text-[10px] font-mono text-white/30 uppercase tracking-widest">
         <Link href="/showcase" className="hover:text-primary transition-colors">
