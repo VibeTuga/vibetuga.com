@@ -38,7 +38,7 @@ export default function RootLayout({
         "dark h-full antialiased",
         geist.variable,
         spaceGrotesk.variable,
-        inter.variable
+        inter.variable,
       )}
     >
       <body className="scanlines min-h-full flex flex-col bg-background text-on-background font-body selection:bg-primary selection:text-on-primary">

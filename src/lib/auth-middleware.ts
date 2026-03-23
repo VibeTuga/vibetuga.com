@@ -28,27 +28,16 @@ export async function getRequiredSession(roles?: UserRole[]) {
  * Returns 401 if unauthenticated, 403 if unauthorized.
  */
 export function withRole(allowedRoles: UserRole[]) {
-  return function <T>(
-    handler: (
-      request: Request,
-      context: T
-    ) => Promise<Response> | Response
-  ) {
+  return function <T>(handler: (request: Request, context: T) => Promise<Response> | Response) {
     return async (request: Request, context: T) => {
       const session = await auth();
 
       if (!session?.user) {
-        return NextResponse.json(
-          { error: "Unauthenticated" },
-          { status: 401 }
-        );
+        return NextResponse.json({ error: "Unauthenticated" }, { status: 401 });
       }
 
       if (!allowedRoles.includes(session.user.role)) {
-        return NextResponse.json(
-          { error: "Forbidden" },
-          { status: 403 }
-        );
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
       }
 
       return handler(request, context);

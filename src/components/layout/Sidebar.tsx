@@ -2,13 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Home,
-  FileText,
-  LayoutGrid,
-  Trophy,
-  User,
-} from "lucide-react";
+import { Home, FileText, LayoutGrid, Trophy, User } from "lucide-react";
 import { Logo } from "@/components/shared/Logo";
 import { cn } from "@/lib/utils";
 
@@ -49,7 +43,7 @@ export function Sidebar() {
                 "flex items-center gap-4 px-6 py-3 font-mono text-xs uppercase transition-all duration-200",
                 active
                   ? "text-primary bg-primary/5 border-r-2 border-primary"
-                  : "text-white/40 hover:bg-surface-container hover:text-primary"
+                  : "text-white/40 hover:bg-surface-container hover:text-primary",
               )}
             >
               <Icon size={20} />

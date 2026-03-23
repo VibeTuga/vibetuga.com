@@ -39,7 +39,7 @@ export function Header() {
                 "transition-colors duration-200",
                 isActive(link.href)
                   ? "text-primary border-b-2 border-primary pb-1"
-                  : "text-white/60 hover:text-white"
+                  : "text-white/60 hover:text-white",
               )}
             >
               {link.label}
@@ -78,9 +78,7 @@ export function Header() {
                 onClick={() => setMobileOpen(false)}
                 className={cn(
                   "py-3 font-headline text-sm uppercase tracking-tight transition-colors",
-                  isActive(link.href)
-                    ? "text-primary"
-                    : "text-white/60 hover:text-white"
+                  isActive(link.href) ? "text-primary" : "text-white/60 hover:text-white",
                 )}
               >
                 {link.label}

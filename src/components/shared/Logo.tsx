@@ -19,7 +19,7 @@ export function Logo({ className, size = "md" }: LogoProps) {
       className={cn(
         "font-headline font-black tracking-tighter text-primary transition-all duration-300 hover:drop-shadow-[0_0_10px_rgba(161,255,194,0.5)]",
         sizeClasses[size],
-        className
+        className,
       )}
     >
       VibeTuga

@@ -17,22 +17,20 @@ export default function NewsletterPage() {
       </h1>
 
       <p className="text-on-surface-variant text-lg max-w-lg mx-auto mb-4 font-light">
-        Recebe os melhores artigos, novos projetos da comunidade, e dicas de
-        vibe coding diretamente no teu email.
+        Recebe os melhores artigos, novos projetos da comunidade, e dicas de vibe coding diretamente
+        no teu email.
       </p>
 
       <div className="text-on-surface-variant/60 text-sm mb-12 space-y-2">
         <p className="flex items-center justify-center gap-2">
-          <span className="text-primary font-mono">&gt;</span> Artigos e
-          tutoriais exclusivos
+          <span className="text-primary font-mono">&gt;</span> Artigos e tutoriais exclusivos
         </p>
         <p className="flex items-center justify-center gap-2">
-          <span className="text-tertiary font-mono">&gt;</span> Projetos em
-          destaque da semana
+          <span className="text-tertiary font-mono">&gt;</span> Projetos em destaque da semana
         </p>
         <p className="flex items-center justify-center gap-2">
-          <span className="text-secondary font-mono">&gt;</span> Ferramentas AI
-          e novidades do ecossistema
+          <span className="text-secondary font-mono">&gt;</span> Ferramentas AI e novidades do
+          ecossistema
         </p>
       </div>
 
