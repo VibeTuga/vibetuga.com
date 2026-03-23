@@ -240,9 +240,7 @@ export default function LeaderboardPage() {
                     {row.level}
                   </span>
                 </td>
-                <td className="px-6 py-4 font-mono font-bold text-primary-dim">
-                  {row.xp}
-                </td>
+                <td className="px-6 py-4 font-mono font-bold text-primary-dim">{row.xp}</td>
                 <td className="px-6 py-4 font-mono">{row.projects}</td>
                 <td className="px-6 py-4">
                   <div className="flex gap-1">
@@ -266,28 +264,20 @@ export default function LeaderboardPage() {
         <div className="max-w-[1200px] mx-auto">
           <div className="bg-surface-container-high border-l-4 border-primary shadow-[0_0_40px_rgba(0,0,0,0.8)] p-4 flex flex-wrap md:flex-nowrap items-center justify-between gap-4">
             <div className="flex items-center gap-6">
-              <div className="font-headline font-black text-2xl italic text-primary">
-                #142
-              </div>
+              <div className="font-headline font-black text-2xl italic text-primary">#142</div>
               <div className="hidden md:block w-[1px] h-8 bg-white/10" />
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-surface-container-highest border border-primary" />
                 <div>
                   <p className="font-bold text-sm">Tu (VibeUser_Zero)</p>
-                  <p className="text-[10px] font-label text-primary uppercase">
-                    Você está aqui
-                  </p>
+                  <p className="text-[10px] font-label text-primary uppercase">Você está aqui</p>
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-8 pr-4">
               <div className="text-right">
-                <p className="text-[10px] font-label text-white/40 uppercase">
-                  Total XP
-                </p>
-                <p className="font-mono font-bold text-primary text-xl">
-                  12.450
-                </p>
+                <p className="text-[10px] font-label text-white/40 uppercase">Total XP</p>
+                <p className="font-mono font-bold text-primary text-xl">12.450</p>
               </div>
               <Link
                 href="#"

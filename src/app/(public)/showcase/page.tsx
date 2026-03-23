@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 const filterTabs = [
   { label: "All", active: true },
   { label: "SaaS", active: false },
@@ -44,8 +42,7 @@ const projects = [
     title: "VibeShader Gen",
     author: "@pixel_ninja",
     level: 8,
-    description:
-      "Gerador de shaders GLSL procedurais via prompts de linguagem natural.",
+    description: "Gerador de shaders GLSL procedurais via prompts de linguagem natural.",
     tags: ["#GLSL", "#AI"],
     aiTool: "GPT-4o",
     votes: 184,
@@ -97,9 +94,7 @@ export default function ShowcasePage() {
                   <p className="text-xs font-label text-secondary tracking-widest uppercase">
                     Criado por
                   </p>
-                  <p className="text-sm font-bold text-white">
-                    {featuredProject.author}
-                  </p>
+                  <p className="text-sm font-bold text-white">{featuredProject.author}</p>
                 </div>
               </div>
               <h2 className="font-headline text-3xl font-black text-white mb-4 leading-tight uppercase">
@@ -127,11 +122,7 @@ export default function ShowcasePage() {
                   stroke="currentColor"
                   strokeWidth={2}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M17 8l4 4m0 0l-4 4m4-4H3"
-                  />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>
               </button>
             </div>
@@ -214,15 +205,9 @@ export default function ShowcasePage() {
                   stroke="currentColor"
                   strokeWidth={2}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M5 15l7-7 7 7"
-                  />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
                 </svg>
-                <span className="font-label text-[10px] font-bold text-white">
-                  {project.votes}
-                </span>
+                <span className="font-label text-[10px] font-bold text-white">{project.votes}</span>
               </div>
             </div>
 
@@ -252,10 +237,7 @@ export default function ShowcasePage() {
 
               <div className="mt-auto flex flex-wrap gap-2 pt-4 border-t border-white/5">
                 {project.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="text-[9px] font-label text-white/40 uppercase"
-                  >
+                  <span key={tag} className="text-[9px] font-label text-white/40 uppercase">
                     {tag}
                   </span>
                 ))}
@@ -292,15 +274,9 @@ export default function ShowcasePage() {
               stroke="currentColor"
               strokeWidth={1}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
-            <p className="font-headline text-white/20 uppercase font-black">
-              Teu Projeto Aqui
-            </p>
+            <p className="font-headline text-white/20 uppercase font-black">Teu Projeto Aqui</p>
           </div>
         </div>
       </div>

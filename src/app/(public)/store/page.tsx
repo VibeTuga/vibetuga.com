@@ -19,29 +19,21 @@ export default function StorePage() {
       </h1>
 
       <p className="text-on-surface-variant text-lg max-w-lg mx-auto mb-12 font-light">
-        O marketplace da comunidade VibeTuga está em construção. Skills,
-        auto-runners, agent kits, prompt packs e muito mais.
+        O marketplace da comunidade VibeTuga está em construção. Skills, auto-runners, agent kits,
+        prompt packs e muito mais.
       </p>
 
       {/* Teaser items */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-12 w-full max-w-lg">
-        {[
-          "Skills",
-          "Auto Runners",
-          "Agent Kits",
-          "Prompt Packs",
-          "Templates",
-          "Cursos",
-        ].map((item) => (
-          <div
-            key={item}
-            className="bg-surface-container border border-white/5 p-4 text-center"
-          >
-            <span className="font-label text-[10px] text-white/30 uppercase tracking-widest">
-              {item}
-            </span>
-          </div>
-        ))}
+        {["Skills", "Auto Runners", "Agent Kits", "Prompt Packs", "Templates", "Cursos"].map(
+          (item) => (
+            <div key={item} className="bg-surface-container border border-white/5 p-4 text-center">
+              <span className="font-label text-[10px] text-white/30 uppercase tracking-widest">
+                {item}
+              </span>
+            </div>
+          ),
+        )}
       </div>
 
       {/* CTA */}

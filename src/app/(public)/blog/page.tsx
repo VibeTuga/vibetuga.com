@@ -1,10 +1,20 @@
-import Link from "next/link";
-
 const categories = [
   { label: "Tudo", active: true, color: "bg-primary text-on-primary" },
-  { label: "Tutoriais", active: false, color: "border-tertiary/20 text-tertiary hover:bg-tertiary/10" },
-  { label: "Showcase", active: false, color: "border-secondary/20 text-secondary hover:bg-secondary/10" },
-  { label: "Deep Dives", active: false, color: "border-primary/20 text-primary hover:bg-primary/10" },
+  {
+    label: "Tutoriais",
+    active: false,
+    color: "border-tertiary/20 text-tertiary hover:bg-tertiary/10",
+  },
+  {
+    label: "Showcase",
+    active: false,
+    color: "border-secondary/20 text-secondary hover:bg-secondary/10",
+  },
+  {
+    label: "Deep Dives",
+    active: false,
+    color: "border-primary/20 text-primary hover:bg-primary/10",
+  },
   { label: "Hardware", active: false, color: "border-white/10 text-white/60 hover:text-white" },
 ] as const;
 
@@ -96,9 +106,7 @@ export default function BlogPage() {
               <button
                 key={cat.label}
                 className={`px-4 py-1.5 text-xs font-bold uppercase rounded-sm flex-shrink-0 transition-colors ${
-                  cat.active
-                    ? cat.color
-                    : `bg-surface-container border ${cat.color}`
+                  cat.active ? cat.color : `bg-surface-container border ${cat.color}`
                 }`}
               >
                 {cat.label}
@@ -158,9 +166,7 @@ export default function BlogPage() {
             className={`group relative bg-surface-container rounded-sm overflow-hidden transition-all duration-300 hover:-translate-y-1 ${post.hoverShadow} flex flex-col`}
           >
             {/* Top color bar */}
-            <div
-              className={`absolute top-0 left-0 w-full h-[3px] ${post.categoryColor} z-10`}
-            />
+            <div className={`absolute top-0 left-0 w-full h-[3px] ${post.categoryColor} z-10`} />
 
             {/* Image placeholder */}
             <div className="aspect-[16/9] overflow-hidden relative">
@@ -182,9 +188,7 @@ export default function BlogPage() {
               >
                 {post.title}
               </h3>
-              <p className="text-white/50 text-sm line-clamp-2 mb-6">
-                {post.excerpt}
-              </p>
+              <p className="text-white/50 text-sm line-clamp-2 mb-6">{post.excerpt}</p>
 
               {/* Author & meta */}
               <div className="mt-auto flex items-center justify-between border-t border-white/5 pt-6">
@@ -192,16 +196,12 @@ export default function BlogPage() {
                   <div className="w-8 h-8 rounded-full bg-surface-container-highest border border-outline-variant/30" />
                   <div>
                     <div className="flex items-center gap-2">
-                      <p className="text-xs font-bold text-white uppercase">
-                        {post.author}
-                      </p>
+                      <p className="text-xs font-bold text-white uppercase">{post.author}</p>
                       <span className="text-[8px] bg-white/5 px-1.5 py-0.5 text-white/40 uppercase">
                         {post.authorRole}
                       </span>
                     </div>
-                    <p className="text-[10px] text-white/30 font-mono">
-                      {post.date}
-                    </p>
+                    <p className="text-[10px] text-white/30 font-mono">{post.date}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 text-white/40">
@@ -217,14 +217,34 @@ export default function BlogPage() {
               {/* Engagement */}
               <div className="flex items-center gap-4 mt-4 justify-end">
                 <span className="flex items-center gap-1 text-white/40 text-[10px] font-mono hover:text-primary transition-colors cursor-pointer">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                    />
                   </svg>
                   {post.likes}
                 </span>
                 <span className="flex items-center gap-1 text-white/40 text-[10px] font-mono hover:text-tertiary transition-colors cursor-pointer">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                    />
                   </svg>
                   {post.comments}
                 </span>
@@ -237,7 +257,13 @@ export default function BlogPage() {
       {/* Pagination */}
       <div className="mt-16 flex justify-center items-center gap-2">
         <button className="w-10 h-10 flex items-center justify-center border border-white/5 hover:border-primary/50 text-white/40 hover:text-primary transition-all">
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
@@ -255,7 +281,13 @@ export default function BlogPage() {
           12
         </button>
         <button className="w-10 h-10 flex items-center justify-center border border-white/5 hover:border-primary/50 text-white/40 hover:text-primary transition-all">
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
           </svg>
         </button>

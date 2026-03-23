@@ -98,8 +98,8 @@ export default function HomePage() {
           </h1>
 
           <p className="text-lg md:text-xl text-on-surface-variant max-w-2xl mx-auto mb-10 font-light">
-            A comunidade portuguesa de vibe coding, AI tooling e desenvolvimento
-            assistido por agentes.
+            A comunidade portuguesa de vibe coding, AI tooling e desenvolvimento assistido por
+            agentes.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -124,9 +124,7 @@ export default function HomePage() {
         <div className="max-w-[1440px] mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
           {stats.map((stat) => (
             <div key={stat.label} className="flex flex-col">
-              <span className={`text-3xl font-mono font-bold ${stat.color}`}>
-                {stat.value}
-              </span>
+              <span className={`text-3xl font-mono font-bold ${stat.color}`}>{stat.value}</span>
               <span className="font-label text-[10px] tracking-widest text-on-surface-variant uppercase">
                 {stat.label}
               </span>
@@ -142,9 +140,7 @@ export default function HomePage() {
             <h2 className="font-headline text-3xl font-black uppercase tracking-tight mb-2">
               Projetos em Destaque
             </h2>
-            <p className="text-on-surface-variant text-sm">
-              O que a comunidade está a construir.
-            </p>
+            <p className="text-on-surface-variant text-sm">O que a comunidade está a construir.</p>
           </div>
           <Link
             href="/showcase"
@@ -168,15 +164,11 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <h3 className="font-headline font-bold text-lg mb-2 truncate">
-                {project.title}
-              </h3>
+              <h3 className="font-headline font-bold text-lg mb-2 truncate">{project.title}</h3>
 
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-5 h-5 rounded-full bg-surface-container-highest" />
-                <span className="text-xs text-on-surface-variant">
-                  {project.author}
-                </span>
+                <span className="text-xs text-on-surface-variant">{project.author}</span>
               </div>
 
               <div className="flex flex-wrap gap-2 mb-6">
@@ -199,15 +191,9 @@ export default function HomePage() {
                     stroke="currentColor"
                     strokeWidth={2}
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M5 15l7-7 7 7"
-                    />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
                   </svg>
-                  <span className="text-xs font-mono font-bold">
-                    {project.votes}
-                  </span>
+                  <span className="text-xs font-mono font-bold">{project.votes}</span>
                 </div>
               </div>
             </div>
@@ -225,7 +211,13 @@ export default function HomePage() {
                 Últimos Posts
               </h2>
               <Link href="/blog" className="text-white/40 hover:text-white transition-colors">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>
               </Link>
@@ -250,15 +242,9 @@ export default function HomePage() {
                       {post.title}
                     </h3>
                     <div className="flex items-center gap-4 text-xs text-on-surface-variant">
-                      <span className="flex items-center gap-1">
-                        {post.author}
-                      </span>
-                      <span className="flex items-center gap-1 font-mono">
-                        {post.readTime}
-                      </span>
-                      <span className="flex items-center gap-1 font-mono">
-                        {post.views}
-                      </span>
+                      <span className="flex items-center gap-1">{post.author}</span>
+                      <span className="flex items-center gap-1 font-mono">{post.readTime}</span>
+                      <span className="flex items-center gap-1 font-mono">{post.views}</span>
                     </div>
                   </div>
                 </div>
@@ -290,15 +276,11 @@ export default function HomePage() {
                   {leaderboardData.map((entry) => (
                     <tr
                       key={entry.rank}
-                      className={`border-b border-white/5 ${
-                        entry.highlight ? "bg-primary/5" : ""
-                      }`}
+                      className={`border-b border-white/5 ${entry.highlight ? "bg-primary/5" : ""}`}
                     >
                       <td
                         className={`px-4 py-4 font-bold ${
-                          entry.highlight
-                            ? "text-primary"
-                            : "text-on-surface-variant"
+                          entry.highlight ? "text-primary" : "text-on-surface-variant"
                         }`}
                       >
                         {entry.rank}
@@ -307,9 +289,7 @@ export default function HomePage() {
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-surface-container-highest border border-outline-variant/30" />
                           <div className="flex flex-col">
-                            <span className="text-white font-bold">
-                              {entry.username}
-                            </span>
+                            <span className="text-white font-bold">{entry.username}</span>
                             <span className="text-[9px] text-primary/60 uppercase">
                               {entry.level}
                             </span>
