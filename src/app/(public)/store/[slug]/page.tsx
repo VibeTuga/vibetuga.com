@@ -6,7 +6,9 @@ import { getProductBySlug } from "@/lib/db/queries/store";
 import { MarkdownContent } from "@/components/blog/MarkdownContent";
 import { BuyButton } from "@/components/store/BuyButton";
 import { ProductReviews } from "@/components/store/ProductReviews";
+import { ReportButton } from "@/components/shared/ReportButton";
 import { getProductJsonLd } from "@/lib/jsonld";
+import { auth } from "@/lib/auth";
 
 export const revalidate = 60;
 
@@ -75,7 +77,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 
 export default async function ProductDetailPage({ params }: { params: Params }) {
   const { slug } = await params;
-  const product = await getProductBySlug(slug);
+  const [product, session] = await Promise.all([getProductBySlug(slug), auth()]);
 
   if (!product) {
     notFound();
@@ -206,6 +208,11 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
 
               {/* Buy button */}
               <BuyButton productId={product.id} />
+              {session?.user && (
+                <div className="mt-4 pt-4 border-t border-white/5 flex justify-end">
+                  <ReportButton contentType="product" contentId={product.id} size="sm" />
+                </div>
+              )}
             </div>
 
             {/* Product details mini card */}
@@ -239,7 +246,7 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
       </div>
 
       {/* Reviews section */}
-      <ProductReviews productId={product.id} />
+      <ProductReviews productId={product.id} isAuthenticated={!!session?.user} />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { MessageSquare, Reply, Send, Loader2 } from "lucide-react";
 import { formatDatePT } from "@/lib/blog-utils";
+import { ReportButton } from "@/components/shared/ReportButton";
 
 type Comment = {
   id: string;
@@ -108,11 +109,13 @@ function CommentNode({
   postId,
   depth,
   onRefresh,
+  isAuthenticated,
 }: {
   comment: Comment;
   postId: string;
   depth: number;
   onRefresh: () => void;
+  isAuthenticated?: boolean;
 }) {
   const [showReply, setShowReply] = useState(false);
   const authorName = comment.authorDisplayName || comment.authorName || "Anónimo";
@@ -151,15 +154,20 @@ function CommentNode({
         </p>
 
         {/* Actions */}
-        {depth < 2 && (
-          <button
-            onClick={() => setShowReply(!showReply)}
-            className="mt-3 flex items-center gap-1.5 text-[10px] font-mono text-white/30 uppercase tracking-widest hover:text-tertiary transition-colors"
-          >
-            <Reply size={12} />
-            Responder
-          </button>
-        )}
+        <div className="mt-3 flex items-center gap-4">
+          {depth < 2 && (
+            <button
+              onClick={() => setShowReply(!showReply)}
+              className="flex items-center gap-1.5 text-[10px] font-mono text-white/30 uppercase tracking-widest hover:text-tertiary transition-colors"
+            >
+              <Reply size={12} />
+              Responder
+            </button>
+          )}
+          {isAuthenticated && (
+            <ReportButton contentType="comment" contentId={comment.id} size="sm" />
+          )}
+        </div>
 
         {/* Inline reply form */}
         {showReply && (
@@ -188,6 +196,7 @@ function CommentNode({
               postId={postId}
               depth={depth + 1}
               onRefresh={onRefresh}
+              isAuthenticated={isAuthenticated}
             />
           ))}
         </div>
@@ -196,7 +205,15 @@ function CommentNode({
   );
 }
 
-export function CommentSection({ postId, initialCount }: { postId: string; initialCount: number }) {
+export function CommentSection({
+  postId,
+  initialCount,
+  isAuthenticated,
+}: {
+  postId: string;
+  initialCount: number;
+  isAuthenticated?: boolean;
+}) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [count, setCount] = useState(initialCount);
@@ -256,6 +273,7 @@ export function CommentSection({ postId, initialCount }: { postId: string; initi
               postId={postId}
               depth={0}
               onRefresh={fetchComments}
+              isAuthenticated={isAuthenticated}
             />
           ))}
         </div>

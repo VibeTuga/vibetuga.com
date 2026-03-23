@@ -3,6 +3,8 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
 import { getProjectBySlug } from "@/lib/db/queries/showcase";
+import { ReportButton } from "@/components/shared/ReportButton";
+import { auth } from "@/lib/auth";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -34,7 +36,7 @@ export const revalidate = 60;
 
 export default async function ShowcaseProjectPage({ params }: Props) {
   const { slug } = await params;
-  const project = await getProjectBySlug(slug);
+  const [project, session] = await Promise.all([getProjectBySlug(slug), auth()]);
 
   if (!project) {
     notFound();
@@ -301,7 +303,7 @@ export default async function ShowcaseProjectPage({ params }: Props) {
           </div>
 
           {/* Date */}
-          <div className="mt-6">
+          <div className="mt-6 flex items-center justify-between">
             <p className="text-[10px] font-mono text-white/20">
               Submetido em{" "}
               {new Date(project.createdAt).toLocaleDateString("pt-PT", {
@@ -310,6 +312,9 @@ export default async function ShowcaseProjectPage({ params }: Props) {
                 year: "numeric",
               })}
             </p>
+            {session?.user && (
+              <ReportButton contentType="project" contentId={project.id} size="sm" />
+            )}
           </div>
         </div>
       </div>
