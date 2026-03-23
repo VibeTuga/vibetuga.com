@@ -130,6 +130,28 @@ export const getSellerProducts = cache(async (sellerId: string) => {
     .orderBy(desc(storeProducts.createdAt));
 });
 
+export const getProductsForAdmin = cache(async () => {
+  return db
+    .select({
+      id: storeProducts.id,
+      title: storeProducts.title,
+      slug: storeProducts.slug,
+      description: storeProducts.description,
+      priceCents: storeProducts.priceCents,
+      productType: storeProducts.productType,
+      status: storeProducts.status,
+      coverImage: storeProducts.coverImage,
+      tags: storeProducts.tags,
+      createdAt: storeProducts.createdAt,
+      sellerName: users.discordUsername,
+      sellerDisplayName: users.displayName,
+      sellerImage: users.image,
+    })
+    .from(storeProducts)
+    .leftJoin(users, eq(storeProducts.sellerId, users.id))
+    .orderBy(desc(storeProducts.createdAt));
+});
+
 export const getPendingProducts = cache(async () => {
   return db
     .select({
@@ -156,3 +178,4 @@ export type StoreProduct = Awaited<ReturnType<typeof getApprovedProducts>>["prod
 export type StoreProductDetail = NonNullable<Awaited<ReturnType<typeof getProductBySlug>>>;
 export type SellerProduct = Awaited<ReturnType<typeof getSellerProducts>>[number];
 export type PendingProduct = Awaited<ReturnType<typeof getPendingProducts>>[number];
+export type AdminProduct = Awaited<ReturnType<typeof getProductsForAdmin>>[number];
