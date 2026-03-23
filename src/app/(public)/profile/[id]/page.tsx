@@ -213,13 +213,31 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: "Perfil não encontrado — VibeTuga" };
   }
   const displayName = profile.user.displayName || profile.user.discordUsername;
+  const description = profile.user.bio ?? `Perfil de ${displayName} na comunidade VibeTuga.`;
+
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://vibetuga.com";
+  const earnedBadgesCount = profile.badges.filter((b) => b.earned).length;
+  const ogParams = new URLSearchParams({
+    name: displayName,
+    level: String(profile.user.level ?? 1),
+    xp: String(profile.user.xpPoints ?? 0),
+    badges: String(earnedBadgesCount),
+  });
+  const ogImageUrl = `${baseUrl}/api/og/profile?${ogParams.toString()}`;
+
   return {
     title: `${displayName} — VibeTuga`,
-    description: profile.user.bio ?? `Perfil de ${displayName} na comunidade VibeTuga.`,
+    description,
     openGraph: {
       title: `${displayName} — VibeTuga`,
-      description: profile.user.bio ?? `Perfil de ${displayName} na comunidade VibeTuga.`,
-      images: profile.user.image ? [{ url: profile.user.image, width: 1200, height: 630 }] : [],
+      description,
+      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: `Perfil de ${displayName}` }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${displayName} — VibeTuga`,
+      description,
+      images: [ogImageUrl],
     },
     alternates: {
       canonical: `https://vibetuga.com/profile/${id}`,

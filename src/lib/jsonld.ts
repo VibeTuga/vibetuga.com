@@ -71,6 +71,38 @@ export function getArticleJsonLd(post: {
   };
 }
 
+// ─── Project (CreativeWork) ────────────────────────────────────────────────────
+
+export function getProjectJsonLd(project: {
+  title: string;
+  description?: string | null;
+  coverImage?: string | null;
+  authorDisplayName?: string | null;
+  authorName?: string | null;
+  liveUrl?: string | null;
+  slug: string;
+  createdAt: Date;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "CreativeWork",
+    name: project.title,
+    description: project.description ?? undefined,
+    image: project.coverImage ?? undefined,
+    url: project.liveUrl || `${SITE_URL}/showcase/${project.slug}`,
+    datePublished: project.createdAt.toISOString(),
+    author: {
+      "@type": "Person",
+      name: project.authorDisplayName || project.authorName || "VibeTuga",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "VibeTuga",
+      url: SITE_URL,
+    },
+  };
+}
+
 // ─── Product ───────────────────────────────────────────────────────────────────
 
 export function getProductJsonLd(product: {

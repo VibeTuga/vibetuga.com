@@ -59,15 +59,30 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     ? product.description.slice(0, 160)
     : `${product.title} - disponível na loja VibeTuga.`;
 
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://vibetuga.com";
+  const sellerName = product.sellerDisplayName || product.sellerName || "VibeTuga";
+  const priceFormatted = (product.priceCents / 100).toFixed(2);
+  const ogParams = new URLSearchParams({
+    title: product.title,
+    seller: sellerName,
+    price: priceFormatted,
+    productType: product.productType,
+  });
+  const ogImageUrl = `${baseUrl}/api/og/store?${ogParams.toString()}`;
+
   return {
     title: `${product.title} | Loja VibeTuga`,
     description,
     openGraph: {
       title: `${product.title} | Loja VibeTuga`,
       description,
-      ...(product.coverImage && {
-        images: [{ url: product.coverImage, width: 1200, height: 630 }],
-      }),
+      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: product.title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${product.title} | Loja VibeTuga`,
+      description,
+      images: [ogImageUrl],
     },
     alternates: {
       canonical: `https://vibetuga.com/store/${slug}`,
