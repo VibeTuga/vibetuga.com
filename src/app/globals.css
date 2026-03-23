@@ -404,20 +404,30 @@
 }
 
 .blog-content pre {
-  background: #000000;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: transparent;
+  border: none;
   padding: 1.25rem;
-  margin: 1.5rem 0;
+  margin: 0;
   overflow-x: auto;
   font-size: 0.875rem;
   line-height: 1.6;
-  border-radius: 0.125rem;
+  border-radius: 0;
 }
 
 .blog-content pre code {
   background: transparent;
   padding: 0;
   color: rgba(255, 255, 255, 0.8);
+}
+
+/* Override highlight.js github-dark bg to match Terminal-Noir */
+.blog-content .code-block-wrapper pre code.hljs {
+  background: transparent;
+  padding: 0;
+}
+
+.blog-content .code-block-wrapper {
+  margin: 1.5rem 0;
 }
 
 .blog-content img {
