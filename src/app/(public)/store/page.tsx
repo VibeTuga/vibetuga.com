@@ -1,68 +1,96 @@
-import Link from "next/link";
+import { Suspense } from "react";
 import type { Metadata } from "next";
+import { getApprovedProducts } from "@/lib/db/queries/store";
+import { ProductCard } from "@/components/store/ProductCard";
+import { Pagination } from "@/components/blog/Pagination";
+import { StoreTypeFilter, StoreSearchInput } from "@/components/store/StoreFilters";
+
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "Loja | VibeTuga",
   description:
-    "O marketplace digital da comunidade VibeTuga. Em breve: skills, auto-runners, agent kits, prompt packs e muito mais.",
+    "O marketplace digital da comunidade VibeTuga. Skills, auto-runners, agent kits, prompt packs, templates e muito mais.",
   openGraph: {
     title: "Loja | VibeTuga",
     description:
-      "O marketplace digital da comunidade VibeTuga. Em breve: skills, auto-runners, agent kits, prompt packs e muito mais.",
+      "O marketplace digital da comunidade VibeTuga. Skills, auto-runners, agent kits, prompt packs, templates e muito mais.",
   },
 };
 
-export default function StorePage() {
+type SearchParams = Promise<{
+  type?: string;
+  q?: string;
+  page?: string;
+}>;
+
+export default async function StorePage({ searchParams }: { searchParams: SearchParams }) {
+  const params = await searchParams;
+  const page = Math.max(1, parseInt(params.page ?? "1", 10) || 1);
+
+  const { products, totalPages, currentPage } = await getApprovedProducts({
+    productType: params.type,
+    q: params.q,
+    page,
+  });
+
+  const paginationParams: Record<string, string> = {};
+  if (params.type) paginationParams.type = params.type;
+  if (params.q) paginationParams.q = params.q;
+
   return (
-    <div className="max-w-[800px] mx-auto px-6 py-24 min-h-[70vh] flex flex-col items-center justify-center text-center">
-      {/* Status indicator */}
-      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/10 border border-secondary/20 mb-8">
-        <span className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
-        <span className="font-label text-[10px] tracking-widest text-secondary uppercase">
-          System_Initializing
-        </span>
-      </div>
+    <div className="max-w-7xl mx-auto px-6 py-8">
+      {/* Header */}
+      <section className="mb-12">
+        <h1 className="text-4xl md:text-5xl font-black font-headline tracking-tighter text-white mb-2">
+          Loja
+        </h1>
+        <p className="text-white/50 text-lg">Ferramentas, templates e kits para vibe coders.</p>
+      </section>
 
-      <h1 className="font-headline text-5xl md:text-7xl font-black tracking-tighter text-white mb-6">
-        Em{" "}
-        <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary to-tertiary">
-          Breve
-        </span>
-      </h1>
+      {/* Filters */}
+      <section className="mb-8 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+        <Suspense fallback={null}>
+          <StoreTypeFilter />
+        </Suspense>
+        <Suspense fallback={null}>
+          <StoreSearchInput />
+        </Suspense>
+      </section>
 
-      <p className="text-on-surface-variant text-lg max-w-lg mx-auto mb-12 font-light">
-        O marketplace da comunidade VibeTuga está em construção. Skills, auto-runners, agent kits,
-        prompt packs e muito mais.
-      </p>
+      {/* Product Grid */}
+      {products.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-24">
+          {products.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center py-24 text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-6">
+            <span className="w-2 h-2 rounded-full bg-white/20" />
+            <span className="font-label text-[10px] tracking-widest text-white/40 uppercase">
+              Sem_Resultados
+            </span>
+          </div>
+          <h2 className="font-headline text-2xl font-bold text-white mb-2">
+            Nenhum produto encontrado
+          </h2>
+          <p className="text-white/40 text-sm max-w-md">
+            {params.type || params.q
+              ? "Tenta ajustar os filtros ou a pesquisa para encontrar o que procuras."
+              : "A loja ainda não tem produtos aprovados. Volta em breve!"}
+          </p>
+        </div>
+      )}
 
-      {/* Teaser items */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-12 w-full max-w-lg">
-        {["Skills", "Auto Runners", "Agent Kits", "Prompt Packs", "Templates", "Cursos"].map(
-          (item) => (
-            <div key={item} className="bg-surface-container border border-white/5 p-4 text-center">
-              <span className="font-label text-[10px] text-white/30 uppercase tracking-widest">
-                {item}
-              </span>
-            </div>
-          ),
-        )}
-      </div>
-
-      {/* CTA */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <Link
-          href="/newsletter"
-          className="px-8 py-4 bg-secondary text-on-secondary font-bold font-headline uppercase tracking-tighter hover:shadow-[0_0_20px_rgba(216,115,255,0.4)] transition-all"
-        >
-          Notifica-me
-        </Link>
-        <Link
-          href="/"
-          className="px-8 py-4 bg-transparent border border-white/10 text-white/60 font-bold hover:text-white hover:border-white/30 transition-all"
-        >
-          Voltar ao início
-        </Link>
-      </div>
+      {/* Pagination */}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        baseUrl="/store"
+        searchParams={paginationParams}
+      />
     </div>
   );
 }
