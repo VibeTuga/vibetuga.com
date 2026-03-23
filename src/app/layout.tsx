@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Space_Grotesk, Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
+import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
 import "./globals.css";
 
 const geist = Geist({
@@ -21,9 +23,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "VibeTuga — Comunidade Portuguesa de Vibe Coding",
+  title: "VibeTuga | Onde o código encontra a vibe",
   description:
-    "A comunidade portuguesa de vibe coding, AI tooling e desenvolvimento assistido por agentes.",
+    "A comunidade portuguesa de vibe coding, AI tooling e desenvolvimento assistido por agentes. Aprende, partilha e constrói o futuro da programação assistida por IA.",
 };
 
 export default function RootLayout({
@@ -41,8 +43,10 @@ export default function RootLayout({
         inter.variable
       )}
     >
-      <body className="scanlines min-h-full flex flex-col bg-background text-foreground font-body">
-        {children}
+      <body className="scanlines min-h-full flex flex-col bg-background text-on-background font-body selection:bg-primary selection:text-on-primary">
+        <Header />
+        <main className="flex-1 pt-20">{children}</main>
+        <Footer />
       </body>
     </html>
   );
