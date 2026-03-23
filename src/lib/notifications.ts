@@ -13,6 +13,8 @@ export const NOTIFICATION_TYPES = {
   MENTION: "mention",
   REFERRAL_COMPLETED: "referral_completed",
   NEW_MESSAGE: "new_message",
+  CHALLENGE_SUBMISSION: "challenge_submission",
+  CHALLENGE_WINNER: "challenge_winner",
 } as const;
 
 export type NotificationType = (typeof NOTIFICATION_TYPES)[keyof typeof NOTIFICATION_TYPES];

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { blogPosts } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { blogPosts, blogRevisions } from "@/lib/db/schema";
+import { eq, desc } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { logAdminAction, getClientIp } from "@/lib/audit";
 
@@ -33,7 +33,46 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
 
     const body = await request.json();
-    const { title, slug, excerpt, content, categoryId, tags, coverImage, status, postType } = body;
+    const {
+      title,
+      slug,
+      excerpt,
+      content,
+      categoryId,
+      tags,
+      coverImage,
+      status,
+      postType,
+      scheduledAt,
+    } = body;
+
+    // Save current version as revision before applying edits
+    if (title !== undefined || content !== undefined) {
+      const [currentPost] = await db
+        .select({ title: blogPosts.title, content: blogPosts.content })
+        .from(blogPosts)
+        .where(eq(blogPosts.id, id))
+        .limit(1);
+
+      if (currentPost) {
+        const [lastRevision] = await db
+          .select({ revisionNumber: blogRevisions.revisionNumber })
+          .from(blogRevisions)
+          .where(eq(blogRevisions.postId, id))
+          .orderBy(desc(blogRevisions.revisionNumber))
+          .limit(1);
+
+        const nextRevision = (lastRevision?.revisionNumber ?? 0) + 1;
+
+        await db.insert(blogRevisions).values({
+          postId: id,
+          title: currentPost.title,
+          content: currentPost.content,
+          editedBy: session.user.id,
+          revisionNumber: nextRevision,
+        });
+      }
+    }
 
     const updates: Record<string, unknown> = { updatedAt: new Date() };
     if (title !== undefined) updates.title = title;
@@ -53,6 +92,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       }
     }
     if (postType !== undefined) updates.postType = postType;
+    if (scheduledAt !== undefined) {
+      updates.scheduledAt = scheduledAt ? new Date(scheduledAt) : null;
+    }
 
     const [post] = await db.update(blogPosts).set(updates).where(eq(blogPosts.id, id)).returning();
 

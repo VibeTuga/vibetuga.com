@@ -3,6 +3,7 @@ import { blogPosts, blogCategories } from "@/lib/db/schema";
 import { eq, asc } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { BlogPostForm } from "../../BlogPostForm";
+import { RevisionHistory } from "./RevisionHistory";
 
 async function getPost(id: string) {
   try {
@@ -32,6 +33,11 @@ export default async function EditBlogPostPage({ params }: { params: Promise<{ i
     notFound();
   }
 
+  // Format scheduledAt for datetime-local input
+  const scheduledAtStr = post.scheduledAt
+    ? new Date(post.scheduledAt).toISOString().slice(0, 16)
+    : "";
+
   return (
     <div>
       <div className="mb-8">
@@ -54,8 +60,14 @@ export default async function EditBlogPostPage({ params }: { params: Promise<{ i
           coverImage: post.coverImage ?? "",
           status: post.status,
           postType: post.postType,
+          scheduledAt: scheduledAtStr,
         }}
       />
+
+      {/* Revision History */}
+      <div className="mt-12">
+        <RevisionHistory postId={post.id} />
+      </div>
     </div>
   );
 }

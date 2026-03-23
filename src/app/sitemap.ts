@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { db } from "@/lib/db";
-import { blogPosts, blogCategories } from "@/lib/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { blogPosts, blogCategories, challenges } from "@/lib/db/schema";
+import { eq, desc, or } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +29,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.6,
+    },
+    {
+      url: `${SITE_URL}/challenges`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.7,
     },
     {
       url: `${SITE_URL}/newsletter`,
@@ -65,5 +71,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  return [...staticPages, ...postPages, ...categoryPages];
+  // Challenges
+  const activeChallenges = await db
+    .select({ id: challenges.id, createdAt: challenges.createdAt })
+    .from(challenges)
+    .where(
+      or(
+        eq(challenges.status, "active"),
+        eq(challenges.status, "voting"),
+        eq(challenges.status, "completed"),
+      ),
+    );
+
+  const challengePages: MetadataRoute.Sitemap = activeChallenges.map((c) => ({
+    url: `${SITE_URL}/challenges/${c.id}`,
+    lastModified: c.createdAt,
+    changeFrequency: "weekly",
+    priority: 0.6,
+  }));
+
+  return [...staticPages, ...postPages, ...categoryPages, ...challengePages];
 }

@@ -48,7 +48,18 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { title, slug, excerpt, content, categoryId, tags, coverImage, status, postType } = body;
+    const {
+      title,
+      slug,
+      excerpt,
+      content,
+      categoryId,
+      tags,
+      coverImage,
+      status,
+      postType,
+      scheduledAt,
+    } = body;
 
     if (!title || !slug || !content) {
       return NextResponse.json({ error: "Title, slug, and content are required" }, { status: 400 });
@@ -94,6 +105,7 @@ export async function POST(request: Request) {
         postType: finalPostType,
         readingTimeMinutes,
         publishedAt: finalStatus === "published" ? new Date() : null,
+        scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
       })
       .returning();
 

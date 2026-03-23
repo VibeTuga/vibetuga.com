@@ -143,7 +143,10 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   collections: many(collections),
   sentMessages: many(directMessages, { relationName: "sentMessages" }),
   receivedMessages: many(directMessages, { relationName: "receivedMessages" }),
+  challengeEntries: many(challengeEntries),
+  challengeEntryVotes: many(challengeEntryVotes),
   blogSeries: many(blogSeries),
+  blogRevisions: many(blogRevisions),
 }));
 
 // ─── NextAuth Required Tables ───────────────────────────────
@@ -236,6 +239,7 @@ export const blogPosts = pgTable("blog_post", {
   viewsCount: integer("views_count").default(0).notNull(),
   likesCount: integer("likes_count").default(0).notNull(),
   publishedAt: timestamp("published_at", { mode: "date" }),
+  scheduledAt: timestamp("scheduled_at", { mode: "date" }),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
 });
@@ -253,6 +257,7 @@ export const blogPostsRelations = relations(blogPosts, ({ one, many }) => ({
   likes: many(blogPostLikes),
   bookmarks: many(blogPostBookmarks),
   seriesEntries: many(blogSeriesPosts),
+  revisions: many(blogRevisions),
 }));
 
 // ─── Blog Comments ──────────────────────────────────────────
@@ -952,6 +957,120 @@ export const collectionItemsRelations = relations(collectionItems, ({ one }) => 
 
 // ─── Direct Messages ───────────────────────────────────────
 
+// ─── Challenges ─────────────────────────────────────────────
+
+export const challengeStatusEnum = pgEnum("challenge_status", [
+  "draft",
+  "active",
+  "voting",
+  "completed",
+]);
+
+export const challengeEntryStatusEnum = pgEnum("challenge_entry_status", [
+  "submitted",
+  "winner",
+  "disqualified",
+]);
+
+export const challenges = pgTable(
+  "challenge",
+  {
+    id: serial("id").primaryKey(),
+    title: varchar("title", { length: 200 }).notNull(),
+    description: text("description").notNull(),
+    startAt: timestamp("start_at", { mode: "date" }).notNull(),
+    endAt: timestamp("end_at", { mode: "date" }).notNull(),
+    badgeRewardId: uuid("badge_reward_id").references(() => badges.id, {
+      onDelete: "set null",
+    }),
+    xpReward: integer("xp_reward").default(0).notNull(),
+    status: challengeStatusEnum("status").default("draft").notNull(),
+    createdBy: uuid("created_by").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [index("challenge_status_idx").on(t.status), index("challenge_start_idx").on(t.startAt)],
+);
+
+export const challengesRelations = relations(challenges, ({ one, many }) => ({
+  badgeReward: one(badges, {
+    fields: [challenges.badgeRewardId],
+    references: [badges.id],
+  }),
+  creator: one(users, {
+    fields: [challenges.createdBy],
+    references: [users.id],
+  }),
+  entries: many(challengeEntries),
+}));
+
+export const challengeEntries = pgTable(
+  "challenge_entry",
+  {
+    id: serial("id").primaryKey(),
+    challengeId: integer("challenge_id")
+      .notNull()
+      .references(() => challenges.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    submissionUrl: varchar("submission_url", { length: 500 }).notNull(),
+    description: text("description"),
+    votesCount: integer("votes_count").default(0).notNull(),
+    status: challengeEntryStatusEnum("status").default("submitted").notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [
+    uniqueIndex("challenge_entry_unique_idx").on(t.challengeId, t.userId),
+    index("challenge_entry_challenge_idx").on(t.challengeId),
+    index("challenge_entry_user_idx").on(t.userId),
+  ],
+);
+
+export const challengeEntriesRelations = relations(challengeEntries, ({ one }) => ({
+  challenge: one(challenges, {
+    fields: [challengeEntries.challengeId],
+    references: [challenges.id],
+  }),
+  user: one(users, {
+    fields: [challengeEntries.userId],
+    references: [users.id],
+  }),
+}));
+
+// ─── Challenge Entry Votes ──────────────────────────────────
+
+export const challengeEntryVotes = pgTable(
+  "challenge_entry_vote",
+  {
+    entryId: integer("entry_id")
+      .notNull()
+      .references(() => challengeEntries.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.entryId, t.userId] }),
+    index("challenge_entry_vote_user_idx").on(t.userId),
+  ],
+);
+
+export const challengeEntryVotesRelations = relations(challengeEntryVotes, ({ one }) => ({
+  entry: one(challengeEntries, {
+    fields: [challengeEntryVotes.entryId],
+    references: [challengeEntries.id],
+  }),
+  user: one(users, {
+    fields: [challengeEntryVotes.userId],
+    references: [users.id],
+  }),
+}));
+
+// ─── Direct Messages ───────────────────────────────────────
+
 export const directMessages = pgTable(
   "direct_message",
   {
@@ -1043,5 +1162,39 @@ export const blogSeriesPostsRelations = relations(blogSeriesPosts, ({ one }) => 
   post: one(blogPosts, {
     fields: [blogSeriesPosts.postId],
     references: [blogPosts.id],
+  }),
+}));
+
+// ─── Blog Revisions ─────────────────────────────────────────
+
+export const blogRevisions = pgTable(
+  "blog_revision",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    postId: uuid("post_id")
+      .notNull()
+      .references(() => blogPosts.id, { onDelete: "cascade" }),
+    content: text("content").notNull(),
+    title: varchar("title", { length: 255 }).notNull(),
+    editedBy: uuid("edited_by").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    revisionNumber: integer("revision_number").notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [
+    index("blog_revision_post_idx").on(t.postId),
+    index("blog_revision_post_num_idx").on(t.postId, t.revisionNumber),
+  ],
+);
+
+export const blogRevisionsRelations = relations(blogRevisions, ({ one }) => ({
+  post: one(blogPosts, {
+    fields: [blogRevisions.postId],
+    references: [blogPosts.id],
+  }),
+  editor: one(users, {
+    fields: [blogRevisions.editedBy],
+    references: [users.id],
   }),
 }));
