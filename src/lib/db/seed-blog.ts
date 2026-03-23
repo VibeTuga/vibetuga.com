@@ -75,25 +75,36 @@ export async function seedBlog() {
   console.log("Seeding categories...");
   await db.insert(blogCategories).values(CATEGORIES).onConflictDoNothing();
 
-  // 2. Seed authors
+  // 2. Seed authors — use existing real users if they already logged in via Discord OAuth,
+  //    otherwise create placeholder users (will need merging later via merge-seed-users.ts)
   console.log("Seeding authors...");
-  await db.insert(users).values(SEED_USERS).onConflictDoNothing();
-
-  // 3. Query back IDs
   const cats = await db.select().from(blogCategories);
   const catMap = Object.fromEntries(cats.map((c) => [c.slug, c.id]));
 
-  const [authorProof] = await db
-    .select()
-    .from(users)
-    .where(eq(users.discordUsername, ".pr00f"))
-    .limit(1);
+  async function getOrCreateAuthor(seed: (typeof SEED_USERS)[number]) {
+    // Try to find existing user by Discord username (real OAuth user)
+    const [existing] = await db
+      .select()
+      .from(users)
+      .where(eq(users.discordUsername, seed.discordUsername))
+      .limit(1);
+    if (existing) {
+      console.log(`  Found existing user "${seed.discordUsername}" (${existing.id})`);
+      return existing;
+    }
+    // Create placeholder user with fake Discord ID
+    console.log(`  Creating placeholder user "${seed.discordUsername}"`);
+    await db.insert(users).values(seed).onConflictDoNothing();
+    const [created] = await db
+      .select()
+      .from(users)
+      .where(eq(users.discordId, seed.discordId))
+      .limit(1);
+    return created;
+  }
 
-  const [authorAcewf] = await db
-    .select()
-    .from(users)
-    .where(eq(users.discordUsername, "acewf"))
-    .limit(1);
+  const authorProof = await getOrCreateAuthor(SEED_USERS[0]);
+  const authorAcewf = await getOrCreateAuthor(SEED_USERS[1]);
 
   if (!authorProof || !authorAcewf) {
     throw new Error("Authors not found after insert");
