@@ -30,6 +30,24 @@ export async function getPresignedUploadUrl(key: string, contentType: string): P
 }
 
 /**
+ * Upload a file directly to R2 from the server.
+ */
+export async function uploadToR2(
+  key: string,
+  body: Buffer | Uint8Array,
+  contentType: string,
+): Promise<void> {
+  const command = new PutObjectCommand({
+    Bucket: R2_BUCKET_NAME,
+    Key: key,
+    Body: body,
+    ContentType: contentType,
+  });
+
+  await r2Client.send(command);
+}
+
+/**
  * Generate a presigned GET URL for downloading a file from R2.
  * Expires in 1 hour.
  */

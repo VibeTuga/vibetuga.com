@@ -38,30 +38,21 @@ export function ImageUpload({ value, onChange, className = "" }: ImageUploadProp
       setUploading(true);
 
       try {
-        const presignRes = await fetch("/api/upload/presign", {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const res = await fetch("/api/upload", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ filename: file.name, contentType: file.type }),
+          body: formData,
         });
 
-        if (!presignRes.ok) {
-          const data = await presignRes.json().catch(() => ({}));
-          throw new Error(data.error || `Erro ao obter URL de upload (${presignRes.status})`);
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || `Erro no upload (${res.status})`);
         }
 
-        const { uploadUrl, key, publicUrl } = await presignRes.json();
-
-        const putRes = await fetch(uploadUrl, {
-          method: "PUT",
-          headers: { "Content-Type": file.type },
-          body: file,
-        });
-
-        if (!putRes.ok) {
-          throw new Error("Erro ao fazer upload da imagem");
-        }
-
-        onChange(publicUrl ?? key);
+        const { url } = await res.json();
+        onChange(url);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Erro desconhecido no upload");
       } finally {

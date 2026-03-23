@@ -51,7 +51,7 @@ next-env.d.ts
 *.swo
 
 # VibeTuga orchestrator files
-products/
+/products/
 .claude/
 .impeccable.md
 .memory/
