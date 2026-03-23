@@ -108,6 +108,7 @@ export async function seedBlog() {
       categoryId: catMap["tutoriais"],
       title: "Como Começar com Vibe Coding em 2025",
       slug: "como-comecar-vibe-coding-2025",
+      coverImage: "https://picsum.photos/seed/como-comecar-vibe-coding-2025/1200/630",
       excerpt:
         "Vibe coding é a nova forma de programar com IA ao teu lado. Neste guia, explico como dar os primeiros passos, quais as ferramentas essenciais e como tirar o máximo partido desta abordagem revolucionária ao desenvolvimento de software.",
       content: `# Como Começar com Vibe Coding em 2025
@@ -158,6 +159,7 @@ O vibe coding é uma habilidade que se aprende com prática. Quanto mais usares,
       categoryId: catMap["ai-tools"],
       title: "Claude Code vs Cursor: Qual Escolher?",
       slug: "claude-code-vs-cursor-qual-escolher",
+      coverImage: "https://picsum.photos/seed/claude-code-vs-cursor-qual-escolher/1200/630",
       excerpt:
         "Dois dos melhores tools de vibe coding frente a frente. Depois de semanas a usar ambos intensivamente, aqui estão as minhas conclusões sobre quando usar cada um e qual se adequa melhor ao teu workflow.",
       content: `# Claude Code vs Cursor: Qual Escolher?
@@ -220,6 +222,7 @@ A resposta honesta? Os melhores vibe coders usam os dois. Claude Code para as ta
       categoryId: catMap["projetos"],
       title: "Construí uma App Completa em 2 Horas com IA",
       slug: "construi-app-completa-2-horas-com-ia",
+      coverImage: "https://picsum.photos/seed/construi-app-completa-2-horas-com-ia/1200/630",
       excerpt:
         "Um breakdown honesto de como usei Claude Code para construir uma aplicação fullstack funcional em tempo recorde. O que correu bem, o que falhou, e o que aprendi sobre os limites do vibe coding.",
       content: `# Construí uma App Completa em 2 Horas com IA
@@ -274,6 +277,7 @@ Estilos finais, estados de loading e erro, e deploy no Vercel. O comando "vercel
       categoryId: catMap["opiniao"],
       title: "O Futuro do Desenvolvimento é Conversacional",
       slug: "futuro-desenvolvimento-conversacional",
+      coverImage: "https://picsum.photos/seed/futuro-desenvolvimento-conversacional/1200/630",
       excerpt:
         "Hot take: daqui a 5 anos, a maioria do código vai ser gerado através de conversação com modelos de IA. Não como substituição dos programadores, mas como uma forma radicalmente diferente de trabalhar. Aqui está porque acredito nisso.",
       content: `# O Futuro do Desenvolvimento é Conversacional
@@ -327,6 +331,7 @@ A VibeTuga existe precisamente para ajudar a comunidade portuguesa a desenvolver
       categoryId: catMap["ai-tools"],
       title: "Top 5 Agents que Estou a Usar Diariamente",
       slug: "top-5-agents-uso-diario",
+      coverImage: "https://picsum.photos/seed/top-5-agents-uso-diario/1200/630",
       excerpt:
         "Deixei de usar apenas chatbots e passei a orquestrar agents especializados para tarefas específicas. Aqui estão os 5 agents que entraram permanentemente no meu workflow e porque é que cada um deles vale o investimento de tempo de configuração.",
       content: `# Top 5 Agents que Estou a Usar Diariamente
@@ -381,6 +386,7 @@ Qual é o teu stack de agents preferido? Partilha na comunidade!`,
       categoryId: catMap["comunidade"],
       title: "VibeTuga: O Que Vem a Seguir para a Comunidade",
       slug: "vibetuga-o-que-vem-a-seguir",
+      coverImage: "https://picsum.photos/seed/vibetuga-o-que-vem-a-seguir/1200/630",
       excerpt:
         "A comunidade VibeTuga está a crescer mais rápido do que esperávamos. É hora de partilhar o roadmap, os planos para os próximos meses, e como podes contribuir para construir a maior comunidade de vibe coding em língua portuguesa.",
       content: `# VibeTuga: O Que Vem a Seguir para a Comunidade
@@ -430,6 +436,7 @@ A qualidade desta comunidade vem de vocês. Obrigado por trazerem energia, curio
       categoryId: catMap["tutoriais"],
       title: "Dicas para Prompts Mais Eficazes no Claude",
       slug: "dicas-prompts-eficazes-claude",
+      coverImage: "https://picsum.photos/seed/dicas-prompts-eficazes-claude/1200/630",
       excerpt:
         "Depois de centenas de horas a trabalhar com Claude, aprendi o que separa um prompt medíocre de um que gera exatamente o que precisas. Aqui estão as técnicas concretas que melhoraram drasticamente a qualidade dos meus outputs.",
       content: `# Dicas para Prompts Mais Eficazes no Claude
@@ -496,6 +503,7 @@ A melhor forma de melhorar os teus prompts é rever os outputs e perguntar: "O q
       categoryId: catMap["comunidade"],
       title: "A Minha Experiência no Primeiro Hackathon AI",
       slug: "experiencia-primeiro-hackathon-ai",
+      coverImage: "https://picsum.photos/seed/experiencia-primeiro-hackathon-ai/1200/630",
       excerpt:
         "48 horas, uma equipa de 3 pessoas, e um projeto construído quase inteiramente com vibe coding. Aqui está o relato honesto da minha primeira experiência num hackathon focado em IA — o que correu bem, o que foi caótico, e o que faria diferente.",
       content: `# A Minha Experiência no Primeiro Hackathon AI
@@ -553,6 +561,9 @@ Hackathons com vibe coding são uma experiência completamente diferente. A barr
     },
   ];
 
+  // Note: onConflictDoNothing means re-running the seed will NOT update existing posts
+  // (e.g. newly added coverImage won't be applied to existing rows). To update existing
+  // posts, delete them first or run a manual UPDATE query.
   await db.insert(blogPosts).values(posts).onConflictDoNothing();
 
   console.log(`Done! Seeded ${CATEGORIES.length} categories, 2 authors, ${posts.length} posts.`);
