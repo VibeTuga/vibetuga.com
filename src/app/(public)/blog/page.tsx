@@ -1,3 +1,4 @@
+import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -6,6 +7,10 @@ import { getCategoryAccent } from "@/lib/blog-utils";
 import { BlogCard } from "@/components/blog/BlogCard";
 import { Pagination } from "@/components/blog/Pagination";
 import { SearchInput, SortSelect } from "@/components/blog/BlogFilters";
+
+const StaggerGrid = dynamic(() =>
+  import("@/components/shared/StaggerGrid").then((m) => m.StaggerGrid),
+);
 
 export const revalidate = 60;
 
@@ -113,11 +118,11 @@ export default async function BlogPage({ searchParams }: { searchParams: SearchP
 
       {/* Posts Grid */}
       {posts.length > 0 ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <StaggerGrid className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {posts.map((post) => (
             <BlogCard key={post.id} post={post} />
           ))}
-        </div>
+        </StaggerGrid>
       ) : (
         <div className="text-center py-24">
           <p className="font-mono text-sm text-white/40 uppercase tracking-widest mb-2">

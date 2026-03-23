@@ -1,7 +1,12 @@
+import dynamic from "next/dynamic";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import Link from "next/link";
 import { FileText, Home, Layers, Package, Plus, ShoppingBag, User } from "lucide-react";
+
+const PageFadeIn = dynamic(() =>
+  import("@/components/shared/PageFadeIn").then((m) => m.PageFadeIn),
+);
 
 export const metadata = {
   title: "Dashboard | VibeTuga",
@@ -81,7 +86,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </Link>
         </div>
       </div>
-      <main className="max-w-[800px] mx-auto px-6 py-8">{children}</main>
+      <main className="max-w-[800px] mx-auto px-6 py-8">
+        <PageFadeIn>{children}</PageFadeIn>
+      </main>
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -8,6 +9,10 @@ import {
   ShowcaseSearchInput,
   SubmitProjectFAB,
 } from "@/components/showcase/ShowcaseFilters";
+
+const StaggerGrid = dynamic(() =>
+  import("@/components/shared/StaggerGrid").then((m) => m.StaggerGrid),
+);
 
 export const revalidate = 60;
 
@@ -171,7 +176,7 @@ export default async function ShowcasePage({ searchParams }: { searchParams: Sea
       </section>
 
       {/* Project Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <StaggerGrid className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {projects.map((project) => (
           <Link
             key={project.id}
@@ -290,7 +295,7 @@ export default async function ShowcasePage({ searchParams }: { searchParams: Sea
             <p className="font-headline text-white/20 uppercase font-black">Teu Projeto Aqui</p>
           </div>
         </div>
-      </div>
+      </StaggerGrid>
 
       {/* Submit FAB */}
       <SubmitProjectFAB />
