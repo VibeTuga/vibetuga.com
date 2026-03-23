@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, FileText, FolderOpen, Users, Clock, Rocket } from "lucide-react";
+import { LayoutDashboard, FileText, FolderOpen, Users, Clock, Rocket, Mail } from "lucide-react";
 import { Logo } from "@/components/shared/Logo";
 import { cn } from "@/lib/utils";
 
@@ -16,6 +16,7 @@ const adminLinks: readonly {
   { href: "/admin/blog", label: "Blog Posts", icon: FileText, exact: true },
   { href: "/admin/blog/pending", label: "Pendentes", icon: Clock },
   { href: "/admin/showcase", label: "Showcase", icon: Rocket },
+  { href: "/admin/newsletter", label: "Newsletter", icon: Mail },
   { href: "/admin/categories", label: "Categorias", icon: FolderOpen },
   { href: "/admin/users", label: "Utilizadores", icon: Users },
 ];
