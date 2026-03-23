@@ -58,7 +58,7 @@ export default async function BlogPostPage({ params }: Props) {
           <>
             <Link
               href={`/blog/category/${post.categorySlug}`}
-              className={`hover:${accent.categoryText.replace("text-", "")} transition-colors`}
+              className={`${accent.categoryText} hover:opacity-80 transition-colors`}
             >
               {post.categoryName}
             </Link>
