@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { getProjectBySlug, getUserProjectVote } from "@/lib/db/queries/showcase";
 import { ReportButton } from "@/components/shared/ReportButton";
 import { VoteButtons } from "@/components/showcase/VoteButtons";
+import { BarChart3 } from "lucide-react";
 import { auth } from "@/lib/auth";
 
 type Props = {
@@ -19,13 +20,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: "Projeto não encontrado | VibeTuga" };
   }
 
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://vibetuga.com";
+  const authorName = project.authorDisplayName ?? project.authorName ?? "VibeTuga";
+  const ogParams = new URLSearchParams({ title: project.title, author: authorName });
+  if (project.techStack?.length) ogParams.set("techStack", project.techStack.join(","));
+  const ogImageUrl = `${baseUrl}/api/og/project?${ogParams.toString()}`;
+
   return {
     title: `${project.title} | VibeTuga Showcase`,
     description: project.description ?? `Projeto ${project.title} da comunidade VibeTuga.`,
     openGraph: {
       title: project.title,
       description: project.description ?? undefined,
-      images: project.coverImage ? [{ url: project.coverImage, width: 1200, height: 630 }] : [],
+      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: project.title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: project.title,
+      description: project.description ?? undefined,
+      images: [ogImageUrl],
     },
     alternates: {
       canonical: `https://vibetuga.com/showcase/${slug}`,
@@ -311,9 +324,24 @@ export default async function ShowcaseProjectPage({ params }: Props) {
                 year: "numeric",
               })}
             </p>
-            {session?.user && (
-              <ReportButton contentType="project" contentId={project.id} size="sm" />
-            )}
+            <div className="flex items-center gap-3">
+              {session?.user &&
+                (project.authorId === currentUserId ||
+                  session.user.role === "admin" ||
+                  session.user.role === "moderator") && (
+                  <Link
+                    href={`/dashboard/analytics/projects/${project.id}`}
+                    className="flex items-center gap-1.5 text-[10px] font-mono text-white/30 hover:text-tertiary transition-colors"
+                    title="Ver análises"
+                  >
+                    <BarChart3 size={14} />
+                    Análises
+                  </Link>
+                )}
+              {session?.user && (
+                <ReportButton contentType="project" contentId={project.id} size="sm" />
+              )}
+            </div>
           </div>
         </div>
       </div>

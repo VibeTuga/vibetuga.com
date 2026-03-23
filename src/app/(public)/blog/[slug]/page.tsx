@@ -14,6 +14,7 @@ import { ReportButton } from "@/components/shared/ReportButton";
 import { ShareButton } from "@/components/blog/ShareButton";
 import { TableOfContents } from "@/components/blog/TableOfContents";
 import { getArticleJsonLd } from "@/lib/jsonld";
+import { BarChart3 } from "lucide-react";
 import { auth } from "@/lib/auth";
 
 type Props = {
@@ -28,6 +29,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: "Post não encontrado | VibeTuga" };
   }
 
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://vibetuga.com";
+  const authorName = post.authorDisplayName || post.authorName || "VibeTuga";
+  const ogParams = new URLSearchParams({ title: post.title, author: authorName });
+  if (post.categoryName) ogParams.set("category", post.categoryName);
+  const ogImageUrl = `${baseUrl}/api/og/blog?${ogParams.toString()}`;
+
   return {
     title: `${post.title} | VibeTuga Blog`,
     description: post.excerpt || `${post.title} — VibeTuga Blog`,
@@ -36,8 +43,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: post.excerpt || undefined,
       type: "article",
       publishedTime: post.publishedAt?.toISOString(),
-      authors: [post.authorDisplayName || post.authorName || "VibeTuga"],
-      ...(post.coverImage && { images: [{ url: post.coverImage, width: 1200, height: 630 }] }),
+      authors: [authorName],
+      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: post.title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.excerpt || undefined,
+      images: [ogImageUrl],
     },
     alternates: {
       canonical: `https://vibetuga.com/blog/${slug}`,
@@ -214,6 +227,19 @@ export default async function BlogPostPage({ params }: Props) {
               excerpt={post.excerpt ?? undefined}
             />
             {session?.user && <ReportButton contentType="post" contentId={post.id} />}
+            {session?.user &&
+              (post.authorId === session.user.id ||
+                session.user.role === "admin" ||
+                session.user.role === "moderator") && (
+                <Link
+                  href={`/dashboard/analytics/posts/${post.id}`}
+                  className="flex items-center gap-1.5 text-xs font-mono text-white/40 hover:text-tertiary transition-colors"
+                  title="Ver análises"
+                >
+                  <BarChart3 size={16} />
+                  <span className="hidden sm:inline">Análises</span>
+                </Link>
+              )}
           </div>
 
           {/* Comments */}
