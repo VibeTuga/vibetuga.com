@@ -1,6 +1,6 @@
 import { cache } from "react";
 import { db } from "@/lib/db";
-import { storeProducts, storeReviews, users } from "@/lib/db/schema";
+import { storeProducts, storePurchases, storeReviews, users } from "@/lib/db/schema";
 import { eq, desc, and, or, count, sql, ilike } from "drizzle-orm";
 
 const PRODUCTS_PER_PAGE = 12;
@@ -174,8 +174,30 @@ export const getPendingProducts = cache(async () => {
     .orderBy(desc(storeProducts.createdAt));
 });
 
+export const getUserPurchases = cache(async (userId: string) => {
+  return db
+    .select({
+      id: storePurchases.id,
+      pricePaidCents: storePurchases.pricePaidCents,
+      createdAt: storePurchases.createdAt,
+      productTitle: storeProducts.title,
+      productSlug: storeProducts.slug,
+      productType: storeProducts.productType,
+      coverImage: storeProducts.coverImage,
+      downloadKey: storeProducts.downloadKey,
+      sellerName: users.discordUsername,
+      sellerDisplayName: users.displayName,
+    })
+    .from(storePurchases)
+    .innerJoin(storeProducts, eq(storePurchases.productId, storeProducts.id))
+    .leftJoin(users, eq(storeProducts.sellerId, users.id))
+    .where(eq(storePurchases.buyerId, userId))
+    .orderBy(desc(storePurchases.createdAt));
+});
+
 export type StoreProduct = Awaited<ReturnType<typeof getApprovedProducts>>["products"][number];
 export type StoreProductDetail = NonNullable<Awaited<ReturnType<typeof getProductBySlug>>>;
 export type SellerProduct = Awaited<ReturnType<typeof getSellerProducts>>[number];
 export type PendingProduct = Awaited<ReturnType<typeof getPendingProducts>>[number];
 export type AdminProduct = Awaited<ReturnType<typeof getProductsForAdmin>>[number];
+export type UserPurchase = Awaited<ReturnType<typeof getUserPurchases>>[number];
