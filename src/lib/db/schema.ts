@@ -133,6 +133,8 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   roleRequestsReviewed: many(roleRequests, { relationName: "roleRequestReviewer" }),
   followers: many(userFollows, { relationName: "following" }),
   following: many(userFollows, { relationName: "follower" }),
+  notifications: many(notifications, { relationName: "notificationRecipient" }),
+  actedNotifications: many(notifications, { relationName: "notificationActor" }),
 }));
 
 // ─── NextAuth Required Tables ───────────────────────────────
@@ -771,5 +773,44 @@ export const adminAuditLogRelations = relations(adminAuditLog, ({ one }) => ({
   actor: one(users, {
     fields: [adminAuditLog.actorId],
     references: [users.id],
+  }),
+}));
+
+// ─── Notifications ──────────────────────────────────────────
+
+export const notifications = pgTable(
+  "notification",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    type: varchar("type", { length: 50 }).notNull(),
+    title: varchar("title", { length: 255 }).notNull(),
+    body: text("body"),
+    link: varchar("link", { length: 500 }),
+    isRead: boolean("is_read").default(false).notNull(),
+    actorId: uuid("actor_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    referenceId: varchar("reference_id", { length: 255 }),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [
+    index("notification_user_read_idx").on(t.userId, t.isRead),
+    index("notification_user_created_idx").on(t.userId, t.createdAt),
+  ],
+);
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, {
+    fields: [notifications.userId],
+    references: [users.id],
+    relationName: "notificationRecipient",
+  }),
+  actor: one(users, {
+    fields: [notifications.actorId],
+    references: [users.id],
+    relationName: "notificationActor",
   }),
 }));

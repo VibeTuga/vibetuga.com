@@ -9,6 +9,7 @@ import { Logo } from "@/components/shared/Logo";
 import { SearchTrigger } from "@/components/shared/SearchDialog";
 import { UserMenu, MobileUserMenu } from "@/components/layout/UserMenu";
 import type { SessionUser } from "@/components/layout/UserMenu";
+import { NotificationBell } from "@/components/shared/NotificationBell";
 import { cn } from "@/lib/utils";
 
 const SearchDialog = dynamic(
@@ -61,11 +62,14 @@ export function Header({ user }: { user?: SessionUser | null }) {
           <SearchTrigger />
           <SearchDialog />
 
-          {/* Auth: user menu or login button */}
+          {/* Auth: notifications + user menu or login button */}
           {user ? (
-            <div className="hidden sm:block">
-              <UserMenu user={user} />
-            </div>
+            <>
+              <NotificationBell />
+              <div className="hidden sm:block">
+                <UserMenu user={user} />
+              </div>
+            </>
           ) : (
             <Link
               href="/login"

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import Link from "next/link";
 import {
+  Bell,
   FileText,
   Home,
   LayoutDashboard,
@@ -74,6 +75,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
             >
               <ShoppingBag size={14} />
               Minhas Compras
+            </Link>
+            <Link
+              href="/dashboard/notifications"
+              className="flex items-center gap-2 text-xs font-mono text-white/50 uppercase tracking-widest hover:text-primary transition-colors"
+            >
+              <Bell size={14} />
+              Notificações
             </Link>
             <Link
               href="/dashboard/settings"

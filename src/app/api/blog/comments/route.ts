@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { blogComments } from "@/lib/db/schema";
+import { blogComments, blogPosts } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { awardXP } from "@/lib/gamification";
 import { rateLimit } from "@/lib/rate-limit";
+import { createNotification, NOTIFICATION_TYPES } from "@/lib/notifications";
 
 const limiter = rateLimit({ interval: 60 * 1000, limit: 10 });
 
@@ -45,6 +47,25 @@ export async function POST(request: NextRequest) {
       .returning();
 
     await awardXP(session.user.id, "blog_comment", postId).catch(() => null);
+
+    // Notify post author about new comment
+    const [post] = await db
+      .select({ authorId: blogPosts.authorId, slug: blogPosts.slug })
+      .from(blogPosts)
+      .where(eq(blogPosts.id, postId))
+      .limit(1);
+
+    if (post && post.authorId !== session.user.id) {
+      createNotification({
+        userId: post.authorId,
+        type: NOTIFICATION_TYPES.COMMENT_REPLY,
+        title: "Novo comentário",
+        body: content.trim().slice(0, 100),
+        link: `/blog/${post.slug}#comments`,
+        actorId: session.user.id,
+        referenceId: comment.id,
+      }).catch(() => null);
+    }
 
     return NextResponse.json(comment, { status: 201 });
   } catch {
