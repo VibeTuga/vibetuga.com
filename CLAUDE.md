@@ -394,6 +394,7 @@ main                    ← Production (automatic deploy via Vercel)
 - #53 Error/loading/empty states for all pages
 - #54 Performance audit (Core Web Vitals, image optimization, bundle analysis)
 - #55 Security audit (rate limiting, CSRF, XSS, input sanitization)
+- Dashboard navigation from main UI — add "Dashboard" link to UserMenu (desktop + mobile) so authenticated users can reach their dashboard (products, projects, purchases, profile) without manually navigating to /dashboard
 
 ### Phase 5: User Management & Moderation (#56-#68)
 
