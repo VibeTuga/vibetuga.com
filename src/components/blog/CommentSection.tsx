@@ -6,6 +6,37 @@ import { MessageSquare, Reply, Send, Loader2 } from "lucide-react";
 import { formatDatePT } from "@/lib/blog-utils";
 import { ReportButton } from "@/components/shared/ReportButton";
 
+const MENTION_REGEX = /@([a-zA-Z0-9_]+)/g;
+
+function renderCommentContent(text: string): React.ReactNode[] {
+  const parts: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  const regex = new RegExp(MENTION_REGEX.source, "g");
+
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index));
+    }
+    const username = match[1];
+    parts.push(
+      <span
+        key={`mention-${match.index}`}
+        className="text-primary font-semibold cursor-pointer hover:underline"
+      >
+        @{username}
+      </span>,
+    );
+    lastIndex = regex.lastIndex;
+  }
+
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
+
+  return parts;
+}
+
 type Comment = {
   id: string;
   postId: string;
@@ -150,7 +181,7 @@ function CommentNode({
 
         {/* Content */}
         <p className="text-sm text-white/70 leading-relaxed whitespace-pre-wrap">
-          {comment.content}
+          {renderCommentContent(comment.content)}
         </p>
 
         {/* Actions */}
