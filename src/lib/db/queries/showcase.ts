@@ -1,17 +1,18 @@
 import { cache } from "react";
 import { db } from "@/lib/db";
 import { showcaseProjects, users } from "@/lib/db/schema";
-import { eq, desc, and, or, count, sql } from "drizzle-orm";
+import { eq, desc, and, or, count, sql, ilike } from "drizzle-orm";
 
 const PROJECTS_PER_PAGE = 12;
 
 type ShowcaseFilters = {
   techStack?: string;
+  q?: string;
   page?: number;
 };
 
 export const getApprovedProjects = cache(async (filters: ShowcaseFilters) => {
-  const { techStack, page = 1 } = filters;
+  const { techStack, q, page = 1 } = filters;
 
   const conditions: ReturnType<typeof eq>[] = [
     or(eq(showcaseProjects.status, "approved"), eq(showcaseProjects.status, "featured"))!,
@@ -19,6 +20,10 @@ export const getApprovedProjects = cache(async (filters: ShowcaseFilters) => {
 
   if (techStack) {
     conditions.push(sql`${showcaseProjects.techStack} @> ARRAY[${techStack}]::text[]`);
+  }
+
+  if (q) {
+    conditions.push(ilike(showcaseProjects.title, `%${q}%`));
   }
 
   const whereClause = and(...conditions);
