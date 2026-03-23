@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
 import { getPostBySlug, getAdjacentPosts } from "@/lib/db/queries/blog";
+import { RelatedPosts } from "@/components/blog/RelatedPosts";
 import { formatDatePT, formatCount, getCategoryAccent } from "@/lib/blog-utils";
 import { ViewTracker } from "@/components/blog/ViewTracker";
 import { CommentSection } from "@/components/blog/CommentSection";
@@ -194,8 +195,8 @@ export default async function BlogPostPage({ params }: Props) {
               {post.tags.map((tag) => (
                 <Link
                   key={tag}
-                  href={`/blog?tag=${encodeURIComponent(tag)}`}
-                  className="px-3 py-1 bg-surface-container border border-white/5 text-xs font-mono text-white/50 hover:text-primary hover:border-primary/30 transition-colors"
+                  href={`/blog/tag/${encodeURIComponent(tag)}`}
+                  className="px-3 py-1 bg-white/5 hover:bg-white/10 text-xs font-mono text-white/50 hover:text-white/80 transition-colors rounded-full"
                 >
                   #{tag}
                 </Link>
@@ -221,6 +222,9 @@ export default async function BlogPostPage({ params }: Props) {
             initialCount={post.commentsCount}
             isAuthenticated={!!session?.user}
           />
+
+          {/* Related Posts */}
+          <RelatedPosts postId={post.id} tags={post.tags} categoryId={post.categoryId} />
 
           {/* Prev / Next navigation */}
           <nav className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-white/5 pt-8">
