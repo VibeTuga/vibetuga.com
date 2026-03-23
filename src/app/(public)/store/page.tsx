@@ -1,4 +1,16 @@
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Loja | VibeTuga",
+  description:
+    "O marketplace digital da comunidade VibeTuga. Em breve: skills, auto-runners, agent kits, prompt packs e muito mais.",
+  openGraph: {
+    title: "Loja | VibeTuga",
+    description:
+      "O marketplace digital da comunidade VibeTuga. Em breve: skills, auto-runners, agent kits, prompt packs e muito mais.",
+  },
+};
 
 export default function StorePage() {
   return (

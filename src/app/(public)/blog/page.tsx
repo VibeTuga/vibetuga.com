@@ -11,6 +11,11 @@ export const metadata: Metadata = {
   title: "Blog | VibeTuga",
   description:
     "Artigos, tutoriais e deep dives sobre vibe coding. A comunidade portuguesa de desenvolvimento assistido por IA.",
+  openGraph: {
+    title: "Blog | VibeTuga",
+    description:
+      "Artigos, tutoriais e deep dives sobre vibe coding. A comunidade portuguesa de desenvolvimento assistido por IA.",
+  },
 };
 
 type SearchParams = Promise<{

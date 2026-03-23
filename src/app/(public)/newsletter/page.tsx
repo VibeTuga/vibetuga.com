@@ -1,9 +1,15 @@
+import type { Metadata } from "next";
 import { NewsletterForm } from "./NewsletterForm";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Newsletter | VibeTuga",
   description:
     "Recebe os melhores artigos, projetos da comunidade e dicas de vibe coding diretamente no teu email.",
+  openGraph: {
+    title: "Newsletter | VibeTuga",
+    description:
+      "Recebe os melhores artigos, projetos da comunidade e dicas de vibe coding diretamente no teu email.",
+  },
 };
 
 export default function NewsletterPage() {

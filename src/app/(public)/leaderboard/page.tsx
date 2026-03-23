@@ -1,8 +1,20 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { db } from "@/lib/db";
 import { users, showcaseProjects } from "@/lib/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth";
+
+export const metadata: Metadata = {
+  title: "Leaderboard | VibeTuga",
+  description:
+    "Rankings de XP e competição da comunidade VibeTuga. Descobre quem está a vibrar mais forte e sobe no leaderboard.",
+  openGraph: {
+    title: "Leaderboard | VibeTuga",
+    description:
+      "Rankings de XP e competição da comunidade VibeTuga. Descobre quem está a vibrar mais forte e sobe no leaderboard.",
+  },
+};
 
 const LEVEL_NAMES: Record<number, string> = {
   1: "Noob",
