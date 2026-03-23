@@ -4,6 +4,7 @@ import { blogPostLikes, blogPosts } from "@/lib/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { rateLimit } from "@/lib/rate-limit";
+import { createNotification, NOTIFICATION_TYPES } from "@/lib/notifications";
 
 const limiter = rateLimit({ interval: 60 * 1000, limit: 30 });
 
@@ -53,6 +54,25 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         .update(blogPosts)
         .set({ likesCount: sql`${blogPosts.likesCount} + 1` })
         .where(eq(blogPosts.id, postId));
+
+      // Notify post author
+      const [post] = await db
+        .select({ authorId: blogPosts.authorId, slug: blogPosts.slug })
+        .from(blogPosts)
+        .where(eq(blogPosts.id, postId))
+        .limit(1);
+
+      if (post && post.authorId !== userId) {
+        createNotification({
+          userId: post.authorId,
+          type: NOTIFICATION_TYPES.POST_LIKED,
+          title: "Post gostado",
+          body: "Alguém gostou do teu post.",
+          link: `/blog/${post.slug}`,
+          actorId: userId,
+          referenceId: postId,
+        }).catch(() => null);
+      }
 
       return NextResponse.json({ liked: true });
     }

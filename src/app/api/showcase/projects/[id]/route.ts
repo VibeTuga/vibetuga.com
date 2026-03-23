@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { awardXP } from "@/lib/gamification";
 import { logAdminAction, getClientIp } from "@/lib/audit";
+import { createNotification, NOTIFICATION_TYPES } from "@/lib/notifications";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -110,6 +111,30 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
     if (status === "featured" && existing.status !== "featured") {
       await awardXP(existing.authorId, "project_featured", id).catch(() => null);
+    }
+
+    // Notify project author on approval/feature
+    if (status === "approved" && existing.status !== "approved") {
+      createNotification({
+        userId: existing.authorId,
+        type: NOTIFICATION_TYPES.POST_APPROVED,
+        title: "Projeto aprovado",
+        body: `O teu projeto "${project.title}" foi aprovado.`,
+        link: `/showcase/${project.slug}`,
+        actorId: session.user.id,
+        referenceId: id,
+      }).catch(() => null);
+    }
+    if (status === "featured" && existing.status !== "featured") {
+      createNotification({
+        userId: existing.authorId,
+        type: NOTIFICATION_TYPES.PROJECT_FEATURED,
+        title: "Projeto em destaque",
+        body: `O teu projeto "${project.title}" foi destacado!`,
+        link: `/showcase/${project.slug}`,
+        actorId: session.user.id,
+        referenceId: id,
+      }).catch(() => null);
     }
 
     // Audit log status changes

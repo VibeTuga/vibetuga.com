@@ -5,6 +5,7 @@ import { eq, and, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { awardXP } from "@/lib/gamification";
 import { rateLimit } from "@/lib/rate-limit";
+import { createNotification, NOTIFICATION_TYPES } from "@/lib/notifications";
 
 const limiter = rateLimit({ interval: 60 * 1000, limit: 30 });
 
@@ -62,6 +63,16 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (followerCount.count === 1) {
       await awardXP(targetUserId, "first_follower", followerId);
     }
+
+    createNotification({
+      userId: targetUserId,
+      type: NOTIFICATION_TYPES.NEW_FOLLOWER,
+      title: "Novo seguidor",
+      body: "Alguém começou a seguir-te.",
+      link: `/profile/${followerId}`,
+      actorId: followerId,
+      referenceId: followerId,
+    }).catch(() => null);
 
     return NextResponse.json({ following: true });
   } catch {
