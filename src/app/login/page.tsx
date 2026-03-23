@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { auth, signIn } from "@/lib/auth";
 import { Logo } from "@/components/shared/Logo";
 
@@ -26,9 +27,21 @@ export default async function LoginPage({
     redirect("/");
   }
 
-  const { error, callbackUrl } = await searchParams;
+  const { error, callbackUrl, ref } = await searchParams;
   const errorMessage = error ? (ERROR_MESSAGES[error as string] ?? ERROR_MESSAGES.Default) : null;
   const redirectTo = typeof callbackUrl === "string" ? callbackUrl : "/";
+
+  // Store referral code in cookie so it survives the OAuth redirect
+  if (typeof ref === "string" && ref.length > 0) {
+    const cookieStore = await cookies();
+    cookieStore.set("vibetuga_ref", ref, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 30, // 30 minutes
+      path: "/",
+    });
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-surface px-4">

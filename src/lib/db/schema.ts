@@ -137,6 +137,8 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   notifications: many(notifications, { relationName: "notificationRecipient" }),
   actedNotifications: many(notifications, { relationName: "notificationActor" }),
   projectVotes: many(projectVotes),
+  referralsMade: many(referrals, { relationName: "referralsMade" }),
+  referralsReceived: many(referrals, { relationName: "referralsReceived" }),
 }));
 
 // ─── NextAuth Required Tables ───────────────────────────────
@@ -847,5 +849,45 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
     fields: [notifications.actorId],
     references: [users.id],
     relationName: "notificationActor",
+  }),
+}));
+
+// ─── Referrals ──────────────────────────────────────────────
+
+export const referralStatusEnum = pgEnum("referral_status", ["pending", "completed", "expired"]);
+
+export const referrals = pgTable(
+  "referral",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    referrerId: uuid("referrer_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    referredUserId: uuid("referred_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    referralCode: varchar("referral_code", { length: 50 }).unique().notNull(),
+    status: referralStatusEnum("status").default("pending").notNull(),
+    xpAwarded: integer("xp_awarded").default(0).notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    completedAt: timestamp("completed_at", { mode: "date" }),
+  },
+  (t) => [
+    index("referral_referrer_idx").on(t.referrerId),
+    index("referral_code_idx").on(t.referralCode),
+    index("referral_status_idx").on(t.status),
+  ],
+);
+
+export const referralsRelations = relations(referrals, ({ one }) => ({
+  referrer: one(users, {
+    fields: [referrals.referrerId],
+    references: [users.id],
+    relationName: "referralsMade",
+  }),
+  referredUser: one(users, {
+    fields: [referrals.referredUserId],
+    references: [users.id],
+    relationName: "referralsReceived",
   }),
 }));

@@ -2,8 +2,11 @@ import NextAuth from "next-auth";
 import Discord, { type DiscordProfile } from "next-auth/providers/discord";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { eq } from "drizzle-orm";
+import { cookies } from "next/headers";
 import { db } from "./db";
-import { users, accounts, sessions, verificationTokens } from "./db/schema";
+import { users, accounts, sessions, verificationTokens, referrals } from "./db/schema";
+import { awardXP } from "./gamification";
+import { createNotification } from "./notifications";
 
 function getDiscordAvatarUrl(profile: DiscordProfile) {
   if (!profile.avatar) {
@@ -72,6 +75,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           .where(eq(users.discordId, discordId))
           .limit(1);
 
+        const isNewUser = existing.length === 0;
+
         if (existing.length > 0) {
           await db
             .update(users)
@@ -91,6 +96,34 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           // New user — set fields that the adapter will use
           user.name = discordUsername;
           user.image = discordImage ?? user.image;
+        }
+
+        // Process referral for new users
+        if (isNewUser) {
+          try {
+            const cookieStore = await cookies();
+            const refCode = cookieStore.get("vibetuga_ref")?.value;
+            if (refCode) {
+              // Delete the cookie
+              cookieStore.delete("vibetuga_ref");
+
+              const [referral] = await db
+                .select()
+                .from(referrals)
+                .where(eq(referrals.referralCode, refCode))
+                .limit(1);
+
+              if (referral && referral.status === "pending") {
+                // We need the new user's ID. For new users, the adapter
+                // hasn't created them yet at this point. We'll handle it in
+                // the jwt callback when trigger === "signIn" and there's a ref code.
+                // Store the ref code in the user object temporarily.
+                (user as Record<string, unknown>).referralCode = refCode;
+              }
+            }
+          } catch {
+            // Cookie read may fail in some contexts — silently ignore
+          }
         }
       }
       return true;
@@ -118,6 +151,49 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         } else {
           token.role = "member";
           token.discordUsername = "";
+        }
+      }
+
+      // Process referral for new users (the user object exists on first sign-in)
+      if (trigger === "signIn" && user) {
+        const refCode = (user as Record<string, unknown>).referralCode as string | undefined;
+        if (refCode && token.id) {
+          try {
+            const [referral] = await db
+              .select()
+              .from(referrals)
+              .where(eq(referrals.referralCode, refCode))
+              .limit(1);
+
+            if (
+              referral &&
+              referral.status === "pending" &&
+              referral.referrerId !== (token.id as string)
+            ) {
+              await db
+                .update(referrals)
+                .set({
+                  referredUserId: token.id as string,
+                  status: "completed",
+                  xpAwarded: 25,
+                  completedAt: new Date(),
+                })
+                .where(eq(referrals.id, referral.id));
+
+              await awardXP(referral.referrerId, "referred_user", referral.id);
+
+              createNotification({
+                userId: referral.referrerId,
+                type: "referral_completed",
+                title: "Referência completada!",
+                body: "Alguém que convidaste juntou-se à VibeTuga. +25 XP!",
+                link: "/dashboard/referrals",
+                actorId: token.id as string,
+              }).catch(() => null);
+            }
+          } catch {
+            // Referral processing failure should not block login
+          }
         }
       }
 

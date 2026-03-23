@@ -13,6 +13,7 @@ import {
   Settings,
   ShoppingBag,
   User,
+  UserPlus,
 } from "lucide-react";
 
 const PageFadeIn = dynamic(() =>
@@ -75,6 +76,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
             >
               <ShoppingBag size={14} />
               Minhas Compras
+            </Link>
+            <Link
+              href="/dashboard/referrals"
+              className="flex items-center gap-2 text-xs font-mono text-white/50 uppercase tracking-widest hover:text-primary transition-colors"
+            >
+              <UserPlus size={14} />
+              Referências
             </Link>
             <Link
               href="/dashboard/notifications"

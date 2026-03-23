@@ -10,6 +10,8 @@ export const NOTIFICATION_TYPES = {
   BADGE_EARNED: "badge_earned",
   POST_LIKED: "post_liked",
   PROJECT_FEATURED: "project_featured",
+  MENTION: "mention",
+  REFERRAL_COMPLETED: "referral_completed",
 } as const;
 
 export type NotificationType = (typeof NOTIFICATION_TYPES)[keyof typeof NOTIFICATION_TYPES];

@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth";
 import { awardXP } from "@/lib/gamification";
 import { rateLimit } from "@/lib/rate-limit";
 import { createNotification, NOTIFICATION_TYPES } from "@/lib/notifications";
+import { parseMentions, resolveMentions } from "@/lib/mentions";
 
 const limiter = rateLimit({ interval: 60 * 1000, limit: 10 });
 
@@ -65,6 +66,27 @@ export async function POST(request: NextRequest) {
         actorId: session.user.id,
         referenceId: comment.id,
       }).catch(() => null);
+    }
+
+    // Notify mentioned users
+    const mentionedUsernames = parseMentions(content.trim());
+    if (mentionedUsernames.length > 0 && post) {
+      resolveMentions(mentionedUsernames)
+        .then((resolved) => {
+          for (const { userId } of resolved) {
+            if (userId === session.user.id) continue;
+            createNotification({
+              userId,
+              type: "mention",
+              title: "Foste mencionado num comentário",
+              body: content.trim().slice(0, 100),
+              link: `/blog/${post.slug}#comments`,
+              actorId: session.user.id,
+              referenceId: comment.id,
+            }).catch(() => null);
+          }
+        })
+        .catch(() => null);
     }
 
     return NextResponse.json(comment, { status: 201 });
