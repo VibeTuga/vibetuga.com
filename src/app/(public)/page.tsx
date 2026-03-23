@@ -103,12 +103,14 @@ export default function HomePage() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              href="#"
+            <a
+              href="https://discord.vibetuga.com"
+              target="_blank"
+              rel="noopener noreferrer"
               className="w-full sm:w-auto px-8 py-4 bg-primary text-on-primary font-bold flex items-center justify-center gap-3 hover:shadow-[0_0_20px_rgba(161,255,194,0.4)] transition-all"
             >
               Junta-te ao Discord
-            </Link>
+            </a>
             <Link
               href="/showcase"
               className="w-full sm:w-auto px-8 py-4 bg-transparent border border-tertiary/40 text-tertiary font-bold hover:bg-tertiary/5 hover:border-tertiary transition-all"

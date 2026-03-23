@@ -1,10 +1,10 @@
 import { Logo } from "@/components/shared/Logo";
 
 const socialLinks = [
-  { href: "https://discord.gg/vibetuga", label: "Discord" },
-  { href: "https://twitch.tv/vibetuga", label: "Twitch" },
-  { href: "https://youtube.com/@vibetuga", label: "YouTube" },
-  { href: "https://tiktok.com/@vibetuga", label: "TikTok" },
+  { href: "https://discord.vibetuga.com", label: "Discord" },
+  { href: "https://twitch.tv/vibetugaai", label: "Twitch" },
+  { href: "https://youtube.com/@VibeTuga", label: "YouTube" },
+  { href: "https://tiktok.com/@vibetugaai", label: "TikTok" },
 ] as const;
 
 export function Footer() {
