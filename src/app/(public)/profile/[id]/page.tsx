@@ -213,7 +213,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title: `${displayName} — VibeTuga`,
       description: profile.user.bio ?? `Perfil de ${displayName} na comunidade VibeTuga.`,
-      images: profile.user.image ? [{ url: profile.user.image }] : [],
+      images: profile.user.image ? [{ url: profile.user.image, width: 1200, height: 630 }] : [],
     },
   };
 }

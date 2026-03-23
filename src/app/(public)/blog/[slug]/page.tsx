@@ -8,6 +8,7 @@ import { ViewTracker } from "@/components/blog/ViewTracker";
 import { CommentSection } from "@/components/blog/CommentSection";
 import { LikeButton } from "@/components/blog/LikeButton";
 import { BookmarkButton } from "@/components/blog/BookmarkButton";
+import { MarkdownContent } from "@/components/blog/MarkdownContent";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -30,7 +31,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: "article",
       publishedTime: post.publishedAt?.toISOString(),
       authors: [post.authorDisplayName || post.authorName || "VibeTuga"],
-      ...(post.coverImage && { images: [{ url: post.coverImage }] }),
+      ...(post.coverImage && { images: [{ url: post.coverImage, width: 1200, height: 630 }] }),
     },
   };
 }
@@ -167,7 +168,7 @@ export default async function BlogPostPage({ params }: Props) {
       )}
 
       {/* Content */}
-      <div className="blog-content mb-12" dangerouslySetInnerHTML={{ __html: post.content }} />
+      <MarkdownContent content={post.content} className="blog-content mb-12" />
 
       {/* Tags */}
       {post.tags && post.tags.length > 0 && (

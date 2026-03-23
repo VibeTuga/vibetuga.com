@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import type { Metadata } from "next";
 import {
   getHomepageStats,
   getHomepageFeaturedProjects,
@@ -8,6 +9,18 @@ import {
 } from "@/lib/db/queries/homepage";
 import { getLevelName } from "@/lib/db/queries/profile";
 import { formatDatePT } from "@/lib/blog-utils";
+
+export const metadata: Metadata = {
+  title: "VibeTuga — Comunidade Portuguesa de Vibe Coding",
+  description:
+    "A comunidade portuguesa de vibe coding, IA e desenvolvimento assistido por agentes. Aprende, partilha e constrói o futuro da programação.",
+  openGraph: {
+    title: "VibeTuga — Comunidade Portuguesa de Vibe Coding",
+    description:
+      "A comunidade portuguesa de vibe coding, IA e desenvolvimento assistido por agentes. Aprende, partilha e constrói o futuro da programação.",
+    type: "website",
+  },
+};
 
 export const revalidate = 60;
 
