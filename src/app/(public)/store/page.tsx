@@ -1,9 +1,14 @@
+import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { getApprovedProducts } from "@/lib/db/queries/store";
 import { ProductCard } from "@/components/store/ProductCard";
 import { Pagination } from "@/components/blog/Pagination";
 import { StoreTypeFilter, StoreSearchInput } from "@/components/store/StoreFilters";
+
+const StaggerGrid = dynamic(() =>
+  import("@/components/shared/StaggerGrid").then((m) => m.StaggerGrid),
+);
 
 export const revalidate = 60;
 
@@ -63,11 +68,11 @@ export default async function StorePage({ searchParams }: { searchParams: Search
 
       {/* Product Grid */}
       {products.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-24">
+        <StaggerGrid className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-24">
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
-        </div>
+        </StaggerGrid>
       ) : (
         <div className="flex flex-col items-center justify-center py-24 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-6">

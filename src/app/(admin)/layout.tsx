@@ -1,7 +1,12 @@
+import dynamic from "next/dynamic";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminHeader } from "@/components/admin/AdminHeader";
+
+const PageFadeIn = dynamic(() =>
+  import("@/components/shared/PageFadeIn").then((m) => m.PageFadeIn),
+);
 
 export const metadata = {
   title: "Admin | VibeTuga",
@@ -24,7 +29,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <AdminSidebar />
       <AdminHeader />
       <main className="pt-24 pb-20 md:pb-12 px-6 max-w-[1440px] mx-auto md:pl-72 min-h-screen">
-        {children}
+        <PageFadeIn>{children}</PageFadeIn>
       </main>
     </>
   );
