@@ -1,9 +1,33 @@
 import NextAuth from "next-auth";
-import Discord from "next-auth/providers/discord";
+import Discord, { type DiscordProfile } from "next-auth/providers/discord";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { eq } from "drizzle-orm";
 import { db } from "./db";
 import { users, accounts, sessions, verificationTokens } from "./db/schema";
+
+function getDiscordAvatarUrl(profile: DiscordProfile) {
+  if (!profile.avatar) {
+    return null;
+  }
+
+  const format = profile.avatar.startsWith("a_") ? "gif" : "png";
+  return `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.${format}`;
+}
+
+function getDiscordImageUrl(profile: DiscordProfile) {
+  const customAvatar = getDiscordAvatarUrl(profile);
+
+  if (customAvatar) {
+    return customAvatar;
+  }
+
+  const defaultAvatarNumber =
+    profile.discriminator === "0"
+      ? Number(BigInt(profile.id) >> BigInt(22)) % 6
+      : Number.parseInt(profile.discriminator, 10) % 5;
+
+  return `https://cdn.discordapp.com/embed/avatars/${defaultAvatarNumber}.png`;
+}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: DrizzleAdapter(db, {
@@ -16,6 +40,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Discord({
       clientId: process.env.DISCORD_CLIENT_ID!,
       clientSecret: process.env.DISCORD_CLIENT_SECRET!,
+      profile(profile) {
+        const discordAvatar = getDiscordAvatarUrl(profile);
+        const image = getDiscordImageUrl(profile);
+
+        return {
+          id: profile.id,
+          email: profile.email,
+          image,
+          name: profile.global_name ?? profile.username,
+          discordId: profile.id,
+          discordUsername: profile.username,
+          discordAvatar,
+        };
+      },
     }),
   ],
   session: { strategy: "jwt" },
@@ -24,9 +62,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (account?.provider === "discord" && profile) {
         const discordId = profile.id as string;
         const discordUsername = (profile.username as string) ?? profile.name ?? "";
-        const discordAvatar = profile.avatar
-          ? `https://cdn.discordapp.com/avatars/${discordId}/${profile.avatar}.png`
-          : null;
+        const discordAvatar = getDiscordAvatarUrl(profile as DiscordProfile);
+        const discordImage = getDiscordImageUrl(profile as DiscordProfile);
         const email = profile.email ?? null;
 
         const existing = await db
@@ -42,7 +79,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               discordUsername,
               discordAvatar,
               email,
-              image: discordAvatar ?? user.image,
+              image: discordImage ?? user.image,
               name: discordUsername,
               updatedAt: new Date(),
             })
@@ -53,7 +90,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         } else {
           // New user — set fields that the adapter will use
           user.name = discordUsername;
-          user.image = discordAvatar ?? user.image;
+          user.image = discordImage ?? user.image;
         }
       }
       return true;
