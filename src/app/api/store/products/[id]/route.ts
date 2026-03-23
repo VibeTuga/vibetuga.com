@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { storeProducts, users } from "@/lib/db/schema";
 import { eq, or } from "drizzle-orm";
 import { auth } from "@/lib/auth";
+import { logAdminAction, getClientIp } from "@/lib/audit";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -124,6 +125,27 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
+    // Audit log status changes by admin/moderator
+    if (status !== undefined && isAdmin && status !== existing.status) {
+      const statusActions: Record<string, string> = {
+        approved: "product_approved",
+        rejected: "product_rejected",
+        archived: "product_archived",
+        pending: "product_status_pending",
+        draft: "product_status_draft",
+      };
+      const action = statusActions[status] ?? `product_status_${status}`;
+      const ip = getClientIp(request);
+      logAdminAction({
+        actorId: session.user.id,
+        action,
+        targetType: "product",
+        targetId: id,
+        details: { title: product.title, before: existing.status, after: status },
+        ipAddress: ip,
+      });
+    }
+
     return NextResponse.json(product);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to update product";
@@ -137,7 +159,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   }
 }
 
-export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
 
   if (!session?.user) {
@@ -148,7 +170,7 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     const { id } = await params;
 
     const [existing] = await db
-      .select({ sellerId: storeProducts.sellerId })
+      .select({ sellerId: storeProducts.sellerId, title: storeProducts.title })
       .from(storeProducts)
       .where(eq(storeProducts.id, id))
       .limit(1);
@@ -171,6 +193,18 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
 
     if (!deleted) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    }
+
+    if (isAdmin) {
+      const ip = getClientIp(request);
+      logAdminAction({
+        actorId: session.user.id,
+        action: "product_deleted",
+        targetType: "product",
+        targetId: id,
+        details: { title: existing.title },
+        ipAddress: ip,
+      });
     }
 
     return NextResponse.json({ success: true });

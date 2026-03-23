@@ -1,20 +1,29 @@
-export default function UsersPage() {
-  return (
-    <div>
-      <div className="mb-8">
-        <h1 className="font-headline font-black text-xl uppercase tracking-tight text-white">
-          Utilizadores
-        </h1>
-        <p className="text-[10px] font-mono text-white/40 uppercase mt-1">
-          Gestão de utilizadores (em breve)
-        </p>
-      </div>
+import { db } from "@/lib/db";
+import { users } from "@/lib/db/schema";
+import { desc } from "drizzle-orm";
+import { AdminUsersManager } from "./AdminUsersManager";
 
-      <div className="bg-surface-container-low p-12 text-center">
-        <p className="text-white/40 font-mono text-xs uppercase">
-          Gestão de utilizadores será implementada no próximo sprint
-        </p>
-      </div>
-    </div>
-  );
+export const metadata = {
+  title: "Utilizadores | Admin | VibeTuga",
+};
+
+export default async function UsersPage() {
+  const allUsers = await db
+    .select({
+      id: users.id,
+      discordUsername: users.discordUsername,
+      displayName: users.displayName,
+      email: users.email,
+      image: users.image,
+      role: users.role,
+      xpPoints: users.xpPoints,
+      level: users.level,
+      isBanned: users.isBanned,
+      isVerified: users.isVerified,
+      createdAt: users.createdAt,
+    })
+    .from(users)
+    .orderBy(desc(users.createdAt));
+
+  return <AdminUsersManager users={allUsers} />;
 }
