@@ -88,18 +88,21 @@ export function CategoriesManager({ initialCategories }: { initialCategories: Ca
         icon: form.icon || null,
       };
 
-      if (editingId) {
-        await fetch(`/api/blog/categories/${editingId}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        });
-      } else {
-        await fetch("/api/blog/categories", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        });
+      const res = editingId
+        ? await fetch(`/api/blog/categories/${editingId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          })
+        : await fetch("/api/blog/categories", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          });
+
+      if (!res.ok) {
+        alert("Erro ao guardar a categoria");
+        return;
       }
 
       cancel();
@@ -112,7 +115,11 @@ export function CategoriesManager({ initialCategories }: { initialCategories: Ca
   async function handleDelete(id: string, name: string) {
     if (!confirm(`Eliminar categoria "${name}"?`)) return;
 
-    await fetch(`/api/blog/categories/${id}`, { method: "DELETE" });
+    const res = await fetch(`/api/blog/categories/${id}`, { method: "DELETE" });
+    if (!res.ok) {
+      alert("Erro ao eliminar a categoria");
+      return;
+    }
     router.refresh();
   }
 

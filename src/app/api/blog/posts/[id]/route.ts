@@ -18,6 +18,19 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
   try {
     const { id } = await params;
+
+    // Authors can only edit their own posts
+    if (session.user.role === "author") {
+      const [existing] = await db
+        .select({ authorId: blogPosts.authorId })
+        .from(blogPosts)
+        .where(eq(blogPosts.id, id))
+        .limit(1);
+      if (!existing || existing.authorId !== session.user.id) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+    }
+
     const body = await request.json();
     const { title, slug, excerpt, content, categoryId, tags, coverImage, status, postType } = body;
 

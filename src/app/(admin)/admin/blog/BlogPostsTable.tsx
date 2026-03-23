@@ -31,9 +31,11 @@ export function BlogPostsTable({ posts }: { posts: Post[] }) {
     if (!confirm(`Eliminar "${title}"?`)) return;
 
     const res = await fetch(`/api/blog/posts/${id}`, { method: "DELETE" });
-    if (res.ok) {
-      router.refresh();
+    if (!res.ok) {
+      alert("Erro ao eliminar o post");
+      return;
     }
+    router.refresh();
   }
 
   if (posts.length === 0) {
