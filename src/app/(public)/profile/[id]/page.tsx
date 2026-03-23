@@ -16,6 +16,7 @@ import { XpProgressBar } from "@/components/profile/XpProgressBar";
 import { LevelRing } from "@/components/profile/LevelRing";
 import { FollowButton } from "@/components/shared/FollowButton";
 import { VerifiedBadge } from "@/components/shared/VerifiedBadge";
+import { SendMessageButton } from "@/components/shared/SendMessageButton";
 
 // ─── helpers ────────────────────────────────────────────────
 
@@ -300,14 +301,15 @@ export default async function ProfilePage({ params, searchParams }: Props) {
                 @{user.discordUsername}
               </p>
 
-              {/* Follow button — only for other users while logged in */}
+              {/* Follow button + message — only for other users while logged in */}
               {sessionUserId && !isOwnProfile && (
-                <div className="mb-4">
+                <div className="mb-4 flex items-center gap-2">
                   <FollowButton
                     targetUserId={user.id}
                     initialFollowing={isFollowing}
                     initialFollowerCount={followerCount}
                   />
+                  <SendMessageButton targetUserId={user.id} />
                 </div>
               )}
 

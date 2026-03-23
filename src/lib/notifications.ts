@@ -12,6 +12,7 @@ export const NOTIFICATION_TYPES = {
   PROJECT_FEATURED: "project_featured",
   MENTION: "mention",
   REFERRAL_COMPLETED: "referral_completed",
+  NEW_MESSAGE: "new_message",
 } as const;
 
 export type NotificationType = (typeof NOTIFICATION_TYPES)[keyof typeof NOTIFICATION_TYPES];

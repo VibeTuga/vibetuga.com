@@ -78,6 +78,20 @@
       "when": 1774300917758,
       "tag": "0010_complex_sage",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1774301342363,
+      "tag": "0011_glossy_red_ghost",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1774302000270,
+      "tag": "0012_loud_wraith",
+      "breakpoints": true
     }
   ]
 }
