@@ -8,8 +8,9 @@ import {
   xpEvents,
   badges,
   userBadges,
+  userFollows,
 } from "@/lib/db/schema";
-import { eq, desc, and, or } from "drizzle-orm";
+import { eq, desc, and, or, sql } from "drizzle-orm";
 
 export const LEVEL_NAMES: Record<number, string> = {
   1: "Noob",
@@ -48,7 +49,7 @@ export function getLevelXpRange(level: number): { current: number; next: number 
   };
 }
 
-export const getUserProfile = cache(async (userId: string) => {
+export const getUserProfile = cache(async (userId: string, sessionUserId?: string | null) => {
   const [user] = await db
     .select({
       id: users.id,
@@ -63,6 +64,7 @@ export const getUserProfile = cache(async (userId: string) => {
       streakDays: users.streakDays,
       createdAt: users.createdAt,
       isBanned: users.isBanned,
+      isVerified: users.isVerified,
     })
     .from(users)
     .where(eq(users.id, userId))
@@ -70,7 +72,16 @@ export const getUserProfile = cache(async (userId: string) => {
 
   if (!user) return null;
 
-  const [allBadges, earnedBadges, posts, projects, recentXpEvents] = await Promise.all([
+  const [
+    allBadges,
+    earnedBadges,
+    posts,
+    projects,
+    recentXpEvents,
+    followerCountResult,
+    followingCountResult,
+    isFollowingResult,
+  ] = await Promise.all([
     db
       .select({
         id: badges.id,
@@ -148,6 +159,26 @@ export const getUserProfile = cache(async (userId: string) => {
       .where(eq(xpEvents.userId, userId))
       .orderBy(desc(xpEvents.createdAt))
       .limit(10),
+
+    db
+      .select({ count: sql<number>`cast(count(*) as int)` })
+      .from(userFollows)
+      .where(eq(userFollows.followingId, userId)),
+
+    db
+      .select({ count: sql<number>`cast(count(*) as int)` })
+      .from(userFollows)
+      .where(eq(userFollows.followerId, userId)),
+
+    sessionUserId
+      ? db
+          .select({ followerId: userFollows.followerId })
+          .from(userFollows)
+          .where(
+            and(eq(userFollows.followerId, sessionUserId), eq(userFollows.followingId, userId)),
+          )
+          .limit(1)
+      : Promise.resolve([]),
   ]);
 
   const earnedBadgeIds = new Set(earnedBadges.map((b) => b.badgeId));
@@ -165,6 +196,9 @@ export const getUserProfile = cache(async (userId: string) => {
     posts,
     projects,
     recentXpEvents,
+    followerCount: followerCountResult[0]?.count ?? 0,
+    followingCount: followingCountResult[0]?.count ?? 0,
+    isFollowing: isFollowingResult.length > 0,
   };
 });
 
