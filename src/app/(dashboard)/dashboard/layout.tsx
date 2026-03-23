@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import Link from "next/link";
-import { FileText, Home } from "lucide-react";
+import { FileText, Home, Layers } from "lucide-react";
 
 export const metadata = {
   title: "Dashboard | VibeTuga",
@@ -29,6 +29,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
             >
               <FileText size={14} />
               Submeter Post
+            </Link>
+            <Link
+              href="/dashboard/submit-project"
+              className="flex items-center gap-2 text-xs font-mono text-white/50 uppercase tracking-widest hover:text-primary transition-colors"
+            >
+              <Layers size={14} />
+              Submeter Projeto
             </Link>
           </nav>
           <Link
