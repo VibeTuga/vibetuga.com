@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
 import { getProjectBySlug } from "@/lib/db/queries/showcase";
 
@@ -26,6 +27,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+export const revalidate = 60;
+
 export default async function ShowcaseProjectPage({ params }: Props) {
   const { slug } = await params;
   const project = await getProjectBySlug(slug);
@@ -50,10 +53,13 @@ export default async function ShowcaseProjectPage({ params }: Props) {
       {/* Cover Image */}
       <div className="relative w-full h-[400px] md:h-[500px] overflow-hidden bg-surface-container-lowest mb-8">
         {project.coverImage ? (
-          <img
+          <Image
             src={project.coverImage}
             alt={project.title}
-            className="w-full h-full object-cover"
+            fill
+            sizes="100vw"
+            className="object-cover"
+            priority
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-surface-container-highest via-surface-container to-surface-container-low" />
@@ -120,10 +126,12 @@ export default async function ShowcaseProjectPage({ params }: Props) {
                     key={i}
                     className="relative aspect-video overflow-hidden bg-surface-container-lowest"
                   >
-                    <img
+                    <Image
                       src={img}
                       alt={`${project.title} screenshot ${i + 1}`}
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                      fill
+                      sizes="(max-width: 1200px) 50vw, 400px"
+                      className="object-cover hover:scale-105 transition-transform duration-500"
                     />
                   </div>
                 ))}

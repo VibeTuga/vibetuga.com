@@ -4,6 +4,9 @@ import { db } from "@/lib/db";
 import { users, showcaseProjects } from "@/lib/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth";
+import { AnimatedPodiumItem, AnimatedTableRow } from "@/components/leaderboard/AnimatedLeaderboard";
+
+export const revalidate = 30;
 
 export const metadata: Metadata = {
   title: "Leaderboard | VibeTuga",
@@ -209,8 +212,9 @@ export default async function LeaderboardPage() {
             const config = podiumColors[i];
             const username = user.displayName || user.discordUsername;
             return (
-              <div
+              <AnimatedPodiumItem
                 key={user.id}
+                index={i}
                 className={`${config.order} flex flex-col items-center bg-surface-container-high/60 backdrop-blur-xl ${config.padding} border-t-2 ${config.borderColor}/50 relative ${
                   config.isFirst
                     ? "transform md:scale-110 z-10 shadow-[0_20px_50px_rgba(161,255,194,0.15)]"
@@ -269,7 +273,7 @@ export default async function LeaderboardPage() {
                 >
                   {formatXP(user.xpPoints)} XP
                 </div>
-              </div>
+              </AnimatedPodiumItem>
             );
           })}
         </section>
@@ -293,8 +297,9 @@ export default async function LeaderboardPage() {
                 const rank = i + 4;
                 const username = user.displayName || user.discordUsername;
                 return (
-                  <tr
+                  <AnimatedTableRow
                     key={user.id}
+                    index={i}
                     className="bg-surface-container-low hover:bg-surface-container transition-colors group"
                   >
                     <td className="px-6 py-4 font-label font-bold text-white/40 group-hover:text-primary">
@@ -329,7 +334,7 @@ export default async function LeaderboardPage() {
                       {formatXP(user.xpPoints)}
                     </td>
                     <td className="px-6 py-4 font-mono">{user.projectCount}</td>
-                  </tr>
+                  </AnimatedTableRow>
                 );
               })}
             </tbody>

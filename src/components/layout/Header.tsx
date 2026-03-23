@@ -2,11 +2,17 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { Logo } from "@/components/shared/Logo";
-import { SearchDialog, SearchTrigger } from "@/components/shared/SearchDialog";
+import { SearchTrigger } from "@/components/shared/SearchDialog";
 import { UserMenu, MobileUserMenu } from "@/components/layout/UserMenu";
+
+const SearchDialog = dynamic(
+  () => import("@/components/shared/SearchDialog").then((m) => m.SearchDialog),
+  { ssr: false },
+);
 import type { SessionUser } from "@/components/layout/UserMenu";
 import { cn } from "@/lib/utils";
 
