@@ -115,7 +115,7 @@ vibetuga-web/
 
 - **`./docs/design/*.html`** — Pre-built HTML design references for key pages and components. Before implementing any page or component, check if a corresponding `.html` file exists in this directory and match its structure, layout, and visual style.
 - **`./docs/design/screenshots/`** — Screenshots of the approved designs. Use these as the visual source of truth when the HTML files alone aren't sufficient to judge spacing, proportions, or overall feel.
-- When building a new page or component: **(1)** check `./docs/design/` for an existing HTML reference, **(2)** cross-reference with screenshots in `./docs/design/screenshot/`, **(3)** consult `DESIGN.md` for tokens and rules, **(4)** only then start coding.
+- When building a new page or component: **(1)** check `./docs/design/` for an existing HTML reference, **(2)** cross-reference with screenshots in `./docs/design/screenshots/`, **(3)** consult `DESIGN.md` for tokens and rules, **(4)** only then start coding.
 - Never deviate from the approved designs without explicit approval. If the design references conflict with DESIGN.md, the HTML references + screenshots take precedence as they represent the latest approved visuals.
 
 ---
