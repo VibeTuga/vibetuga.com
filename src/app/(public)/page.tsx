@@ -69,11 +69,46 @@ const latestPosts = [
 ] as const;
 
 const leaderboardData = [
-  { rank: "#1", username: "vibe_master", level: "Vibe Coder", xp: "12,450", highlight: true },
-  { rank: "#2", username: "cyber_tuga", level: "Sentinel", xp: "9,200", highlight: false },
-  { rank: "#3", username: "lisbon_glow", level: "Rebel", xp: "7,800", highlight: false },
-  { rank: "#4", username: "retro_coder", level: "Builder", xp: "6,420", highlight: false },
-  { rank: "#5", username: "neon_panda", level: "Hacker", xp: "5,100", highlight: false },
+  {
+    rank: "#1",
+    username: "vibe_master",
+    level: "Vibe Coder",
+    xp: "12,450",
+    highlight: true,
+    color: "#a1ffc2",
+  },
+  {
+    rank: "#2",
+    username: "cyber_tuga",
+    level: "Sentinel",
+    xp: "9,200",
+    highlight: false,
+    color: "#c084fc",
+  },
+  {
+    rank: "#3",
+    username: "lisbon_glow",
+    level: "Rebel",
+    xp: "7,800",
+    highlight: false,
+    color: "#38bdf8",
+  },
+  {
+    rank: "#4",
+    username: "retro_coder",
+    level: "Builder",
+    xp: "6,420",
+    highlight: false,
+    color: "#f59e0b",
+  },
+  {
+    rank: "#5",
+    username: "neon_panda",
+    level: "Hacker",
+    xp: "5,100",
+    highlight: false,
+    color: "#f472b6",
+  },
 ] as const;
 
 export default function HomePage() {
@@ -81,6 +116,12 @@ export default function HomePage() {
     <>
       {/* Hero Section */}
       <section className="relative min-h-[80vh] flex flex-col items-center justify-center text-center px-6 overflow-hidden">
+        <img
+          src="/images/hero-bg.svg"
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
         <div className="absolute inset-0 hero-gradient" />
         <div className="relative z-10 max-w-4xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 mb-8">
@@ -153,14 +194,18 @@ export default function HomePage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {featuredProjects.map((project) => (
+          {featuredProjects.map((project, index) => (
             <div
               key={project.title}
               className="group bg-surface-container border border-white/5 p-4 transition-all hover:bg-surface-container-high hover:border-primary/30"
             >
               {/* Image placeholder */}
               <div className="relative aspect-video mb-4 overflow-hidden bg-surface-container-lowest">
-                <div className="w-full h-full bg-gradient-to-br from-surface-container-highest to-surface-container-low" />
+                <img
+                  src={`/images/project-placeholder-${index + 1}.svg`}
+                  alt={project.title}
+                  className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity"
+                />
                 <div className="absolute bottom-2 right-2 px-2 py-0.5 bg-black/80 backdrop-blur-md border border-white/10 text-[10px] font-mono text-tertiary">
                   {project.type}
                 </div>
@@ -226,13 +271,17 @@ export default function HomePage() {
             </div>
 
             <div className="space-y-6">
-              {latestPosts.map((post) => (
+              {latestPosts.map((post, index) => (
                 <div
                   key={post.title}
                   className={`group grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6 p-4 hover:bg-surface-container-low transition-colors border-l-2 border-transparent ${post.hoverColor}`}
                 >
                   <div className="aspect-video bg-surface-container-highest overflow-hidden">
-                    <div className="w-full h-full bg-gradient-to-br from-surface-container-highest to-surface-container" />
+                    <img
+                      src={`/images/blog-placeholder-${index + 1}.svg`}
+                      alt={post.title}
+                      className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity"
+                    />
                   </div>
                   <div>
                     <span
@@ -289,7 +338,12 @@ export default function HomePage() {
                       </td>
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-surface-container-highest border border-outline-variant/30" />
+                          <div
+                            className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border border-outline-variant/30"
+                            style={{ backgroundColor: `${entry.color}15`, color: entry.color }}
+                          >
+                            {entry.username.charAt(0).toUpperCase()}
+                          </div>
                           <div className="flex flex-col">
                             <span className="text-white font-bold">{entry.username}</span>
                             <span className="text-[9px] text-primary/60 uppercase">

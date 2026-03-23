@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <radialGradient id="g1" cx="30%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#a1ffc2" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#0a0a0a" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="g2" cx="70%" cy="60%" r="50%">
+      <stop offset="0%" stop-color="#00d4ff" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#0a0a0a" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
+      <path d="M 60 0 L 0 0 0 60" fill="none" stroke="rgba(161,255,194,0.04)" stroke-width="0.5"/>
+    </pattern>
+    <linearGradient id="line1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#a1ffc2" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#a1ffc2" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#a1ffc2" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="line2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#00d4ff" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#00d4ff" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#00d4ff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="#0a0a0a"/>
+  <rect width="1920" height="1080" fill="url(#grid)"/>
+  <rect width="1920" height="1080" fill="url(#g1)"/>
+  <rect width="1920" height="1080" fill="url(#g2)"/>
+  <!-- Horizontal accent lines -->
+  <line x1="0" y1="300" x2="1920" y2="300" stroke="url(#line1)" stroke-width="0.5"/>
+  <line x1="0" y1="600" x2="1920" y2="600" stroke="url(#line1)" stroke-width="0.3"/>
+  <line x1="0" y1="780" x2="1920" y2="780" stroke="url(#line1)" stroke-width="0.5"/>
+  <!-- Vertical accent lines -->
+  <line x1="480" y1="0" x2="480" y2="1080" stroke="url(#line2)" stroke-width="0.5"/>
+  <line x1="960" y1="0" x2="960" y2="1080" stroke="url(#line2)" stroke-width="0.3"/>
+  <line x1="1440" y1="0" x2="1440" y2="1080" stroke="url(#line2)" stroke-width="0.5"/>
+  <!-- Mesh nodes -->
+  <circle cx="480" cy="300" r="3" fill="#a1ffc2" opacity="0.12"/>
+  <circle cx="960" cy="600" r="4" fill="#00d4ff" opacity="0.1"/>
+  <circle cx="1440" cy="300" r="3" fill="#a1ffc2" opacity="0.08"/>
+  <circle cx="480" cy="780" r="2" fill="#00d4ff" opacity="0.1"/>
+  <circle cx="1440" cy="780" r="3" fill="#a1ffc2" opacity="0.06"/>
+  <!-- Diagonal mesh lines -->
+  <line x1="200" y1="0" x2="800" y2="1080" stroke="#a1ffc2" stroke-width="0.3" opacity="0.04"/>
+  <line x1="1100" y1="0" x2="1700" y2="1080" stroke="#00d4ff" stroke-width="0.3" opacity="0.03"/>
+  <line x1="600" y1="0" x2="0" y2="800" stroke="#a1ffc2" stroke-width="0.3" opacity="0.03"/>
+  <line x1="1920" y1="200" x2="1200" y2="1080" stroke="#00d4ff" stroke-width="0.3" opacity="0.04"/>
+</svg>

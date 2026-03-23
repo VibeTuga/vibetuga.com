@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450">
+  <defs>
+    <linearGradient id="bg2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#140a1a"/>
+      <stop offset="100%" stop-color="#0f0a14"/>
+    </linearGradient>
+    <pattern id="hex2" width="52" height="60" patternUnits="userSpaceOnUse">
+      <polygon points="26,2 50,16 50,44 26,58 2,44 2,16" fill="none" stroke="#c084fc" stroke-width="0.4" opacity="0.07"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="450" fill="url(#bg2)"/>
+  <rect width="800" height="450" fill="url(#hex2)"/>
+  <!-- Flowing curves -->
+  <path d="M 0 200 Q 200 100 400 225 Q 600 350 800 200" fill="none" stroke="#c084fc" stroke-width="1.2" opacity="0.15"/>
+  <path d="M 0 280 Q 250 180 450 280 Q 650 380 800 250" fill="none" stroke="#f472b6" stroke-width="0.8" opacity="0.12"/>
+  <path d="M 0 150 Q 300 50 500 180 Q 700 310 800 150" fill="none" stroke="#c084fc" stroke-width="0.6" opacity="0.08"/>
+  <!-- Diamond shapes -->
+  <rect x="350" y="170" width="50" height="50" fill="none" stroke="#c084fc" stroke-width="0.8" opacity="0.2" transform="rotate(45 375 195)"/>
+  <rect x="550" y="120" width="35" height="35" fill="none" stroke="#f472b6" stroke-width="0.6" opacity="0.15" transform="rotate(45 567 137)"/>
+  <rect x="150" y="280" width="40" height="40" fill="none" stroke="#c084fc" stroke-width="0.6" opacity="0.12" transform="rotate(45 170 300)"/>
+  <!-- Dots -->
+  <circle cx="400" cy="225" r="5" fill="#c084fc" opacity="0.25"/>
+  <circle cx="200" cy="175" r="3" fill="#f472b6" opacity="0.2"/>
+  <circle cx="600" cy="275" r="4" fill="#c084fc" opacity="0.2"/>
+  <!-- Glow -->
+  <circle cx="400" cy="225" r="150" fill="#c084fc" opacity="0.03"/>
+  <circle cx="200" cy="300" r="100" fill="#f472b6" opacity="0.02"/>
+</svg>

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450">
+  <defs>
+    <linearGradient id="bbg3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a1218"/>
+      <stop offset="100%" stop-color="#080e12"/>
+    </linearGradient>
+    <pattern id="bgrid3" width="45" height="45" patternUnits="userSpaceOnUse">
+      <path d="M 45 0 L 0 0 0 45" fill="none" stroke="#38bdf8" stroke-width="0.3" opacity="0.05"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="450" fill="url(#bbg3)"/>
+  <rect width="800" height="450" fill="url(#bgrid3)"/>
+  <!-- Waveform -->
+  <path d="M 0 225 Q 50 180 100 225 Q 150 270 200 225 Q 250 180 300 225 Q 350 270 400 225 Q 450 180 500 225 Q 550 270 600 225 Q 650 180 700 225 Q 750 270 800 225" fill="none" stroke="#38bdf8" stroke-width="1.5" opacity="0.12"/>
+  <path d="M 0 225 Q 50 200 100 225 Q 150 250 200 225 Q 250 200 300 225 Q 350 250 400 225 Q 450 200 500 225 Q 550 250 600 225 Q 650 200 700 225 Q 750 250 800 225" fill="none" stroke="#2dd4bf" stroke-width="0.8" opacity="0.08"/>
+  <!-- Floating UI elements -->
+  <rect x="100" y="80" width="160" height="90" rx="4" fill="none" stroke="#38bdf8" stroke-width="0.6" opacity="0.1"/>
+  <line x1="115" y1="100" x2="200" y2="100" stroke="#38bdf8" stroke-width="2" opacity="0.08"/>
+  <line x1="115" y1="115" x2="240" y2="115" stroke="#2dd4bf" stroke-width="1" opacity="0.06"/>
+  <line x1="115" y1="130" x2="220" y2="130" stroke="#38bdf8" stroke-width="1" opacity="0.05"/>
+  <rect x="540" y="280" width="140" height="80" rx="4" fill="none" stroke="#2dd4bf" stroke-width="0.6" opacity="0.08"/>
+  <line x1="555" y1="300" x2="630" y2="300" stroke="#2dd4bf" stroke-width="2" opacity="0.08"/>
+  <line x1="555" y1="315" x2="660" y2="315" stroke="#38bdf8" stroke-width="1" opacity="0.06"/>
+  <!-- Glow -->
+  <circle cx="400" cy="225" r="200" fill="#38bdf8" opacity="0.02"/>
+</svg>

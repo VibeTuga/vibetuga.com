@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450">
+  <defs>
+    <linearGradient id="bbg2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f0a18"/>
+      <stop offset="100%" stop-color="#0a0812"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#bbg2)"/>
+  <!-- Network nodes -->
+  <circle cx="200" cy="150" r="30" fill="none" stroke="#c084fc" stroke-width="0.8" opacity="0.12"/>
+  <circle cx="400" cy="100" r="25" fill="none" stroke="#f472b6" stroke-width="0.6" opacity="0.1"/>
+  <circle cx="600" cy="200" r="35" fill="none" stroke="#c084fc" stroke-width="0.8" opacity="0.1"/>
+  <circle cx="300" cy="300" r="20" fill="none" stroke="#f472b6" stroke-width="0.6" opacity="0.08"/>
+  <circle cx="550" cy="350" r="28" fill="none" stroke="#c084fc" stroke-width="0.6" opacity="0.08"/>
+  <!-- Network connections -->
+  <line x1="200" y1="150" x2="400" y2="100" stroke="#c084fc" stroke-width="0.5" opacity="0.1"/>
+  <line x1="400" y1="100" x2="600" y2="200" stroke="#f472b6" stroke-width="0.5" opacity="0.08"/>
+  <line x1="200" y1="150" x2="300" y2="300" stroke="#c084fc" stroke-width="0.4" opacity="0.08"/>
+  <line x1="300" y1="300" x2="550" y2="350" stroke="#f472b6" stroke-width="0.4" opacity="0.06"/>
+  <line x1="600" y1="200" x2="550" y2="350" stroke="#c084fc" stroke-width="0.4" opacity="0.08"/>
+  <!-- Node centers -->
+  <circle cx="200" cy="150" r="3" fill="#c084fc" opacity="0.3"/>
+  <circle cx="400" cy="100" r="3" fill="#f472b6" opacity="0.25"/>
+  <circle cx="600" cy="200" r="4" fill="#c084fc" opacity="0.25"/>
+  <circle cx="300" cy="300" r="2" fill="#f472b6" opacity="0.2"/>
+  <circle cx="550" cy="350" r="3" fill="#c084fc" opacity="0.2"/>
+  <!-- Glow -->
+  <circle cx="400" cy="225" r="200" fill="#c084fc" opacity="0.02"/>
+</svg>

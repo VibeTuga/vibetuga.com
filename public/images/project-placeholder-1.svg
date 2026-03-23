@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450">
+  <defs>
+    <linearGradient id="bg1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a1a14"/>
+      <stop offset="100%" stop-color="#0a0f0d"/>
+    </linearGradient>
+    <pattern id="grid1" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#a1ffc2" stroke-width="0.4" opacity="0.08"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="450" fill="url(#bg1)"/>
+  <rect width="800" height="450" fill="url(#grid1)"/>
+  <!-- Circuit traces -->
+  <path d="M 0 120 H 200 L 240 160 H 400 L 420 140 H 600" fill="none" stroke="#a1ffc2" stroke-width="1" opacity="0.15"/>
+  <path d="M 800 280 H 600 L 560 320 H 350 L 330 300 H 100" fill="none" stroke="#00d4ff" stroke-width="1" opacity="0.12"/>
+  <path d="M 300 0 V 100 L 340 140 V 250 L 320 270 V 450" fill="none" stroke="#a1ffc2" stroke-width="0.8" opacity="0.1"/>
+  <!-- Nodes -->
+  <circle cx="200" cy="120" r="4" fill="#a1ffc2" opacity="0.3"/>
+  <circle cx="400" cy="160" r="3" fill="#00d4ff" opacity="0.25"/>
+  <circle cx="600" cy="280" r="4" fill="#a1ffc2" opacity="0.2"/>
+  <circle cx="340" cy="140" r="3" fill="#00d4ff" opacity="0.3"/>
+  <!-- Geometric shapes -->
+  <rect x="500" y="60" width="80" height="80" fill="none" stroke="#a1ffc2" stroke-width="0.6" opacity="0.1" transform="rotate(15 540 100)"/>
+  <rect x="120" y="300" width="60" height="60" fill="none" stroke="#00d4ff" stroke-width="0.6" opacity="0.08" transform="rotate(-10 150 330)"/>
+  <!-- Glow spots -->
+  <circle cx="250" cy="200" r="120" fill="#a1ffc2" opacity="0.03"/>
+  <circle cx="600" cy="300" r="100" fill="#00d4ff" opacity="0.02"/>
+</svg>

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450">
+  <defs>
+    <linearGradient id="bbg1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a1410"/>
+      <stop offset="100%" stop-color="#0a0f0c"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#bbg1)"/>
+  <!-- Terminal-style lines -->
+  <text x="40" y="60" font-family="monospace" font-size="11" fill="#a1ffc2" opacity="0.12">$ claude --model opus</text>
+  <text x="40" y="85" font-family="monospace" font-size="11" fill="#a1ffc2" opacity="0.08">$ refactor --legacy-code</text>
+  <text x="40" y="110" font-family="monospace" font-size="11" fill="#00d4ff" opacity="0.1">> analyzing patterns...</text>
+  <text x="40" y="135" font-family="monospace" font-size="11" fill="#a1ffc2" opacity="0.06">$ git commit -m "fix"</text>
+  <text x="40" y="160" font-family="monospace" font-size="11" fill="#a1ffc2" opacity="0.08">> 42 files changed</text>
+  <!-- Code bracket shapes -->
+  <text x="500" y="200" font-family="monospace" font-size="120" fill="#a1ffc2" opacity="0.04">{</text>
+  <text x="620" y="380" font-family="monospace" font-size="120" fill="#00d4ff" opacity="0.03">}</text>
+  <!-- Accent line -->
+  <line x1="0" y1="400" x2="800" y2="400" stroke="#a1ffc2" stroke-width="2" opacity="0.08"/>
+  <!-- Glow -->
+  <circle cx="400" cy="250" r="200" fill="#a1ffc2" opacity="0.02"/>
+</svg>
