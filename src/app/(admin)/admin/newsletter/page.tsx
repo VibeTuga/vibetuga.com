@@ -3,6 +3,7 @@ import { newsletterSubscribers, newsletterCampaigns } from "@/lib/db/schema";
 import { eq, count, desc, gte } from "drizzle-orm";
 import Link from "next/link";
 import { Mail, Users, PlusCircle, Send, Clock, FileText, TrendingUp } from "lucide-react";
+import { SendCampaignButton } from "@/components/admin/SendCampaignButton";
 
 async function getStats() {
   try {
@@ -158,6 +159,9 @@ export default async function AdminNewsletterPage() {
                   <th className="text-right px-6 py-4 font-mono text-[10px] uppercase tracking-widest text-white/40">
                     Data
                   </th>
+                  <th className="text-right px-6 py-4 font-mono text-[10px] uppercase tracking-widest text-white/40">
+                    Ações
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -167,6 +171,7 @@ export default async function AdminNewsletterPage() {
                     campaign.sentCount > 0
                       ? Math.round((campaign.openCount / campaign.sentCount) * 100)
                       : 0;
+                  const canSend = campaign.status === "draft" || campaign.status === "scheduled";
                   return (
                     <tr
                       key={campaign.id}
@@ -211,6 +216,9 @@ export default async function AdminNewsletterPage() {
                       </td>
                       <td className="px-6 py-4 text-right font-mono text-[10px] text-white/40">
                         {(campaign.sentAt ?? campaign.createdAt).toLocaleDateString("pt-PT")}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        {canSend && <SendCampaignButton campaignId={campaign.id} />}
                       </td>
                     </tr>
                   );

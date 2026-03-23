@@ -3,11 +3,14 @@
 import { useState, useEffect } from "react";
 import { Heart } from "lucide-react";
 import { formatCount } from "@/lib/blog-utils";
+import { motion, useReducedMotion } from "framer-motion";
 
 export function LikeButton({ postId, initialCount }: { postId: string; initialCount: number }) {
   const [liked, setLiked] = useState(false);
   const [count, setCount] = useState(initialCount);
   const [loading, setLoading] = useState(false);
+  const [popKey, setPopKey] = useState(0);
+  const prefersReduced = useReducedMotion();
 
   // Check initial like state
   useEffect(() => {
@@ -23,6 +26,7 @@ export function LikeButton({ postId, initialCount }: { postId: string; initialCo
     // Optimistic update
     setLiked(!wasLiked);
     setCount((c) => (wasLiked ? Math.max(0, c - 1) : c + 1));
+    setPopKey((k) => k + 1);
 
     try {
       const res = await fetch(`/api/blog/posts/${postId}/like`, { method: "POST" });
@@ -62,10 +66,14 @@ export function LikeButton({ postId, initialCount }: { postId: string; initialCo
       }`}
       aria-label={liked ? "Remover like" : "Dar like"}
     >
-      <Heart
-        size={16}
-        className={`transition-transform group-hover:scale-110 ${liked ? "fill-current" : ""}`}
-      />
+      <motion.span
+        key={prefersReduced ? undefined : popKey}
+        animate={prefersReduced ? {} : { scale: [1, 1.3, 1] }}
+        transition={{ duration: 0.25, ease: "easeOut" }}
+        style={{ display: "inline-flex" }}
+      >
+        <Heart size={16} className={`transition-colors ${liked ? "fill-current" : ""}`} />
+      </motion.span>
       {formatCount(count)}
     </button>
   );

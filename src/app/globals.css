@@ -234,8 +234,23 @@
 
 /* ============================================
    Hero Gradient
-   Radial gradient using primary color
+   Radial gradient using primary color — shifts slowly
    ============================================ */
+
+@keyframes hero-gradient-shift {
+  0% {
+    background-position: 50% -20%;
+    opacity: 1;
+  }
+  50% {
+    background-position: 55% -15%;
+    opacity: 0.85;
+  }
+  100% {
+    background-position: 50% -20%;
+    opacity: 1;
+  }
+}
 
 .hero-gradient {
   background: radial-gradient(
@@ -244,6 +259,17 @@
     rgba(161, 255, 194, 0.05) 40%,
     transparent 70%
   );
+  animation: hero-gradient-shift 8s ease-in-out infinite;
+}
+
+/* ============================================
+   Respect prefers-reduced-motion globally
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-gradient {
+    animation: none;
+  }
 }
 
 /* ============================================

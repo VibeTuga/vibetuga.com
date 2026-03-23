@@ -8,6 +8,8 @@ import {
   pgEnum,
   primaryKey,
   uuid,
+  smallint,
+  index,
   type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
@@ -53,6 +55,33 @@ export const campaignStatusEnum = pgEnum("campaign_status", [
   "failed",
 ]);
 
+export const productTypeEnum = pgEnum("product_type", [
+  "skill",
+  "auto_runner",
+  "agent_kit",
+  "prompt_pack",
+  "template",
+  "course",
+  "guide",
+  "other",
+]);
+
+export const productStatusEnum = pgEnum("product_status", [
+  "draft",
+  "pending",
+  "approved",
+  "rejected",
+  "archived",
+]);
+
+export const subscriptionPlanEnum = pgEnum("subscription_plan", ["monthly", "yearly"]);
+
+export const subscriptionStatusEnum = pgEnum("subscription_status", [
+  "active",
+  "canceled",
+  "past_due",
+]);
+
 // ─── Users ──────────────────────────────────────────────────
 
 export const users = pgTable("user", {
@@ -85,6 +114,10 @@ export const usersRelations = relations(users, ({ many }) => ({
   xpEvents: many(xpEvents),
   userBadges: many(userBadges),
   newsletterSubscriptions: many(newsletterSubscribers),
+  storeProducts: many(storeProducts),
+  storePurchases: many(storePurchases),
+  storeReviews: many(storeReviews),
+  subscriptions: many(subscriptions),
 }));
 
 // ─── NextAuth Required Tables ───────────────────────────────
@@ -422,3 +455,140 @@ export const newsletterCampaigns = pgTable("newsletter_campaign", {
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
 });
+
+// ─── Store Products ────────────────────────────────────────
+
+export const storeProducts = pgTable(
+  "store_product",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    sellerId: uuid("seller_id")
+      .notNull()
+      .references(() => users.id),
+    title: varchar("title", { length: 255 }).notNull(),
+    slug: varchar("slug", { length: 255 }).unique().notNull(),
+    description: text("description"),
+    priceCents: integer("price_cents").notNull(),
+    productType: productTypeEnum("product_type").default("other").notNull(),
+    status: productStatusEnum("status").default("draft").notNull(),
+    stripePriceId: varchar("stripe_price_id", { length: 255 }),
+    downloadKey: varchar("download_key", { length: 512 }),
+    coverImage: text("cover_image"),
+    tags: text("tags").array(),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [
+    index("store_product_seller_idx").on(t.sellerId),
+    index("store_product_slug_idx").on(t.slug),
+    index("store_product_status_idx").on(t.status),
+    index("store_product_type_idx").on(t.productType),
+  ],
+);
+
+export const storeProductsRelations = relations(storeProducts, ({ one, many }) => ({
+  seller: one(users, {
+    fields: [storeProducts.sellerId],
+    references: [users.id],
+  }),
+  purchases: many(storePurchases),
+  reviews: many(storeReviews),
+}));
+
+// ─── Store Purchases ───────────────────────────────────────
+
+export const storePurchases = pgTable(
+  "store_purchase",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    buyerId: uuid("buyer_id")
+      .notNull()
+      .references(() => users.id),
+    productId: uuid("product_id")
+      .notNull()
+      .references(() => storeProducts.id),
+    pricePaidCents: integer("price_paid_cents").notNull(),
+    stripePaymentId: varchar("stripe_payment_id", { length: 255 }),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [
+    index("store_purchase_buyer_idx").on(t.buyerId),
+    index("store_purchase_product_idx").on(t.productId),
+  ],
+);
+
+export const storePurchasesRelations = relations(storePurchases, ({ one }) => ({
+  buyer: one(users, {
+    fields: [storePurchases.buyerId],
+    references: [users.id],
+  }),
+  product: one(storeProducts, {
+    fields: [storePurchases.productId],
+    references: [storeProducts.id],
+  }),
+}));
+
+// ─── Store Reviews ─────────────────────────────────────────
+
+export const storeReviews = pgTable(
+  "store_review",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    productId: uuid("product_id")
+      .notNull()
+      .references(() => storeProducts.id, { onDelete: "cascade" }),
+    reviewerId: uuid("reviewer_id")
+      .notNull()
+      .references(() => users.id),
+    rating: smallint("rating").notNull(),
+    comment: text("comment"),
+    isVerifiedPurchase: boolean("is_verified_purchase").default(false).notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [
+    index("store_review_product_idx").on(t.productId),
+    index("store_review_reviewer_idx").on(t.reviewerId),
+  ],
+);
+
+export const storeReviewsRelations = relations(storeReviews, ({ one }) => ({
+  product: one(storeProducts, {
+    fields: [storeReviews.productId],
+    references: [storeProducts.id],
+  }),
+  reviewer: one(users, {
+    fields: [storeReviews.reviewerId],
+    references: [users.id],
+  }),
+}));
+
+// ─── Subscriptions ─────────────────────────────────────────
+
+export const subscriptions = pgTable(
+  "subscription",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    plan: subscriptionPlanEnum("plan").notNull(),
+    stripeSubscriptionId: varchar("stripe_subscription_id", { length: 255 }),
+    stripeCustomerId: varchar("stripe_customer_id", { length: 255 }),
+    status: subscriptionStatusEnum("status").default("active").notNull(),
+    currentPeriodStart: timestamp("current_period_start", { mode: "date" }).notNull(),
+    currentPeriodEnd: timestamp("current_period_end", { mode: "date" }).notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [
+    index("subscription_user_idx").on(t.userId),
+    index("subscription_stripe_idx").on(t.stripeSubscriptionId),
+  ],
+);
+
+export const subscriptionsRelations = relations(subscriptions, ({ one }) => ({
+  user: one(users, {
+    fields: [subscriptions.userId],
+    references: [users.id],
+  }),
+}));
