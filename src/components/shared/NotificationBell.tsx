@@ -39,6 +39,11 @@ const TYPE_ICONS: Record<string, string> = {
   badge_earned: "🏆",
   post_liked: "❤️",
   project_featured: "🚀",
+  challenge_submission: "🎯",
+  challenge_winner: "🏆",
+  mention: "📢",
+  referral_completed: "🤝",
+  new_message: "✉️",
 };
 
 export function NotificationBell() {
@@ -60,10 +65,57 @@ export function NotificationBell() {
     }
   }, []);
 
+  // SSE for real-time notifications, fallback to polling
   useEffect(() => {
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 30000);
-    return () => clearInterval(interval);
+
+    let eventSource: EventSource | null = null;
+    let pollInterval: ReturnType<typeof setInterval> | null = null;
+
+    function connectSSE() {
+      try {
+        eventSource = new EventSource("/api/notifications/stream");
+
+        eventSource.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data.notifications && data.notifications.length > 0) {
+              setItems((prev) => {
+                const existingIds = new Set(prev.map((n) => n.id));
+                const newItems = (data.notifications as NotificationItem[]).filter(
+                  (n) => !existingIds.has(n.id),
+                );
+                return [...newItems, ...prev].slice(0, 20);
+              });
+              setUnreadCount(data.unreadCount ?? 0);
+            }
+          } catch {
+            // Bad SSE data — ignore
+          }
+        };
+
+        eventSource.onerror = () => {
+          // SSE failed — close and fall back to polling
+          eventSource?.close();
+          eventSource = null;
+          if (!pollInterval) {
+            pollInterval = setInterval(fetchNotifications, 30_000);
+          }
+        };
+      } catch {
+        // EventSource not supported — use polling
+        if (!pollInterval) {
+          pollInterval = setInterval(fetchNotifications, 30_000);
+        }
+      }
+    }
+
+    connectSSE();
+
+    return () => {
+      eventSource?.close();
+      if (pollInterval) clearInterval(pollInterval);
+    };
   }, [fetchNotifications]);
 
   // Close dropdown on outside click
