@@ -43,10 +43,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthenticated" }, { status: 401 });
   }
 
-  const allowedRoles = ["admin", "moderator", "author"];
-  if (!allowedRoles.includes(session.user.role)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  const privilegedRoles = ["admin", "moderator", "author"];
+  const isPrivileged = privilegedRoles.includes(session.user.role);
 
   try {
     const body = await request.json();
@@ -56,7 +54,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Title, slug, and content are required" }, { status: 400 });
     }
 
+    // Members can only submit community posts for review
+    const isCommunitySubmission = postType === "community" && status === "pending_review";
+    if (!isPrivileged && !isCommunitySubmission) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const readingTimeMinutes = Math.max(1, Math.ceil(content.split(/\s+/).length / 200));
+
+    // Force community submissions to pending_review
+    const finalStatus = isPrivileged ? status || "draft" : "pending_review";
+    const finalPostType = isPrivileged ? postType || "admin" : "community";
 
     const [post] = await db
       .insert(blogPosts)
@@ -69,10 +77,10 @@ export async function POST(request: Request) {
         categoryId: categoryId || null,
         tags: tags || [],
         coverImage: coverImage || null,
-        status: status || "draft",
-        postType: postType || "admin",
+        status: finalStatus,
+        postType: finalPostType,
         readingTimeMinutes,
-        publishedAt: status === "published" ? new Date() : null,
+        publishedAt: finalStatus === "published" ? new Date() : null,
       })
       .returning();
 

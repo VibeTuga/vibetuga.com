@@ -5,6 +5,9 @@ import type { Metadata } from "next";
 import { getPostBySlug, getAdjacentPosts } from "@/lib/db/queries/blog";
 import { formatDatePT, formatCount, getCategoryAccent } from "@/lib/blog-utils";
 import { ViewTracker } from "@/components/blog/ViewTracker";
+import { CommentSection } from "@/components/blog/CommentSection";
+import { LikeButton } from "@/components/blog/LikeButton";
+import { BookmarkButton } from "@/components/blog/BookmarkButton";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -168,7 +171,7 @@ export default async function BlogPostPage({ params }: Props) {
 
       {/* Tags */}
       {post.tags && post.tags.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2 mb-12 border-t border-white/5 pt-8">
+        <div className="flex flex-wrap items-center gap-2 mb-8 border-t border-white/5 pt-8">
           <span className="text-[10px] font-mono text-white/30 uppercase tracking-widest mr-2">
             Tags:
           </span>
@@ -183,6 +186,15 @@ export default async function BlogPostPage({ params }: Props) {
           ))}
         </div>
       )}
+
+      {/* Engagement buttons */}
+      <div className="flex items-center gap-3 mb-12">
+        <LikeButton postId={post.id} initialCount={post.likesCount} />
+        <BookmarkButton postId={post.id} />
+      </div>
+
+      {/* Comments */}
+      <CommentSection postId={post.id} initialCount={post.commentsCount} />
 
       {/* Prev / Next navigation */}
       <nav className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-white/5 pt-8">

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, FileText, FolderOpen, Users } from "lucide-react";
+import { LayoutDashboard, FileText, FolderOpen, Users, Clock } from "lucide-react";
 import { Logo } from "@/components/shared/Logo";
 import { cn } from "@/lib/utils";
 
@@ -13,7 +13,8 @@ const adminLinks: readonly {
   exact?: boolean;
 }[] = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { href: "/admin/blog", label: "Blog Posts", icon: FileText },
+  { href: "/admin/blog", label: "Blog Posts", icon: FileText, exact: true },
+  { href: "/admin/blog/pending", label: "Pendentes", icon: Clock },
   { href: "/admin/categories", label: "Categorias", icon: FolderOpen },
   { href: "/admin/users", label: "Utilizadores", icon: Users },
 ];

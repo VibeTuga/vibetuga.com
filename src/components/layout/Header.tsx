@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { Logo } from "@/components/shared/Logo";
+import { SearchDialog, SearchTrigger } from "@/components/shared/SearchDialog";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -47,8 +48,10 @@ export function Header() {
           ))}
         </nav>
 
-        {/* Right side: auth area + mobile toggle */}
+        {/* Right side: search + auth area + mobile toggle */}
         <div className="flex items-center gap-4">
+          <SearchTrigger />
+          <SearchDialog />
           <Link
             href="/api/auth/signin"
             className="hidden sm:inline-flex items-center gap-2 px-4 py-2 bg-primary text-on-primary font-bold text-sm hover:shadow-[0_0_15px_rgba(161,255,194,0.4)] transition-all"
