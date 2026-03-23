@@ -9,6 +9,7 @@ import { CommentSection } from "@/components/blog/CommentSection";
 import { LikeButton } from "@/components/blog/LikeButton";
 import { BookmarkButton } from "@/components/blog/BookmarkButton";
 import { MarkdownContent } from "@/components/blog/MarkdownContent";
+import { getArticleJsonLd } from "@/lib/jsonld";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -33,6 +34,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       authors: [post.authorDisplayName || post.authorName || "VibeTuga"],
       ...(post.coverImage && { images: [{ url: post.coverImage, width: 1200, height: 630 }] }),
     },
+    alternates: {
+      canonical: `https://vibetuga.com/blog/${slug}`,
+    },
   };
 }
 
@@ -50,6 +54,10 @@ export default async function BlogPostPage({ params }: Props) {
 
   return (
     <article className="max-w-[800px] mx-auto px-6 py-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(getArticleJsonLd(post)) }}
+      />
       <ViewTracker postId={post.id} />
 
       {/* Breadcrumb */}

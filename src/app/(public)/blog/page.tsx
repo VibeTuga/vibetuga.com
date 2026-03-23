@@ -18,6 +18,9 @@ export const metadata: Metadata = {
     description:
       "Artigos, tutoriais e deep dives sobre vibe coding. A comunidade portuguesa de desenvolvimento assistido por IA.",
   },
+  alternates: {
+    canonical: "https://vibetuga.com/blog",
+  },
 };
 
 type SearchParams = Promise<{

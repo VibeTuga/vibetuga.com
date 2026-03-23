@@ -24,6 +24,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: project.description ?? undefined,
       images: project.coverImage ? [{ url: project.coverImage, width: 1200, height: 630 }] : [],
     },
+    alternates: {
+      canonical: `https://vibetuga.com/showcase/${slug}`,
+    },
   };
 }
 

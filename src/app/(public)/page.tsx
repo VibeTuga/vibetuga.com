@@ -11,6 +11,7 @@ import {
 } from "@/lib/db/queries/homepage";
 import { getLevelName } from "@/lib/db/queries/profile";
 import { formatDatePT } from "@/lib/blog-utils";
+import { getOrganizationJsonLd, getWebSiteJsonLd } from "@/lib/jsonld";
 
 const AnimateIn = dynamic(() => import("@/components/shared/AnimateIn").then((m) => m.AnimateIn));
 
@@ -23,6 +24,9 @@ export const metadata: Metadata = {
     description:
       "A comunidade portuguesa de vibe coding, IA e desenvolvimento assistido por agentes. Aprende, partilha e constrói o futuro da programação.",
     type: "website",
+  },
+  alternates: {
+    canonical: "https://vibetuga.com",
   },
 };
 
@@ -530,6 +534,12 @@ async function LatestContentSection() {
 export default function HomePage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([getOrganizationJsonLd(), getWebSiteJsonLd()]),
+        }}
+      />
       <HeroSection />
       <Suspense fallback={<StatsSkeleton />}>
         <StatsSection />

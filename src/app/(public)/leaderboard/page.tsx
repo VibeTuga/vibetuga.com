@@ -17,6 +17,9 @@ export const metadata: Metadata = {
     description:
       "Rankings de XP e competição da comunidade VibeTuga. Descobre quem está a vibrar mais forte e sobe no leaderboard.",
   },
+  alternates: {
+    canonical: "https://vibetuga.com/leaderboard",
+  },
 };
 
 const LEVEL_NAMES: Record<number, string> = {

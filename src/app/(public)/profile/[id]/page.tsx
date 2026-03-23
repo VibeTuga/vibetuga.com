@@ -217,6 +217,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: profile.user.bio ?? `Perfil de ${displayName} na comunidade VibeTuga.`,
       images: profile.user.image ? [{ url: profile.user.image, width: 1200, height: 630 }] : [],
     },
+    alternates: {
+      canonical: `https://vibetuga.com/profile/${id}`,
+    },
   };
 }
 
