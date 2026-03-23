@@ -1,19 +1,22 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, Inter, Geist } from "next/font/google";
-import "./globals.css";
+import { Geist, Space_Grotesk, Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
+import "./globals.css";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const geist = Geist({
+  subsets: ["latin"],
+  variable: "--font-sans",
+});
 
 const spaceGrotesk = Space_Grotesk({
-  variable: "--font-headline",
   subsets: ["latin"],
+  variable: "--font-headline",
   display: "swap",
 });
 
 const inter = Inter({
-  variable: "--font-body",
   subsets: ["latin"],
+  variable: "--font-body",
   display: "swap",
 });
 
@@ -31,9 +34,14 @@ export default function RootLayout({
   return (
     <html
       lang="pt"
-      className={cn("dark", "h-full", "antialiased", spaceGrotesk.variable, inter.variable, "font-sans", geist.variable)}
+      className={cn(
+        "dark h-full antialiased",
+        geist.variable,
+        spaceGrotesk.variable,
+        inter.variable
+      )}
     >
-      <body className="scanlines min-h-full flex flex-col bg-background text-on-surface font-body">
+      <body className="scanlines min-h-full flex flex-col bg-background text-foreground font-body">
         {children}
       </body>
     </html>
