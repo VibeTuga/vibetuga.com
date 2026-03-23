@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import Link from "next/link";
-import { FileText, Home, Layers } from "lucide-react";
+import { FileText, Home, Layers, Package, Plus } from "lucide-react";
 
 export const metadata = {
   title: "Dashboard | VibeTuga",
@@ -13,6 +13,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
   if (!session?.user) {
     redirect("/login");
   }
+
+  const canSell = ["admin", "moderator", "seller"].includes(session.user.role);
 
   return (
     <div className="min-h-screen">
@@ -37,6 +39,24 @@ export default async function DashboardLayout({ children }: { children: React.Re
               <Layers size={14} />
               Submeter Projeto
             </Link>
+            {canSell && (
+              <>
+                <Link
+                  href="/dashboard/my-products"
+                  className="flex items-center gap-2 text-xs font-mono text-white/50 uppercase tracking-widest hover:text-primary transition-colors"
+                >
+                  <Package size={14} />
+                  Meus Produtos
+                </Link>
+                <Link
+                  href="/dashboard/submit-product"
+                  className="flex items-center gap-2 text-xs font-mono text-white/50 uppercase tracking-widest hover:text-primary transition-colors"
+                >
+                  <Plus size={14} />
+                  Submeter Produto
+                </Link>
+              </>
+            )}
           </nav>
           <Link
             href="/"
