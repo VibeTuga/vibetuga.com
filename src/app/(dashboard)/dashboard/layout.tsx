@@ -8,12 +8,12 @@ import {
   Home,
   LayoutDashboard,
   Layers,
+  MessageCircle,
   Package,
   Plus,
   Settings,
   ShoppingBag,
   User,
-  UserPlus,
 } from "lucide-react";
 
 const PageFadeIn = dynamic(() =>
@@ -78,11 +78,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
               Minhas Compras
             </Link>
             <Link
-              href="/dashboard/referrals"
+              href="/dashboard/messages"
               className="flex items-center gap-2 text-xs font-mono text-white/50 uppercase tracking-widest hover:text-primary transition-colors"
             >
-              <UserPlus size={14} />
-              Referências
+              <MessageCircle size={14} />
+              Mensagens
             </Link>
             <Link
               href="/dashboard/notifications"

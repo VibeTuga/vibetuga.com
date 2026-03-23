@@ -8,6 +8,7 @@ import {
   pgEnum,
   primaryKey,
   uuid,
+  serial,
   smallint,
   index,
   uniqueIndex,
@@ -139,6 +140,9 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   projectVotes: many(projectVotes),
   referralsMade: many(referrals, { relationName: "referralsMade" }),
   referralsReceived: many(referrals, { relationName: "referralsReceived" }),
+  collections: many(collections),
+  sentMessages: many(directMessages, { relationName: "sentMessages" }),
+  receivedMessages: many(directMessages, { relationName: "receivedMessages" }),
 }));
 
 // ─── NextAuth Required Tables ───────────────────────────────
@@ -889,5 +893,92 @@ export const referralsRelations = relations(referrals, ({ one }) => ({
     fields: [referrals.referredUserId],
     references: [users.id],
     relationName: "referralsReceived",
+  }),
+}));
+
+// ─── Collections ────────────────────────────────────────────
+
+export const collections = pgTable(
+  "collection",
+  {
+    id: serial("id").primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    name: varchar("name", { length: 100 }).notNull(),
+    description: text("description"),
+    isPublic: boolean("is_public").default(false).notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [index("collection_user_idx").on(t.userId)],
+);
+
+export const collectionsRelations = relations(collections, ({ one, many }) => ({
+  user: one(users, {
+    fields: [collections.userId],
+    references: [users.id],
+  }),
+  items: many(collectionItems),
+}));
+
+// ─── Collection Items ───────────────────────────────────────
+
+export const collectionItems = pgTable(
+  "collection_item",
+  {
+    id: serial("id").primaryKey(),
+    collectionId: integer("collection_id")
+      .notNull()
+      .references(() => collections.id, { onDelete: "cascade" }),
+    itemType: varchar("item_type", { length: 50 }).notNull(),
+    itemId: varchar("item_id", { length: 255 }).notNull(),
+    addedAt: timestamp("added_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [
+    uniqueIndex("collection_item_unique_idx").on(t.collectionId, t.itemType, t.itemId),
+    index("collection_item_collection_idx").on(t.collectionId),
+  ],
+);
+
+export const collectionItemsRelations = relations(collectionItems, ({ one }) => ({
+  collection: one(collections, {
+    fields: [collectionItems.collectionId],
+    references: [collections.id],
+  }),
+}));
+
+// ─── Direct Messages ───────────────────────────────────────
+
+export const directMessages = pgTable(
+  "direct_message",
+  {
+    id: serial("id").primaryKey(),
+    senderId: uuid("sender_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    recipientId: uuid("recipient_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    content: text("content").notNull(),
+    isRead: boolean("is_read").default(false).notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [
+    index("dm_recipient_read_idx").on(t.recipientId, t.isRead),
+    index("dm_conversation_idx").on(t.senderId, t.recipientId, t.createdAt),
+  ],
+);
+
+export const directMessagesRelations = relations(directMessages, ({ one }) => ({
+  sender: one(users, {
+    fields: [directMessages.senderId],
+    references: [users.id],
+    relationName: "sentMessages",
+  }),
+  recipient: one(users, {
+    fields: [directMessages.recipientId],
+    references: [users.id],
+    relationName: "receivedMessages",
   }),
 }));
