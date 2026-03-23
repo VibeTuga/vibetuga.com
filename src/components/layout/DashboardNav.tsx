@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Bell,
+  BookOpen,
   FileText,
   Home,
   LayoutDashboard,
@@ -25,6 +26,7 @@ const dashboardLinks = [
   { href: "/dashboard/profile", label: "Meu Perfil", icon: User },
   { href: "/dashboard/submit-post", label: "Submeter Post", icon: FileText },
   { href: "/dashboard/submit-project", label: "Submeter Projeto", icon: Layers },
+  { href: "/dashboard/my-series", label: "Séries", icon: BookOpen },
   { href: "/dashboard/my-purchases", label: "Minhas Compras", icon: ShoppingBag },
   { href: "/dashboard/messages", label: "Mensagens", icon: MessageCircle },
   { href: "/dashboard/notifications", label: "Notificações", icon: Bell },

@@ -146,6 +146,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   receivedMessages: many(directMessages, { relationName: "receivedMessages" }),
   challengeEntries: many(challengeEntries),
   challengeEntryVotes: many(challengeEntryVotes),
+  blogSeries: many(blogSeries),
 }));
 
 // ─── NextAuth Required Tables ───────────────────────────────
@@ -254,6 +255,7 @@ export const blogPostsRelations = relations(blogPosts, ({ one, many }) => ({
   comments: many(blogComments),
   likes: many(blogPostLikes),
   bookmarks: many(blogPostBookmarks),
+  seriesEntries: many(blogSeriesPosts),
 }));
 
 // ─── Blog Comments ──────────────────────────────────────────
@@ -1097,6 +1099,67 @@ export const directMessagesRelations = relations(directMessages, ({ one }) => ({
     fields: [directMessages.recipientId],
     references: [users.id],
     relationName: "receivedMessages",
+  }),
+}));
+
+// ─── Blog Series ──────────────────────────────────────────
+
+export const blogSeries = pgTable(
+  "blog_series",
+  {
+    id: serial("id").primaryKey(),
+    title: varchar("title", { length: 200 }).notNull(),
+    slug: varchar("slug", { length: 200 }).unique().notNull(),
+    description: text("description"),
+    coverImage: varchar("cover_image", { length: 500 }),
+    authorId: uuid("author_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    sortOrder: integer("sort_order").default(0).notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [index("blog_series_author_idx").on(t.authorId), index("blog_series_slug_idx").on(t.slug)],
+);
+
+export const blogSeriesRelations = relations(blogSeries, ({ one, many }) => ({
+  author: one(users, {
+    fields: [blogSeries.authorId],
+    references: [users.id],
+  }),
+  posts: many(blogSeriesPosts),
+}));
+
+// ─── Blog Series Posts ────────────────────────────────────
+
+export const blogSeriesPosts = pgTable(
+  "blog_series_post",
+  {
+    id: serial("id").primaryKey(),
+    seriesId: integer("series_id")
+      .notNull()
+      .references(() => blogSeries.id, { onDelete: "cascade" }),
+    postId: uuid("post_id")
+      .notNull()
+      .references(() => blogPosts.id, { onDelete: "cascade" }),
+    order: integer("order").notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [
+    uniqueIndex("blog_series_post_unique_idx").on(t.seriesId, t.postId),
+    index("blog_series_post_series_idx").on(t.seriesId),
+    index("blog_series_post_post_idx").on(t.postId),
+  ],
+);
+
+export const blogSeriesPostsRelations = relations(blogSeriesPosts, ({ one }) => ({
+  series: one(blogSeries, {
+    fields: [blogSeriesPosts.seriesId],
+    references: [blogSeries.id],
+  }),
+  post: one(blogPosts, {
+    fields: [blogSeriesPosts.postId],
+    references: [blogPosts.id],
   }),
 }));
 
