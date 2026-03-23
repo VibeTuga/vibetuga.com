@@ -161,6 +161,20 @@ export async function getUserProjectVote(projectId: string, userId: string) {
   return vote?.voteType ?? null;
 }
 
+export const getProjectBasicById = cache(async (id: string) => {
+  const [project] = await db
+    .select({
+      id: showcaseProjects.id,
+      authorId: showcaseProjects.authorId,
+      title: showcaseProjects.title,
+      slug: showcaseProjects.slug,
+    })
+    .from(showcaseProjects)
+    .where(eq(showcaseProjects.id, id))
+    .limit(1);
+  return project ?? null;
+});
+
 export type ShowcaseProject = Awaited<ReturnType<typeof getApprovedProjects>>["projects"][number];
 export type ShowcaseProjectDetail = NonNullable<Awaited<ReturnType<typeof getProjectBySlug>>>;
 export type PendingProject = Awaited<ReturnType<typeof getPendingProjects>>[number];

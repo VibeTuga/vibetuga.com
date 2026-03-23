@@ -107,6 +107,7 @@ export const getPostBySlug = cache(async (slug: string) => {
   const [post] = await db
     .select({
       id: blogPosts.id,
+      authorId: blogPosts.authorId,
       title: blogPosts.title,
       slug: blogPosts.slug,
       excerpt: blogPosts.excerpt,
@@ -326,6 +327,20 @@ export const getPostsByTag = cache(async (tag: string, page = 1) => {
     totalPages: Math.ceil(total / POSTS_PER_PAGE),
     currentPage: page,
   };
+});
+
+export const getPostBasicById = cache(async (id: string) => {
+  const [post] = await db
+    .select({
+      id: blogPosts.id,
+      authorId: blogPosts.authorId,
+      title: blogPosts.title,
+      slug: blogPosts.slug,
+    })
+    .from(blogPosts)
+    .where(eq(blogPosts.id, id))
+    .limit(1);
+  return post ?? null;
 });
 
 export type BlogPost = Awaited<ReturnType<typeof getPublishedPosts>>["posts"][number];
