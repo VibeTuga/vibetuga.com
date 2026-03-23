@@ -24,6 +24,11 @@ export const metadata: Metadata = {
   title: "VibeTuga | Onde o código encontra a vibe",
   description:
     "A comunidade portuguesa de vibe coding, AI tooling e desenvolvimento assistido por agentes. Aprende, partilha e constrói o futuro da programação assistida por IA.",
+  alternates: {
+    types: {
+      "application/rss+xml": "/feed.xml",
+    },
+  },
 };
 
 export default function RootLayout({

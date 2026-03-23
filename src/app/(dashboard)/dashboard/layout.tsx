@@ -1,0 +1,46 @@
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
+import Link from "next/link";
+import { FileText, Home } from "lucide-react";
+
+export const metadata = {
+  title: "Dashboard | VibeTuga",
+};
+
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const session = await auth();
+
+  if (!session?.user) {
+    redirect("/login");
+  }
+
+  return (
+    <div className="min-h-screen">
+      {/* Dashboard nav bar */}
+      <div className="border-b border-white/5 bg-surface-container-low">
+        <div className="max-w-[1200px] mx-auto px-6 py-3 flex items-center gap-6">
+          <span className="text-[10px] font-mono text-white/30 uppercase tracking-widest">
+            Dashboard
+          </span>
+          <nav className="flex items-center gap-4">
+            <Link
+              href="/dashboard/submit-post"
+              className="flex items-center gap-2 text-xs font-mono text-white/50 uppercase tracking-widest hover:text-primary transition-colors"
+            >
+              <FileText size={14} />
+              Submeter Post
+            </Link>
+          </nav>
+          <Link
+            href="/"
+            className="ml-auto flex items-center gap-2 text-xs font-mono text-white/30 uppercase tracking-widest hover:text-white transition-colors"
+          >
+            <Home size={14} />
+            Voltar
+          </Link>
+        </div>
+      </div>
+      <main className="max-w-[800px] mx-auto px-6 py-8">{children}</main>
+    </div>
+  );
+}
