@@ -32,6 +32,10 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: "**.vibetuga.com",
+      },
+      {
+        protocol: "https",
         hostname: "**.r2.cloudflarestorage.com",
       },
     ],

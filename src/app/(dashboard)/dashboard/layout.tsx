@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import Link from "next/link";
-import { FileText, Home, Layers, Package, Plus, ShoppingBag } from "lucide-react";
+import { FileText, Home, Layers, Package, Plus, ShoppingBag, User } from "lucide-react";
 
 export const metadata = {
   title: "Dashboard | VibeTuga",
@@ -25,6 +25,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
             Dashboard
           </span>
           <nav className="flex items-center gap-4">
+            <Link
+              href="/dashboard/profile"
+              className="flex items-center gap-2 text-xs font-mono text-white/50 uppercase tracking-widest hover:text-primary transition-colors"
+            >
+              <User size={14} />
+              Meu Perfil
+            </Link>
             <Link
               href="/dashboard/submit-post"
               className="flex items-center gap-2 text-xs font-mono text-white/50 uppercase tracking-widest hover:text-primary transition-colors"
