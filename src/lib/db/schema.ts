@@ -10,6 +10,7 @@ import {
   uuid,
   smallint,
   index,
+  uniqueIndex,
   type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
@@ -135,6 +136,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   following: many(userFollows, { relationName: "follower" }),
   notifications: many(notifications, { relationName: "notificationRecipient" }),
   actedNotifications: many(notifications, { relationName: "notificationActor" }),
+  projectVotes: many(projectVotes),
 }));
 
 // ─── NextAuth Required Tables ───────────────────────────────
@@ -358,9 +360,42 @@ export const showcaseProjects = pgTable("showcase_project", {
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
 });
 
-export const showcaseProjectsRelations = relations(showcaseProjects, ({ one }) => ({
+export const showcaseProjectsRelations = relations(showcaseProjects, ({ one, many }) => ({
   author: one(users, {
     fields: [showcaseProjects.authorId],
+    references: [users.id],
+  }),
+  votes: many(projectVotes),
+}));
+
+// ─── Project Votes ───────────────────────────────────────────
+
+export const projectVotes = pgTable(
+  "project_vote",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => showcaseProjects.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    voteType: varchar("vote_type", { length: 10 }).notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [
+    uniqueIndex("project_vote_project_user_idx").on(t.projectId, t.userId),
+    index("project_vote_user_idx").on(t.userId),
+  ],
+);
+
+export const projectVotesRelations = relations(projectVotes, ({ one }) => ({
+  project: one(showcaseProjects, {
+    fields: [projectVotes.projectId],
+    references: [showcaseProjects.id],
+  }),
+  user: one(users, {
+    fields: [projectVotes.userId],
     references: [users.id],
   }),
 }));

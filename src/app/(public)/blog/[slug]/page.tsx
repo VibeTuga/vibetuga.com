@@ -10,6 +10,7 @@ import { LikeButton } from "@/components/blog/LikeButton";
 import { BookmarkButton } from "@/components/blog/BookmarkButton";
 import { MarkdownContent } from "@/components/blog/MarkdownContent";
 import { ReportButton } from "@/components/shared/ReportButton";
+import { ShareButton } from "@/components/blog/ShareButton";
 import { getArticleJsonLd } from "@/lib/jsonld";
 import { auth } from "@/lib/auth";
 
@@ -202,6 +203,11 @@ export default async function BlogPostPage({ params }: Props) {
       <div className="flex items-center gap-3 mb-12">
         <LikeButton postId={post.id} initialCount={post.likesCount} />
         <BookmarkButton postId={post.id} />
+        <ShareButton
+          title={post.title}
+          url={`https://vibetuga.com/blog/${slug}`}
+          excerpt={post.excerpt ?? undefined}
+        />
         {session?.user && <ReportButton contentType="post" contentId={post.id} />}
       </div>
 

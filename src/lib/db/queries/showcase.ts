@@ -1,6 +1,6 @@
 import { cache } from "react";
 import { db } from "@/lib/db";
-import { showcaseProjects, users } from "@/lib/db/schema";
+import { showcaseProjects, users, projectVotes } from "@/lib/db/schema";
 import { eq, desc, and, or, count, sql, ilike } from "drizzle-orm";
 
 const PROJECTS_PER_PAGE = 12;
@@ -72,6 +72,7 @@ export const getProjectBySlug = cache(async (slug: string) => {
   const [project] = await db
     .select({
       id: showcaseProjects.id,
+      authorId: showcaseProjects.authorId,
       title: showcaseProjects.title,
       slug: showcaseProjects.slug,
       description: showcaseProjects.description,
@@ -147,6 +148,18 @@ export const getFeaturedProjects = cache(async () => {
     .where(eq(showcaseProjects.status, "featured"))
     .orderBy(desc(showcaseProjects.createdAt));
 });
+
+export async function getUserProjectVote(projectId: string, userId: string) {
+  const [vote] = await db
+    .select({
+      voteType: projectVotes.voteType,
+    })
+    .from(projectVotes)
+    .where(and(eq(projectVotes.projectId, projectId), eq(projectVotes.userId, userId)))
+    .limit(1);
+
+  return vote?.voteType ?? null;
+}
 
 export type ShowcaseProject = Awaited<ReturnType<typeof getApprovedProjects>>["projects"][number];
 export type ShowcaseProjectDetail = NonNullable<Awaited<ReturnType<typeof getProjectBySlug>>>;

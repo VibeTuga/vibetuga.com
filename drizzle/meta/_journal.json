@@ -64,6 +64,13 @@
       "when": 1774299779004,
       "tag": "0008_breezy_sentry",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1774300551502,
+      "tag": "0009_far_giant_girl",
+      "breakpoints": true
     }
   ]
 }
