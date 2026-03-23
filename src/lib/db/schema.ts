@@ -12,6 +12,7 @@ import {
   smallint,
   index,
   uniqueIndex,
+  date,
   type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
@@ -1098,3 +1099,28 @@ export const directMessagesRelations = relations(directMessages, ({ one }) => ({
     relationName: "receivedMessages",
   }),
 }));
+
+// ─── Content Analytics ────────────────────────────────────
+
+export const contentAnalytics = pgTable(
+  "content_analytics",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    contentType: varchar("content_type", { length: 50 }).notNull(),
+    contentId: uuid("content_id").notNull(),
+    date: date("date", { mode: "string" }).notNull(),
+    views: integer("views").default(0).notNull(),
+    uniqueViews: integer("unique_views").default(0).notNull(),
+    referralSource: varchar("referral_source", { length: 255 }),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [
+    uniqueIndex("content_analytics_upsert_idx").on(
+      t.contentType,
+      t.contentId,
+      t.date,
+      t.referralSource,
+    ),
+    index("content_analytics_content_idx").on(t.contentType, t.contentId),
+  ],
+);
