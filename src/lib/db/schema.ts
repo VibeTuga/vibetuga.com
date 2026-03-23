@@ -82,6 +82,12 @@ export const subscriptionStatusEnum = pgEnum("subscription_status", [
   "past_due",
 ]);
 
+export const roleRequestStatusEnum = pgEnum("role_request_status", [
+  "pending",
+  "approved",
+  "rejected",
+]);
+
 // ─── Users ──────────────────────────────────────────────────
 
 export const users = pgTable("user", {
@@ -122,6 +128,8 @@ export const usersRelations = relations(users, ({ one, many }) => ({
     fields: [users.id],
     references: [userSettings.userId],
   }),
+  roleRequests: many(roleRequests, { relationName: "roleRequestUser" }),
+  roleRequestsReviewed: many(roleRequests, { relationName: "roleRequestReviewer" }),
 }));
 
 // ─── NextAuth Required Tables ───────────────────────────────
@@ -621,5 +629,43 @@ export const userSettingsRelations = relations(userSettings, ({ one }) => ({
   user: one(users, {
     fields: [userSettings.userId],
     references: [users.id],
+  }),
+}));
+
+// ─── Role Requests ──────────────────────────────────────────
+
+export const roleRequests = pgTable(
+  "role_request",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    requestedRole: userRoleEnum("requested_role").notNull(),
+    reason: text("reason").notNull(),
+    status: roleRequestStatusEnum("status").default("pending").notNull(),
+    reviewedBy: uuid("reviewed_by").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    reviewNote: text("review_note"),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [
+    index("role_request_user_idx").on(t.userId),
+    index("role_request_status_idx").on(t.status),
+  ],
+);
+
+export const roleRequestsRelations = relations(roleRequests, ({ one }) => ({
+  user: one(users, {
+    fields: [roleRequests.userId],
+    references: [users.id],
+    relationName: "roleRequestUser",
+  }),
+  reviewer: one(users, {
+    fields: [roleRequests.reviewedBy],
+    references: [users.id],
+    relationName: "roleRequestReviewer",
   }),
 }));
