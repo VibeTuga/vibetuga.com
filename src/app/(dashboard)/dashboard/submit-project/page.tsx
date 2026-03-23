@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Send, Loader2, CheckCircle } from "lucide-react";
+import { ImageUpload } from "@/components/shared/ImageUpload";
 
 function slugify(text: string): string {
   return text
@@ -150,18 +151,12 @@ export default function SubmitProjectPage() {
           />
         </div>
 
-        {/* Cover Image URL */}
+        {/* Cover Image */}
         <div>
           <label className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2">
-            URL da Imagem de Capa
+            Imagem de Capa
           </label>
-          <input
-            type="url"
-            value={coverImage}
-            onChange={(e) => setCoverImage(e.target.value)}
-            className="w-full bg-surface-container-lowest border border-white/5 focus:border-tertiary/50 focus:shadow-[0_0_8px_rgba(129,233,255,0.15)] text-white text-sm p-4 font-body placeholder:text-white/20 transition-all outline-none"
-            placeholder="https://..."
-          />
+          <ImageUpload value={coverImage} onChange={setCoverImage} />
         </div>
 
         {/* Live URL */}

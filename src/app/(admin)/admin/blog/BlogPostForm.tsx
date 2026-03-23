@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Save, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { ImageUpload } from "@/components/shared/ImageUpload";
 
 interface Category {
   id: string;
@@ -263,14 +264,11 @@ export function BlogPostForm({
           {/* Cover Image */}
           <div className="bg-surface-container p-4 space-y-4">
             <label className="block text-[10px] font-mono uppercase tracking-widest text-white/40">
-              Imagem de Capa (URL)
+              Imagem de Capa
             </label>
-            <input
-              type="url"
+            <ImageUpload
               value={form.coverImage}
-              onChange={(e) => setForm((prev) => ({ ...prev, coverImage: e.target.value }))}
-              className="w-full bg-surface-container-lowest border border-white/10 px-4 py-3 text-sm text-white font-mono placeholder:text-white/20 focus:ring-1 focus:ring-tertiary focus:border-tertiary outline-none transition-all"
-              placeholder="https://..."
+              onChange={(url) => setForm((prev) => ({ ...prev, coverImage: url }))}
             />
           </div>
 
