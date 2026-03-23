@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
+import { ReportButton } from "@/components/shared/ReportButton";
 
 type Review = {
   id: string;
@@ -48,7 +49,13 @@ function StarRating({
   );
 }
 
-export function ProductReviews({ productId }: { productId: string }) {
+export function ProductReviews({
+  productId,
+  isAuthenticated,
+}: {
+  productId: string;
+  isAuthenticated?: boolean;
+}) {
   const { data: session } = useSession();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
@@ -235,9 +242,14 @@ export function ProductReviews({ productId }: { productId: string }) {
                     )}
                   </div>
                 </div>
-                <span className="text-[10px] text-white/30 font-mono">
-                  {new Date(review.createdAt).toLocaleDateString("pt-PT")}
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className="text-[10px] text-white/30 font-mono">
+                    {new Date(review.createdAt).toLocaleDateString("pt-PT")}
+                  </span>
+                  {isAuthenticated && (
+                    <ReportButton contentType="review" contentId={review.id} size="sm" />
+                  )}
+                </div>
               </div>
 
               <StarRating rating={review.rating} />

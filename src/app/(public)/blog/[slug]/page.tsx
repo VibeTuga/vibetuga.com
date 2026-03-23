@@ -9,7 +9,9 @@ import { CommentSection } from "@/components/blog/CommentSection";
 import { LikeButton } from "@/components/blog/LikeButton";
 import { BookmarkButton } from "@/components/blog/BookmarkButton";
 import { MarkdownContent } from "@/components/blog/MarkdownContent";
+import { ReportButton } from "@/components/shared/ReportButton";
 import { getArticleJsonLd } from "@/lib/jsonld";
+import { auth } from "@/lib/auth";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -44,7 +46,7 @@ export const revalidate = 60;
 
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
-  const post = await getPostBySlug(slug);
+  const [post, session] = await Promise.all([getPostBySlug(slug), auth()]);
 
   if (!post) notFound();
 
@@ -200,10 +202,15 @@ export default async function BlogPostPage({ params }: Props) {
       <div className="flex items-center gap-3 mb-12">
         <LikeButton postId={post.id} initialCount={post.likesCount} />
         <BookmarkButton postId={post.id} />
+        {session?.user && <ReportButton contentType="post" contentId={post.id} />}
       </div>
 
       {/* Comments */}
-      <CommentSection postId={post.id} initialCount={post.commentsCount} />
+      <CommentSection
+        postId={post.id}
+        initialCount={post.commentsCount}
+        isAuthenticated={!!session?.user}
+      />
 
       {/* Prev / Next navigation */}
       <nav className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-white/5 pt-8">
