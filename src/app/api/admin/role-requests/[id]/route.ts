@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { roleRequests, users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
+import { logAdminAction, getClientIp } from "@/lib/audit";
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
@@ -61,6 +62,20 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         })
         .where(eq(users.id, existing.userId));
     }
+
+    const ip = getClientIp(request);
+    logAdminAction({
+      actorId: session.user.id,
+      action: action === "approve" ? "role_request_approved" : "role_request_rejected",
+      targetType: "role_request",
+      targetId: id,
+      details: {
+        userId: existing.userId,
+        requestedRole: existing.requestedRole,
+        reviewNote: reviewNote || null,
+      },
+      ipAddress: ip,
+    });
 
     return NextResponse.json(updated);
   } catch {

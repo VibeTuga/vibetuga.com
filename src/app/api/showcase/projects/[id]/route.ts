@@ -4,6 +4,7 @@ import { showcaseProjects, users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { awardXP } from "@/lib/gamification";
+import { logAdminAction, getClientIp } from "@/lib/audit";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -111,6 +112,26 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       await awardXP(existing.authorId, "project_featured", id).catch(() => null);
     }
 
+    // Audit log status changes
+    if (status !== undefined && status !== existing.status) {
+      const statusActions: Record<string, string> = {
+        approved: "project_approved",
+        featured: "project_featured",
+        rejected: "project_status_rejected",
+        pending: "project_status_pending",
+      };
+      const action = statusActions[status] ?? `project_status_${status}`;
+      const ip = getClientIp(request);
+      logAdminAction({
+        actorId: session.user.id,
+        action,
+        targetType: "project",
+        targetId: id,
+        details: { title: project.title, before: existing.status, after: status },
+        ipAddress: ip,
+      });
+    }
+
     return NextResponse.json(project);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to update project";
@@ -118,7 +139,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   }
 }
 
-export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
 
   if (!session?.user) {
@@ -136,11 +157,21 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     const [deleted] = await db
       .delete(showcaseProjects)
       .where(eq(showcaseProjects.id, id))
-      .returning({ id: showcaseProjects.id });
+      .returning({ id: showcaseProjects.id, title: showcaseProjects.title });
 
     if (!deleted) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
+
+    const ip = getClientIp(request);
+    logAdminAction({
+      actorId: session.user.id,
+      action: "project_deleted",
+      targetType: "project",
+      targetId: id,
+      details: { title: deleted.title },
+      ipAddress: ip,
+    });
 
     return NextResponse.json({ success: true });
   } catch {
