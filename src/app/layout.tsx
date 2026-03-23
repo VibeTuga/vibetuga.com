@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Space_Grotesk, Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import "./globals.css";
 
 const geist = Geist({
@@ -44,9 +42,7 @@ export default function RootLayout({
       )}
     >
       <body className="scanlines min-h-full flex flex-col bg-background text-on-background font-body selection:bg-primary selection:text-on-primary">
-        <Header />
-        <main className="flex-1 pt-20">{children}</main>
-        <Footer />
+        {children}
       </body>
     </html>
   );
