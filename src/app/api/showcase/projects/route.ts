@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { showcaseProjects, users } from "@/lib/db/schema";
 import { eq, desc, and, or, sql, count } from "drizzle-orm";
 import { auth } from "@/lib/auth";
+import { awardXP } from "@/lib/gamification";
 
 const PROJECTS_PER_PAGE = 12;
 
@@ -108,6 +109,8 @@ export async function POST(request: Request) {
         status: "pending",
       })
       .returning();
+
+    await awardXP(session.user.id, "project_submitted", project.id).catch(() => null);
 
     return NextResponse.json(project, { status: 201 });
   } catch (error) {

@@ -68,6 +68,8 @@ export const usersRelations = relations(users, ({ many }) => ({
   blogPostLikes: many(blogPostLikes),
   blogPostBookmarks: many(blogPostBookmarks),
   showcaseProjects: many(showcaseProjects),
+  xpEvents: many(xpEvents),
+  userBadges: many(userBadges),
 }));
 
 // ─── NextAuth Required Tables ───────────────────────────────
@@ -297,3 +299,76 @@ export const showcaseProjectsRelations = relations(showcaseProjects, ({ one }) =
     references: [users.id],
   }),
 }));
+
+// ─── XP Events ──────────────────────────────────────────────
+
+export const xpEvents = pgTable("xp_event", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  action: varchar("action", { length: 100 }).notNull(),
+  xpAmount: integer("xp_amount").notNull(),
+  referenceId: uuid("reference_id"),
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+});
+
+export const xpEventsRelations = relations(xpEvents, ({ one }) => ({
+  user: one(users, {
+    fields: [xpEvents.userId],
+    references: [users.id],
+  }),
+}));
+
+// ─── Badges ─────────────────────────────────────────────────
+
+export const badges = pgTable("badge", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 100 }).notNull(),
+  slug: varchar("slug", { length: 100 }).unique().notNull(),
+  description: text("description"),
+  icon: varchar("icon", { length: 50 }),
+  criteria: text("criteria"),
+  xpReward: integer("xp_reward").default(0).notNull(),
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+});
+
+export const badgesRelations = relations(badges, ({ many }) => ({
+  userBadges: many(userBadges),
+}));
+
+// ─── User Badges ─────────────────────────────────────────────
+
+export const userBadges = pgTable(
+  "user_badge",
+  {
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    badgeId: uuid("badge_id")
+      .notNull()
+      .references(() => badges.id, { onDelete: "cascade" }),
+    awardedAt: timestamp("awarded_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.badgeId] })],
+);
+
+export const userBadgesRelations = relations(userBadges, ({ one }) => ({
+  user: one(users, {
+    fields: [userBadges.userId],
+    references: [users.id],
+  }),
+  badge: one(badges, {
+    fields: [userBadges.badgeId],
+    references: [badges.id],
+  }),
+}));
+
+// ─── Levels ──────────────────────────────────────────────────
+
+export const levels = pgTable("level", {
+  level: integer("level").primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  xpRequired: integer("xp_required").notNull(),
+  perks: text("perks"),
+});

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { blogComments } from "@/lib/db/schema";
 import { auth } from "@/lib/auth";
+import { awardXP } from "@/lib/gamification";
 
 export async function POST(request: Request) {
   const session = await auth();
@@ -31,6 +32,8 @@ export async function POST(request: Request) {
         content: content.trim(),
       })
       .returning();
+
+    await awardXP(session.user.id, "blog_comment", postId).catch(() => null);
 
     return NextResponse.json(comment, { status: 201 });
   } catch {
