@@ -1,10 +1,21 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { blogComments } from "@/lib/db/schema";
 import { auth } from "@/lib/auth";
 import { awardXP } from "@/lib/gamification";
+import { rateLimit } from "@/lib/rate-limit";
 
-export async function POST(request: Request) {
+const limiter = rateLimit({ interval: 60 * 1000, limit: 10 });
+
+export async function POST(request: NextRequest) {
+  const ip = request.headers.get("x-forwarded-for") ?? "127.0.0.1";
+  if (!limiter.check(ip).success) {
+    return NextResponse.json(
+      { error: "Demasiados pedidos. Tenta novamente mais tarde." },
+      { status: 429 },
+    );
+  }
+
   const session = await auth();
 
   if (!session?.user) {
