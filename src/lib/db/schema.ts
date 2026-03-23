@@ -32,6 +32,13 @@ export const postStatusEnum = pgEnum("post_status", [
 
 export const postTypeEnum = pgEnum("post_type", ["admin", "community", "guest"]);
 
+export const projectStatusEnum = pgEnum("project_status", [
+  "pending",
+  "approved",
+  "featured",
+  "rejected",
+]);
+
 // ─── Users ──────────────────────────────────────────────────
 
 export const users = pgTable("user", {
@@ -60,6 +67,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   blogComments: many(blogComments),
   blogPostLikes: many(blogPostLikes),
   blogPostBookmarks: many(blogPostBookmarks),
+  showcaseProjects: many(showcaseProjects),
 }));
 
 // ─── NextAuth Required Tables ───────────────────────────────
@@ -256,6 +264,36 @@ export const blogPostBookmarksRelations = relations(blogPostBookmarks, ({ one })
   }),
   user: one(users, {
     fields: [blogPostBookmarks.userId],
+    references: [users.id],
+  }),
+}));
+
+// ─── Showcase Projects ─────────────────────────────────────
+
+export const showcaseProjects = pgTable("showcase_project", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  authorId: uuid("author_id")
+    .notNull()
+    .references(() => users.id),
+  title: varchar("title", { length: 255 }).notNull(),
+  slug: varchar("slug", { length: 255 }).unique().notNull(),
+  description: text("description"),
+  coverImage: text("cover_image"),
+  galleryImages: text("gallery_images").array(),
+  liveUrl: varchar("live_url", { length: 512 }),
+  repoUrl: varchar("repo_url", { length: 512 }),
+  videoUrl: varchar("video_url", { length: 512 }),
+  techStack: text("tech_stack").array(),
+  aiToolsUsed: text("ai_tools_used").array(),
+  status: projectStatusEnum("status").default("pending").notNull(),
+  votesCount: integer("votes_count").default(0).notNull(),
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
+});
+
+export const showcaseProjectsRelations = relations(showcaseProjects, ({ one }) => ({
+  author: one(users, {
+    fields: [showcaseProjects.authorId],
     references: [users.id],
   }),
 }));
