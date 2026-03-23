@@ -29,6 +29,13 @@
       "when": 1774282106833,
       "tag": "0003_newsletter_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1774288393145,
+      "tag": "0004_gorgeous_mother_askani",
+      "breakpoints": true
     }
   ]
 }

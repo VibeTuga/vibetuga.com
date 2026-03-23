@@ -11,6 +11,8 @@ import {
   type ProfileProject,
   type ProfileBadge,
 } from "@/lib/db/queries/profile";
+import { XpProgressBar } from "@/components/profile/XpProgressBar";
+import { LevelRing } from "@/components/profile/LevelRing";
 
 // ─── helpers ────────────────────────────────────────────────
 
@@ -261,49 +263,7 @@ export default async function ProfilePage({ params, searchParams }: Props) {
             <div className="flex flex-col items-center text-center">
               {/* Avatar with level ring */}
               <div className="relative mb-6">
-                {ring.style ? (
-                  /* Level 10 gradient ring */
-                  <div
-                    style={{
-                      ...ring.style,
-                      padding: "4px",
-                      borderRadius: "50%",
-                      display: "inline-block",
-                    }}
-                  >
-                    <div className="w-28 h-28 rounded-full overflow-hidden bg-surface-container-highest">
-                      {user.image ? (
-                        <Image
-                          src={user.image}
-                          alt={displayName}
-                          width={112}
-                          height={112}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center font-headline font-black text-2xl text-primary">
-                          {displayName.slice(0, 2).toUpperCase()}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <div className={`w-32 h-32 rounded-full border-4 ${ring.border} p-1.5`}>
-                    {user.image ? (
-                      <Image
-                        src={user.image}
-                        alt={displayName}
-                        width={116}
-                        height={116}
-                        className="w-full h-full rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full rounded-full bg-surface-container-highest flex items-center justify-center font-headline font-black text-2xl text-primary">
-                        {displayName.slice(0, 2).toUpperCase()}
-                      </div>
-                    )}
-                  </div>
-                )}
+                <LevelRing ring={ring} image={user.image} displayName={displayName} />
 
                 {/* Role badge */}
                 <div
@@ -367,12 +327,7 @@ export default async function ProfilePage({ params, searchParams }: Props) {
                   </span>
                 )}
               </div>
-              <div className="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden mb-3">
-                <div
-                  className="h-full bg-primary shadow-[0_0_10px_rgba(161,255,194,0.5)] transition-all"
-                  style={{ width: `${progressPct}%` }}
-                />
-              </div>
+              <XpProgressBar progressPct={progressPct} />
               <div className="font-mono text-[10px] text-right text-white/40 tracking-widest">
                 TOTAL_XP: {formatXP(user.xpPoints)}
               </div>

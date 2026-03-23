@@ -10,7 +10,7 @@ export function BlogCard({ post }: { post: BlogPost }) {
   return (
     <Link href={`/blog/${post.slug}`}>
       <article
-        className={`group relative bg-surface-container rounded-sm overflow-hidden transition-all duration-300 hover:-translate-y-1 flex flex-col h-full ${accent.hoverShadow}`}
+        className={`group relative bg-surface-container rounded-sm overflow-hidden transition-all duration-300 hover:-translate-y-[4px] hover:shadow-[0_12px_32px_rgba(0,0,0,0.5)] flex flex-col h-full ${accent.hoverShadow}`}
       >
         {/* Top color bar */}
         <div className={`absolute top-0 left-0 w-full h-[3px] ${accent.barBg} z-10`} />
@@ -22,11 +22,11 @@ export function BlogCard({ post }: { post: BlogPost }) {
               src={post.coverImage}
               alt={post.title}
               fill
-              className="object-cover transition-transform duration-500 group-hover:scale-105 opacity-80"
+              className="object-cover transition-transform duration-500 group-hover:scale-[1.04] opacity-80 group-hover:opacity-100"
               sizes="(max-width: 1024px) 100vw, 50vw"
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-surface-container-highest to-surface-container-low transition-transform duration-500 group-hover:scale-105 opacity-80" />
+            <div className="w-full h-full bg-gradient-to-br from-surface-container-highest to-surface-container-low transition-transform duration-500 group-hover:scale-[1.04] opacity-80" />
           )}
 
           {/* Category badge */}

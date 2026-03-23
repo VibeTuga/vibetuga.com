@@ -2,10 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { Bookmark } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
 
 export function BookmarkButton({ postId }: { postId: string }) {
   const [bookmarked, setBookmarked] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [popKey, setPopKey] = useState(0);
+  const prefersReduced = useReducedMotion();
 
   useEffect(() => {
     const key = `vt-bookmarked-${postId}`;
@@ -18,6 +21,7 @@ export function BookmarkButton({ postId }: { postId: string }) {
 
     const was = bookmarked;
     setBookmarked(!was);
+    setPopKey((k) => k + 1);
 
     try {
       const res = await fetch(`/api/blog/posts/${postId}/bookmark`, { method: "POST" });
@@ -54,10 +58,14 @@ export function BookmarkButton({ postId }: { postId: string }) {
       }`}
       aria-label={bookmarked ? "Remover bookmark" : "Guardar"}
     >
-      <Bookmark
-        size={16}
-        className={`transition-transform group-hover:scale-110 ${bookmarked ? "fill-current" : ""}`}
-      />
+      <motion.span
+        key={prefersReduced ? undefined : popKey}
+        animate={prefersReduced ? {} : { scale: [1, 1.3, 1] }}
+        transition={{ duration: 0.25, ease: "easeOut" }}
+        style={{ display: "inline-flex" }}
+      >
+        <Bookmark size={16} className={`transition-colors ${bookmarked ? "fill-current" : ""}`} />
+      </motion.span>
       {bookmarked ? "Guardado" : "Guardar"}
     </button>
   );
