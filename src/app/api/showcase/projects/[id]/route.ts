@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { showcaseProjects, users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
+import { awardXP } from "@/lib/gamification";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -73,6 +74,16 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       status,
     } = body;
 
+    const [existing] = await db
+      .select({ status: showcaseProjects.status, authorId: showcaseProjects.authorId })
+      .from(showcaseProjects)
+      .where(eq(showcaseProjects.id, id))
+      .limit(1);
+
+    if (!existing) {
+      return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    }
+
     const updates: Record<string, unknown> = { updatedAt: new Date() };
     if (title !== undefined) updates.title = title;
     if (slug !== undefined) updates.slug = slug;
@@ -94,6 +105,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
     if (!project) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    }
+
+    if (status === "featured" && existing.status !== "featured") {
+      await awardXP(existing.authorId, "project_featured", id).catch(() => null);
     }
 
     return NextResponse.json(project);
