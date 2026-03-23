@@ -105,7 +105,7 @@ export const users = pgTable("user", {
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
 });
 
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ one, many }) => ({
   blogPosts: many(blogPosts),
   blogComments: many(blogComments),
   blogPostLikes: many(blogPostLikes),
@@ -118,6 +118,10 @@ export const usersRelations = relations(users, ({ many }) => ({
   storePurchases: many(storePurchases),
   storeReviews: many(storeReviews),
   subscriptions: many(subscriptions),
+  settings: one(userSettings, {
+    fields: [users.id],
+    references: [userSettings.userId],
+  }),
 }));
 
 // ─── NextAuth Required Tables ───────────────────────────────
@@ -589,6 +593,33 @@ export const subscriptions = pgTable(
 export const subscriptionsRelations = relations(subscriptions, ({ one }) => ({
   user: one(users, {
     fields: [subscriptions.userId],
+    references: [users.id],
+  }),
+}));
+
+// ─── Privacy Level Enum ──────────────────────────────────────
+
+export const privacyLevelEnum = pgEnum("privacy_level", ["public", "members", "private"]);
+
+// ─── User Settings ──────────────────────────────────────────
+
+export const userSettings = pgTable("user_setting", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .unique()
+    .references(() => users.id, { onDelete: "cascade" }),
+  emailNotifications: boolean("email_notifications").default(true).notNull(),
+  inAppNotifications: boolean("in_app_notifications").default(true).notNull(),
+  privacyLevel: privacyLevelEnum("privacy_level").default("public").notNull(),
+  locale: varchar("locale", { length: 10 }).default("pt").notNull(),
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
+});
+
+export const userSettingsRelations = relations(userSettings, ({ one }) => ({
+  user: one(users, {
+    fields: [userSettings.userId],
     references: [users.id],
   }),
 }));

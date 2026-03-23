@@ -2,7 +2,17 @@ import dynamic from "next/dynamic";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import Link from "next/link";
-import { FileText, Home, Layers, Package, Plus, ShoppingBag, User } from "lucide-react";
+import {
+  FileText,
+  Home,
+  LayoutDashboard,
+  Layers,
+  Package,
+  Plus,
+  Settings,
+  ShoppingBag,
+  User,
+} from "lucide-react";
 
 const PageFadeIn = dynamic(() =>
   import("@/components/shared/PageFadeIn").then((m) => m.PageFadeIn),
@@ -31,6 +41,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </span>
           <nav className="flex items-center gap-4">
             <Link
+              href="/dashboard"
+              className="flex items-center gap-2 text-xs font-mono text-white/50 uppercase tracking-widest hover:text-primary transition-colors"
+            >
+              <LayoutDashboard size={14} />
+              Início
+            </Link>
+            <Link
               href="/dashboard/profile"
               className="flex items-center gap-2 text-xs font-mono text-white/50 uppercase tracking-widest hover:text-primary transition-colors"
             >
@@ -57,6 +74,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
             >
               <ShoppingBag size={14} />
               Minhas Compras
+            </Link>
+            <Link
+              href="/dashboard/settings"
+              className="flex items-center gap-2 text-xs font-mono text-white/50 uppercase tracking-widest hover:text-primary transition-colors"
+            >
+              <Settings size={14} />
+              Definições
             </Link>
             {canSell && (
               <>
