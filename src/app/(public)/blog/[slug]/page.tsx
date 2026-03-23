@@ -2,8 +2,9 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
-import { getPostBySlug, getAdjacentPosts } from "@/lib/db/queries/blog";
+import { getPostBySlug, getAdjacentPosts, getSeriesForPost } from "@/lib/db/queries/blog";
 import { RelatedPosts } from "@/components/blog/RelatedPosts";
+import { SeriesBanner } from "@/components/blog/SeriesBanner";
 import { formatDatePT, formatCount, getCategoryAccent } from "@/lib/blog-utils";
 import { ViewTracker } from "@/components/blog/ViewTracker";
 import { CommentSection } from "@/components/blog/CommentSection";
@@ -53,7 +54,10 @@ export default async function BlogPostPage({ params }: Props) {
 
   if (!post) notFound();
 
-  const { prev, next } = await getAdjacentPosts(post.publishedAt, post.id);
+  const [{ prev, next }, seriesInfo] = await Promise.all([
+    getAdjacentPosts(post.publishedAt, post.id),
+    getSeriesForPost(post.id),
+  ]);
   const accent = getCategoryAccent(post.categoryColor);
   const authorName = post.authorDisplayName || post.authorName || "Anónimo";
 
@@ -182,6 +186,9 @@ export default async function BlogPostPage({ params }: Props) {
               <div className={`absolute top-0 left-0 w-full h-[3px] ${accent.barBg}`} />
             </div>
           )}
+
+          {/* Series banner */}
+          {seriesInfo && <SeriesBanner series={seriesInfo} currentPostId={post.id} />}
 
           {/* Content */}
           <MarkdownContent content={post.content} className="blog-content mb-12" />

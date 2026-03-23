@@ -14,6 +14,7 @@ import {
   Shield,
   Flag,
   ActivitySquare,
+  BookOpen,
 } from "lucide-react";
 import { Logo } from "@/components/shared/Logo";
 import { cn } from "@/lib/utils";
@@ -27,6 +28,7 @@ const adminLinks: readonly {
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/admin/blog", label: "Blog Posts", icon: FileText, exact: true },
   { href: "/admin/blog/pending", label: "Pendentes", icon: Clock },
+  { href: "/admin/series", label: "Séries", icon: BookOpen },
   { href: "/admin/showcase", label: "Showcase", icon: Rocket },
   { href: "/admin/newsletter", label: "Newsletter", icon: Mail },
   { href: "/admin/store", label: "Loja", icon: ShoppingBag },

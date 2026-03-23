@@ -1,6 +1,6 @@
 import { cache } from "react";
 import { db } from "@/lib/db";
-import { blogPosts, blogCategories, users } from "@/lib/db/schema";
+import { blogPosts, blogCategories, blogSeries, blogSeriesPosts, users } from "@/lib/db/schema";
 import { eq, desc, asc, and, or, ilike, sql, count, lt, gt, ne } from "drizzle-orm";
 
 const POSTS_PER_PAGE = 12;
@@ -330,3 +330,139 @@ export const getPostsByTag = cache(async (tag: string, page = 1) => {
 
 export type BlogPost = Awaited<ReturnType<typeof getPublishedPosts>>["posts"][number];
 export type BlogPostDetail = NonNullable<Awaited<ReturnType<typeof getPostBySlug>>>;
+
+// ─── Series Queries ────────────────────────────────────────
+
+export const getAllSeries = cache(async () => {
+  return db
+    .select({
+      id: blogSeries.id,
+      title: blogSeries.title,
+      slug: blogSeries.slug,
+      description: blogSeries.description,
+      coverImage: blogSeries.coverImage,
+      authorId: blogSeries.authorId,
+      sortOrder: blogSeries.sortOrder,
+      createdAt: blogSeries.createdAt,
+      authorName: users.discordUsername,
+      authorDisplayName: users.displayName,
+      authorImage: users.image,
+      postCount:
+        sql<number>`(SELECT count(*)::int FROM blog_series_post WHERE blog_series_post.series_id = blog_series.id)`.as(
+          "post_count",
+        ),
+    })
+    .from(blogSeries)
+    .leftJoin(users, eq(blogSeries.authorId, users.id))
+    .orderBy(asc(blogSeries.sortOrder), desc(blogSeries.createdAt));
+});
+
+export const getSeriesBySlug = cache(async (slug: string) => {
+  const [series] = await db
+    .select({
+      id: blogSeries.id,
+      title: blogSeries.title,
+      slug: blogSeries.slug,
+      description: blogSeries.description,
+      coverImage: blogSeries.coverImage,
+      authorId: blogSeries.authorId,
+      sortOrder: blogSeries.sortOrder,
+      createdAt: blogSeries.createdAt,
+      authorName: users.discordUsername,
+      authorDisplayName: users.displayName,
+      authorImage: users.image,
+    })
+    .from(blogSeries)
+    .leftJoin(users, eq(blogSeries.authorId, users.id))
+    .where(eq(blogSeries.slug, slug))
+    .limit(1);
+
+  if (!series) return null;
+
+  const posts = await db
+    .select({
+      id: blogPosts.id,
+      title: blogPosts.title,
+      slug: blogPosts.slug,
+      excerpt: blogPosts.excerpt,
+      coverImage: blogPosts.coverImage,
+      readingTimeMinutes: blogPosts.readingTimeMinutes,
+      publishedAt: blogPosts.publishedAt,
+      status: blogPosts.status,
+      order: blogSeriesPosts.order,
+    })
+    .from(blogSeriesPosts)
+    .innerJoin(blogPosts, eq(blogSeriesPosts.postId, blogPosts.id))
+    .where(eq(blogSeriesPosts.seriesId, series.id))
+    .orderBy(asc(blogSeriesPosts.order));
+
+  return { ...series, posts };
+});
+
+export const getSeriesForPost = cache(async (postId: string) => {
+  const [entry] = await db
+    .select({
+      seriesId: blogSeriesPosts.seriesId,
+      order: blogSeriesPosts.order,
+      seriesTitle: blogSeries.title,
+      seriesSlug: blogSeries.slug,
+    })
+    .from(blogSeriesPosts)
+    .innerJoin(blogSeries, eq(blogSeriesPosts.seriesId, blogSeries.id))
+    .where(eq(blogSeriesPosts.postId, postId))
+    .limit(1);
+
+  if (!entry) return null;
+
+  const allPosts = await db
+    .select({
+      postId: blogSeriesPosts.postId,
+      order: blogSeriesPosts.order,
+      title: blogPosts.title,
+      slug: blogPosts.slug,
+      status: blogPosts.status,
+    })
+    .from(blogSeriesPosts)
+    .innerJoin(blogPosts, eq(blogSeriesPosts.postId, blogPosts.id))
+    .where(eq(blogSeriesPosts.seriesId, entry.seriesId))
+    .orderBy(asc(blogSeriesPosts.order));
+
+  const currentIdx = allPosts.findIndex((p) => p.postId === postId);
+  const publishedPosts = allPosts.filter((p) => p.status === "published");
+
+  return {
+    seriesTitle: entry.seriesTitle,
+    seriesSlug: entry.seriesSlug,
+    currentOrder: entry.order,
+    totalPosts: allPosts.length,
+    posts: publishedPosts,
+    prev: currentIdx > 0 ? allPosts[currentIdx - 1] : null,
+    next: currentIdx < allPosts.length - 1 ? allPosts[currentIdx + 1] : null,
+  };
+});
+
+export const getSeriesForAdmin = cache(async () => {
+  return db
+    .select({
+      id: blogSeries.id,
+      title: blogSeries.title,
+      slug: blogSeries.slug,
+      description: blogSeries.description,
+      coverImage: blogSeries.coverImage,
+      sortOrder: blogSeries.sortOrder,
+      createdAt: blogSeries.createdAt,
+      authorName: users.discordUsername,
+      authorDisplayName: users.displayName,
+      postCount:
+        sql<number>`(SELECT count(*)::int FROM blog_series_post WHERE blog_series_post.series_id = blog_series.id)`.as(
+          "post_count",
+        ),
+    })
+    .from(blogSeries)
+    .leftJoin(users, eq(blogSeries.authorId, users.id))
+    .orderBy(asc(blogSeries.sortOrder), desc(blogSeries.createdAt));
+});
+
+export type SeriesListItem = Awaited<ReturnType<typeof getAllSeries>>[number];
+export type SeriesDetail = NonNullable<Awaited<ReturnType<typeof getSeriesBySlug>>>;
+export type SeriesForPost = NonNullable<Awaited<ReturnType<typeof getSeriesForPost>>>;
