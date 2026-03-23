@@ -8,13 +8,13 @@ import { Menu, X } from "lucide-react";
 import { Logo } from "@/components/shared/Logo";
 import { SearchTrigger } from "@/components/shared/SearchDialog";
 import { UserMenu, MobileUserMenu } from "@/components/layout/UserMenu";
+import type { SessionUser } from "@/components/layout/UserMenu";
+import { cn } from "@/lib/utils";
 
 const SearchDialog = dynamic(
   () => import("@/components/shared/SearchDialog").then((m) => m.SearchDialog),
   { ssr: false },
 );
-import type { SessionUser } from "@/components/layout/UserMenu";
-import { cn } from "@/lib/utils";
 
 const navLinks = [
   { href: "/", label: "Home" },
