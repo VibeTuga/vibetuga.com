@@ -123,6 +123,7 @@ export const getPostBySlug = cache(async (slug: string) => {
       authorDisplayName: users.displayName,
       authorImage: users.image,
       authorRole: users.role,
+      authorIsVerified: users.isVerified,
       categoryName: blogCategories.name,
       categorySlug: blogCategories.slug,
       categoryColor: blogCategories.color,

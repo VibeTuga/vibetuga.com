@@ -5,6 +5,7 @@ import { users, showcaseProjects } from "@/lib/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { AnimatedPodiumItem, AnimatedTableRow } from "@/components/leaderboard/AnimatedLeaderboard";
+import { VerifiedBadge } from "@/components/shared/VerifiedBadge";
 
 export const revalidate = 30;
 
@@ -112,6 +113,7 @@ export default async function LeaderboardPage() {
         image: users.image,
         xpPoints: users.xpPoints,
         level: users.level,
+        isVerified: users.isVerified,
         projectCount: sql<number>`cast(count(distinct ${showcaseProjects.id}) as int)`,
       })
       .from(users)
@@ -142,6 +144,7 @@ export default async function LeaderboardPage() {
           image: users.image,
           xpPoints: users.xpPoints,
           level: users.level,
+          isVerified: users.isVerified,
           projectCount: sql<number>`cast(count(distinct ${showcaseProjects.id}) as int)`,
         })
         .from(users)
@@ -257,12 +260,13 @@ export default async function LeaderboardPage() {
                   )}
                 </div>
 
-                <Link href={`/profile/${user.id}`}>
+                <Link href={`/profile/${user.id}`} className="flex items-center gap-1.5">
                   <h3
                     className={`font-headline ${config.isFirst ? "text-2xl font-black" : "text-xl font-bold"} ${config.textColor} mb-1 hover:underline`}
                   >
                     {username}
                   </h3>
+                  {user.isVerified && <VerifiedBadge size="sm" />}
                 </Link>
 
                 <div
@@ -326,6 +330,7 @@ export default async function LeaderboardPage() {
                           </div>
                         )}
                         <span className="font-bold">{username}</span>
+                        {user.isVerified && <VerifiedBadge size="sm" />}
                       </Link>
                     </td>
                     <td className="px-6 py-4">

@@ -8,8 +8,9 @@ import {
   xpEvents,
   badges,
   userBadges,
+  userFollows,
 } from "@/lib/db/schema";
-import { eq, desc, and, or } from "drizzle-orm";
+import { eq, desc, and, or, sql } from "drizzle-orm";
 
 export const LEVEL_NAMES: Record<number, string> = {
   1: "Noob",
@@ -63,6 +64,7 @@ export const getUserProfile = cache(async (userId: string) => {
       streakDays: users.streakDays,
       createdAt: users.createdAt,
       isBanned: users.isBanned,
+      isVerified: users.isVerified,
     })
     .from(users)
     .where(eq(users.id, userId))
@@ -70,7 +72,15 @@ export const getUserProfile = cache(async (userId: string) => {
 
   if (!user) return null;
 
-  const [allBadges, earnedBadges, posts, projects, recentXpEvents] = await Promise.all([
+  const [
+    allBadges,
+    earnedBadges,
+    posts,
+    projects,
+    recentXpEvents,
+    followerCountResult,
+    followingCountResult,
+  ] = await Promise.all([
     db
       .select({
         id: badges.id,
@@ -148,6 +158,16 @@ export const getUserProfile = cache(async (userId: string) => {
       .where(eq(xpEvents.userId, userId))
       .orderBy(desc(xpEvents.createdAt))
       .limit(10),
+
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(userFollows)
+      .where(eq(userFollows.followingId, userId)),
+
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(userFollows)
+      .where(eq(userFollows.followerId, userId)),
   ]);
 
   const earnedBadgeIds = new Set(earnedBadges.map((b) => b.badgeId));
@@ -165,6 +185,8 @@ export const getUserProfile = cache(async (userId: string) => {
     posts,
     projects,
     recentXpEvents,
+    followerCount: followerCountResult[0]?.count ?? 0,
+    followingCount: followingCountResult[0]?.count ?? 0,
   };
 });
 
@@ -172,3 +194,12 @@ export type UserProfile = NonNullable<Awaited<ReturnType<typeof getUserProfile>>
 export type ProfilePost = UserProfile["posts"][number];
 export type ProfileProject = UserProfile["projects"][number];
 export type ProfileBadge = UserProfile["badges"][number];
+
+export async function isFollowing(followerId: string, followingId: string): Promise<boolean> {
+  const [row] = await db
+    .select({ followerId: userFollows.followerId })
+    .from(userFollows)
+    .where(and(eq(userFollows.followerId, followerId), eq(userFollows.followingId, followingId)))
+    .limit(1);
+  return !!row;
+}

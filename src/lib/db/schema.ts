@@ -88,6 +88,8 @@ export const roleRequestStatusEnum = pgEnum("role_request_status", [
   "rejected",
 ]);
 
+export const reportStatusEnum = pgEnum("report_status", ["pending", "resolved", "dismissed"]);
+
 // ─── Users ──────────────────────────────────────────────────
 
 export const users = pgTable("user", {
@@ -107,6 +109,7 @@ export const users = pgTable("user", {
   level: integer("level").default(1).notNull(),
   streakDays: integer("streak_days").default(0).notNull(),
   isBanned: boolean("is_banned").default(false).notNull(),
+  isVerified: boolean("is_verified").default(false).notNull(),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
 });
@@ -130,6 +133,10 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   }),
   roleRequests: many(roleRequests, { relationName: "roleRequestUser" }),
   roleRequestsReviewed: many(roleRequests, { relationName: "roleRequestReviewer" }),
+  followers: many(userFollows, { relationName: "userFollowsFollowing" }),
+  following: many(userFollows, { relationName: "userFollowsFollower" }),
+  reportsSubmitted: many(reports, { relationName: "reportReporter" }),
+  reportsResolved: many(reports, { relationName: "reportResolver" }),
 }));
 
 // ─── NextAuth Required Tables ───────────────────────────────
@@ -667,5 +674,79 @@ export const roleRequestsRelations = relations(roleRequests, ({ one }) => ({
     fields: [roleRequests.reviewedBy],
     references: [users.id],
     relationName: "roleRequestReviewer",
+  }),
+}));
+
+// ─── User Follows ──────────────────────────────────────────
+
+export const userFollows = pgTable(
+  "user_follow",
+  {
+    followerId: uuid("follower_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    followingId: uuid("following_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.followerId, t.followingId] }),
+    index("user_follow_follower_idx").on(t.followerId),
+    index("user_follow_following_idx").on(t.followingId),
+  ],
+);
+
+export const userFollowsRelations = relations(userFollows, ({ one }) => ({
+  follower: one(users, {
+    fields: [userFollows.followerId],
+    references: [users.id],
+    relationName: "userFollowsFollower",
+  }),
+  following: one(users, {
+    fields: [userFollows.followingId],
+    references: [users.id],
+    relationName: "userFollowsFollowing",
+  }),
+}));
+
+// ─── Reports ──────────────────────────────────────────────────
+
+export const reports = pgTable(
+  "report",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    reporterId: uuid("reporter_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    contentType: varchar("content_type", { length: 50 }).notNull(),
+    contentId: uuid("content_id").notNull(),
+    reason: varchar("reason", { length: 50 }).notNull(),
+    details: text("details"),
+    status: reportStatusEnum("status").default("pending").notNull(),
+    resolvedBy: uuid("resolved_by").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    resolvedNote: text("resolved_note"),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [
+    index("report_content_idx").on(t.contentType, t.contentId),
+    index("report_status_idx").on(t.status),
+    index("report_reporter_idx").on(t.reporterId),
+  ],
+);
+
+export const reportsRelations = relations(reports, ({ one }) => ({
+  reporter: one(users, {
+    fields: [reports.reporterId],
+    references: [users.id],
+    relationName: "reportReporter",
+  }),
+  resolver: one(users, {
+    fields: [reports.resolvedBy],
+    references: [users.id],
+    relationName: "reportResolver",
   }),
 }));

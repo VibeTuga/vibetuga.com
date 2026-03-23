@@ -7,12 +7,17 @@ import {
   getUserProfile,
   getLevelName,
   getLevelXpRange,
+  isFollowing,
   type ProfilePost,
   type ProfileProject,
   type ProfileBadge,
 } from "@/lib/db/queries/profile";
+import { auth } from "@/lib/auth";
 import { XpProgressBar } from "@/components/profile/XpProgressBar";
 import { LevelRing } from "@/components/profile/LevelRing";
+import { FollowButton } from "@/components/shared/FollowButton";
+import { VerifiedBadge } from "@/components/shared/VerifiedBadge";
+import { FollowList } from "@/components/profile/FollowList";
 
 // ─── helpers ────────────────────────────────────────────────
 
@@ -227,10 +232,21 @@ export default async function ProfilePage({ params, searchParams }: Props) {
   const { id } = await params;
   const { tab = "badges" } = await searchParams;
 
-  const profile = await getUserProfile(id);
+  const [profile, session] = await Promise.all([getUserProfile(id), auth()]);
   if (!profile) notFound();
 
-  const { user, badges: allBadges, posts, projects, recentXpEvents } = profile;
+  const {
+    user,
+    badges: allBadges,
+    posts,
+    projects,
+    recentXpEvents,
+    followerCount,
+    followingCount,
+  } = profile;
+  const isOwnProfile = session?.user?.id === id;
+  const currentlyFollowing =
+    session?.user?.id && !isOwnProfile ? await isFollowing(session.user.id, id) : false;
   const displayName = user.displayName || user.discordUsername;
   const roleLabel = ROLE_LABELS[user.role] ?? user.role;
   const roleStyle = ROLE_STYLES[user.role] ?? ROLE_STYLES.member;
@@ -250,6 +266,8 @@ export default async function ProfilePage({ params, searchParams }: Props) {
     { key: "badges", label: "Badges", count: earnedCount },
     { key: "posts", label: "Posts", count: posts.length },
     { key: "projects", label: "Projetos", count: projects.length },
+    { key: "followers", label: "Seguidores", count: followerCount },
+    { key: "following", label: "A seguir", count: followingCount },
     { key: "activity", label: "Atividade", count: recentXpEvents.length },
   ];
 
@@ -276,12 +294,24 @@ export default async function ProfilePage({ params, searchParams }: Props) {
                 </div>
               </div>
 
-              <h1 className="font-headline text-2xl font-bold tracking-tight mt-2 mb-0.5">
+              <h1 className="font-headline text-2xl font-bold tracking-tight mt-2 mb-0.5 flex items-center gap-2 justify-center">
                 {displayName}
+                {user.isVerified && <VerifiedBadge />}
               </h1>
               <p className="font-mono text-[10px] text-white/40 uppercase tracking-widest mb-4">
                 @{user.discordUsername}
               </p>
+
+              {/* Follow button */}
+              {session?.user && !isOwnProfile && (
+                <div className="mb-4">
+                  <FollowButton
+                    targetUserId={id}
+                    initialFollowing={currentlyFollowing}
+                    initialCount={followerCount}
+                  />
+                </div>
+              )}
 
               {/* Streak */}
               {user.streakDays > 0 && (
@@ -338,18 +368,45 @@ export default async function ProfilePage({ params, searchParams }: Props) {
           </section>
 
           {/* Mini stats grid */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-3">
             <div className="bg-surface-container rounded-lg p-4 border border-white/5 flex flex-col gap-2">
-              <span className="text-tertiary text-xl">🚀</span>
+              <span className="text-primary text-lg">👥</span>
+              <div className="font-headline text-lg font-black tracking-tighter leading-none">
+                {followerCount}
+              </div>
+              <div className="font-mono text-[9px] text-white/40 uppercase tracking-widest">
+                Seguidores
+              </div>
+            </div>
+            <div className="bg-surface-container rounded-lg p-4 border border-white/5 flex flex-col gap-2">
+              <span className="text-tertiary text-lg">➡️</span>
+              <div className="font-headline text-lg font-black tracking-tighter leading-none">
+                {followingCount}
+              </div>
+              <div className="font-mono text-[9px] text-white/40 uppercase tracking-widest">
+                A seguir
+              </div>
+            </div>
+            <div className="bg-surface-container rounded-lg p-4 border border-white/5 flex flex-col gap-2">
+              <span className="text-secondary text-lg">🎖️</span>
+              <div className="font-headline text-lg font-black tracking-tighter leading-none">
+                {user.level}
+              </div>
+              <div className="font-mono text-[9px] text-white/40 uppercase tracking-widest">
+                Nível
+              </div>
+            </div>
+            <div className="bg-surface-container rounded-lg p-4 border border-white/5 flex flex-col gap-2">
+              <span className="text-tertiary text-lg">🚀</span>
               <div className="font-headline text-lg font-black tracking-tighter leading-none">
                 {projects.length}
               </div>
               <div className="font-mono text-[9px] text-white/40 uppercase tracking-widest">
-                Projects
+                Projetos
               </div>
             </div>
             <div className="bg-surface-container rounded-lg p-4 border border-white/5 flex flex-col gap-2">
-              <span className="text-secondary text-xl">📝</span>
+              <span className="text-secondary text-lg">📝</span>
               <div className="font-headline text-lg font-black tracking-tighter leading-none">
                 {posts.length}
               </div>
@@ -358,21 +415,12 @@ export default async function ProfilePage({ params, searchParams }: Props) {
               </div>
             </div>
             <div className="bg-surface-container rounded-lg p-4 border border-white/5 flex flex-col gap-2">
-              <span className="text-primary text-xl">⭐</span>
+              <span className="text-primary text-lg">⭐</span>
               <div className="font-headline text-lg font-black tracking-tighter leading-none">
                 {String(earnedCount).padStart(2, "0")}
               </div>
               <div className="font-mono text-[9px] text-white/40 uppercase tracking-widest">
                 Badges
-              </div>
-            </div>
-            <div className="bg-surface-container rounded-lg p-4 border border-white/5 flex flex-col gap-2">
-              <span className="text-white text-xl">🎖️</span>
-              <div className="font-headline text-lg font-black tracking-tighter leading-none">
-                {user.level}
-              </div>
-              <div className="font-mono text-[9px] text-white/40 uppercase tracking-widest">
-                Nível
               </div>
             </div>
           </div>
@@ -464,6 +512,12 @@ export default async function ProfilePage({ params, searchParams }: Props) {
               )}
             </div>
           )}
+
+          {/* Followers tab */}
+          {tab === "followers" && <FollowList userId={id} type="followers" />}
+
+          {/* Following tab */}
+          {tab === "following" && <FollowList userId={id} type="following" />}
 
           {/* Activity tab */}
           {tab === "activity" && (

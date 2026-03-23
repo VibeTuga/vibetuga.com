@@ -7,6 +7,7 @@ import { MarkdownContent } from "@/components/blog/MarkdownContent";
 import { BuyButton } from "@/components/store/BuyButton";
 import { ProductReviews } from "@/components/store/ProductReviews";
 import { getProductJsonLd } from "@/lib/jsonld";
+import { ReportButton } from "@/components/shared/ReportButton";
 
 export const revalidate = 60;
 
@@ -236,6 +237,11 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Report */}
+      <div className="flex justify-end mt-4">
+        <ReportButton contentType="product" contentId={product.id} />
       </div>
 
       {/* Reviews section */}

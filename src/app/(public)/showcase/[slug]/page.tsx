@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
 import { getProjectBySlug } from "@/lib/db/queries/showcase";
+import { ReportButton } from "@/components/shared/ReportButton";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -300,8 +301,8 @@ export default async function ShowcaseProjectPage({ params }: Props) {
             )}
           </div>
 
-          {/* Date */}
-          <div className="mt-6">
+          {/* Date & Report */}
+          <div className="mt-6 flex items-center justify-between">
             <p className="text-[10px] font-mono text-white/20">
               Submetido em{" "}
               {new Date(project.createdAt).toLocaleDateString("pt-PT", {
@@ -310,6 +311,7 @@ export default async function ShowcaseProjectPage({ params }: Props) {
                 year: "numeric",
               })}
             </p>
+            <ReportButton contentType="project" contentId={project.id} size="sm" />
           </div>
         </div>
       </div>

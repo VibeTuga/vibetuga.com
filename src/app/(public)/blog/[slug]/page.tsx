@@ -10,6 +10,8 @@ import { LikeButton } from "@/components/blog/LikeButton";
 import { BookmarkButton } from "@/components/blog/BookmarkButton";
 import { MarkdownContent } from "@/components/blog/MarkdownContent";
 import { getArticleJsonLd } from "@/lib/jsonld";
+import { VerifiedBadge } from "@/components/shared/VerifiedBadge";
+import { ReportButton } from "@/components/shared/ReportButton";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -134,6 +136,7 @@ export default async function BlogPostPage({ params }: Props) {
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-bold text-white uppercase">{authorName}</span>
+                {post.authorIsVerified && <VerifiedBadge size="sm" />}
                 {post.authorRole && (
                   <span className="text-[8px] bg-white/5 px-1.5 py-0.5 text-white/40 uppercase">
                     {post.authorRole}
@@ -197,9 +200,12 @@ export default async function BlogPostPage({ params }: Props) {
       )}
 
       {/* Engagement buttons */}
-      <div className="flex items-center gap-3 mb-12">
-        <LikeButton postId={post.id} initialCount={post.likesCount} />
-        <BookmarkButton postId={post.id} />
+      <div className="flex items-center justify-between mb-12">
+        <div className="flex items-center gap-3">
+          <LikeButton postId={post.id} initialCount={post.likesCount} />
+          <BookmarkButton postId={post.id} />
+        </div>
+        <ReportButton contentType="post" contentId={post.id} />
       </div>
 
       {/* Comments */}

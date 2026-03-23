@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { MessageSquare, Reply, Send, Loader2 } from "lucide-react";
 import { formatDatePT } from "@/lib/blog-utils";
+import { ReportButton } from "@/components/shared/ReportButton";
 
 type Comment = {
   id: string;
@@ -151,15 +152,18 @@ function CommentNode({
         </p>
 
         {/* Actions */}
-        {depth < 2 && (
-          <button
-            onClick={() => setShowReply(!showReply)}
-            className="mt-3 flex items-center gap-1.5 text-[10px] font-mono text-white/30 uppercase tracking-widest hover:text-tertiary transition-colors"
-          >
-            <Reply size={12} />
-            Responder
-          </button>
-        )}
+        <div className="mt-3 flex items-center gap-4">
+          {depth < 2 && (
+            <button
+              onClick={() => setShowReply(!showReply)}
+              className="flex items-center gap-1.5 text-[10px] font-mono text-white/30 uppercase tracking-widest hover:text-tertiary transition-colors"
+            >
+              <Reply size={12} />
+              Responder
+            </button>
+          )}
+          <ReportButton contentType="comment" contentId={comment.id} size="sm" />
+        </div>
 
         {/* Inline reply form */}
         {showReply && (

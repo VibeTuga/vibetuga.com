@@ -12,6 +12,7 @@ import {
   Mail,
   ShoppingBag,
   Shield,
+  Flag,
 } from "lucide-react";
 import { Logo } from "@/components/shared/Logo";
 import { cn } from "@/lib/utils";
@@ -21,6 +22,7 @@ const adminLinks: readonly {
   label: string;
   icon: typeof LayoutDashboard;
   exact?: boolean;
+  badgeKey?: string;
 }[] = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/admin/blog", label: "Blog Posts", icon: FileText, exact: true },
@@ -28,12 +30,13 @@ const adminLinks: readonly {
   { href: "/admin/showcase", label: "Showcase", icon: Rocket },
   { href: "/admin/newsletter", label: "Newsletter", icon: Mail },
   { href: "/admin/store", label: "Loja", icon: ShoppingBag },
+  { href: "/admin/reports", label: "Denúncias", icon: Flag, badgeKey: "reports" },
   { href: "/admin/role-requests", label: "Pedidos de Role", icon: Shield },
   { href: "/admin/categories", label: "Categorias", icon: FolderOpen },
   { href: "/admin/users", label: "Utilizadores", icon: Users },
 ];
 
-export function AdminSidebar() {
+export function AdminSidebar({ pendingReportsCount = 0 }: { pendingReportsCount?: number }) {
   const pathname = usePathname();
 
   function isActive(href: string, exact?: boolean) {
@@ -66,7 +69,12 @@ export function AdminSidebar() {
               )}
             >
               <Icon size={18} />
-              <span>{link.label}</span>
+              <span className="flex-1">{link.label}</span>
+              {link.badgeKey === "reports" && pendingReportsCount > 0 && (
+                <span className="bg-error text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full leading-none">
+                  {pendingReportsCount}
+                </span>
+              )}
             </Link>
           );
         })}
