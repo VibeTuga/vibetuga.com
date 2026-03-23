@@ -143,6 +143,8 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   collections: many(collections),
   sentMessages: many(directMessages, { relationName: "sentMessages" }),
   receivedMessages: many(directMessages, { relationName: "receivedMessages" }),
+  challengeEntries: many(challengeEntries),
+  challengeEntryVotes: many(challengeEntryVotes),
 }));
 
 // ─── NextAuth Required Tables ───────────────────────────────
@@ -945,6 +947,120 @@ export const collectionItemsRelations = relations(collectionItems, ({ one }) => 
   collection: one(collections, {
     fields: [collectionItems.collectionId],
     references: [collections.id],
+  }),
+}));
+
+// ─── Direct Messages ───────────────────────────────────────
+
+// ─── Challenges ─────────────────────────────────────────────
+
+export const challengeStatusEnum = pgEnum("challenge_status", [
+  "draft",
+  "active",
+  "voting",
+  "completed",
+]);
+
+export const challengeEntryStatusEnum = pgEnum("challenge_entry_status", [
+  "submitted",
+  "winner",
+  "disqualified",
+]);
+
+export const challenges = pgTable(
+  "challenge",
+  {
+    id: serial("id").primaryKey(),
+    title: varchar("title", { length: 200 }).notNull(),
+    description: text("description").notNull(),
+    startAt: timestamp("start_at", { mode: "date" }).notNull(),
+    endAt: timestamp("end_at", { mode: "date" }).notNull(),
+    badgeRewardId: uuid("badge_reward_id").references(() => badges.id, {
+      onDelete: "set null",
+    }),
+    xpReward: integer("xp_reward").default(0).notNull(),
+    status: challengeStatusEnum("status").default("draft").notNull(),
+    createdBy: uuid("created_by").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [index("challenge_status_idx").on(t.status), index("challenge_start_idx").on(t.startAt)],
+);
+
+export const challengesRelations = relations(challenges, ({ one, many }) => ({
+  badgeReward: one(badges, {
+    fields: [challenges.badgeRewardId],
+    references: [badges.id],
+  }),
+  creator: one(users, {
+    fields: [challenges.createdBy],
+    references: [users.id],
+  }),
+  entries: many(challengeEntries),
+}));
+
+export const challengeEntries = pgTable(
+  "challenge_entry",
+  {
+    id: serial("id").primaryKey(),
+    challengeId: integer("challenge_id")
+      .notNull()
+      .references(() => challenges.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    submissionUrl: varchar("submission_url", { length: 500 }).notNull(),
+    description: text("description"),
+    votesCount: integer("votes_count").default(0).notNull(),
+    status: challengeEntryStatusEnum("status").default("submitted").notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [
+    uniqueIndex("challenge_entry_unique_idx").on(t.challengeId, t.userId),
+    index("challenge_entry_challenge_idx").on(t.challengeId),
+    index("challenge_entry_user_idx").on(t.userId),
+  ],
+);
+
+export const challengeEntriesRelations = relations(challengeEntries, ({ one }) => ({
+  challenge: one(challenges, {
+    fields: [challengeEntries.challengeId],
+    references: [challenges.id],
+  }),
+  user: one(users, {
+    fields: [challengeEntries.userId],
+    references: [users.id],
+  }),
+}));
+
+// ─── Challenge Entry Votes ──────────────────────────────────
+
+export const challengeEntryVotes = pgTable(
+  "challenge_entry_vote",
+  {
+    entryId: integer("entry_id")
+      .notNull()
+      .references(() => challengeEntries.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.entryId, t.userId] }),
+    index("challenge_entry_vote_user_idx").on(t.userId),
+  ],
+);
+
+export const challengeEntryVotesRelations = relations(challengeEntryVotes, ({ one }) => ({
+  entry: one(challengeEntries, {
+    fields: [challengeEntryVotes.entryId],
+    references: [challengeEntries.id],
+  }),
+  user: one(users, {
+    fields: [challengeEntryVotes.userId],
+    references: [users.id],
   }),
 }));
 

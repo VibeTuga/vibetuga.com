@@ -17,6 +17,8 @@ export const XP_VALUES = {
   referred_user: 25,
   community_helper: 15,
   first_follower: 10,
+  challenge_entry: 20,
+  challenge_winner: 200,
 } as const;
 
 export type XpAction = keyof typeof XP_VALUES;

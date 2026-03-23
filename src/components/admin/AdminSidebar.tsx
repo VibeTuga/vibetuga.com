@@ -14,6 +14,7 @@ import {
   Shield,
   Flag,
   ActivitySquare,
+  Trophy,
 } from "lucide-react";
 import { Logo } from "@/components/shared/Logo";
 import { cn } from "@/lib/utils";
@@ -29,6 +30,7 @@ const adminLinks: readonly {
   { href: "/admin/blog/pending", label: "Pendentes", icon: Clock },
   { href: "/admin/showcase", label: "Showcase", icon: Rocket },
   { href: "/admin/newsletter", label: "Newsletter", icon: Mail },
+  { href: "/admin/challenges", label: "Desafios", icon: Trophy },
   { href: "/admin/store", label: "Loja", icon: ShoppingBag },
   { href: "/admin/role-requests", label: "Pedidos de Role", icon: Shield },
   { href: "/admin/reports", label: "Denúncias", icon: Flag },
