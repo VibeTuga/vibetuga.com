@@ -1,7 +1,7 @@
 import { cache } from "react";
 import { db } from "@/lib/db";
 import { blogPosts, blogCategories, users } from "@/lib/db/schema";
-import { eq, desc, asc, and, or, ilike, sql, count, lt, gt } from "drizzle-orm";
+import { eq, desc, asc, and, or, ilike, sql, count, lt, gt, ne } from "drizzle-orm";
 
 const POSTS_PER_PAGE = 12;
 
@@ -114,6 +114,7 @@ export const getPostBySlug = cache(async (slug: string) => {
       coverImage: blogPosts.coverImage,
       postType: blogPosts.postType,
       tags: blogPosts.tags,
+      categoryId: blogPosts.categoryId,
       readingTimeMinutes: blogPosts.readingTimeMinutes,
       viewsCount: blogPosts.viewsCount,
       likesCount: blogPosts.likesCount,
@@ -183,6 +184,148 @@ export const getCategoryBySlug = cache(async (slug: string) => {
     .where(eq(blogCategories.slug, slug))
     .limit(1);
   return category ?? null;
+});
+
+export const getRelatedPosts = cache(
+  async (postId: string, tags: string[] | null, categoryId: string | null, limit = 3) => {
+    const conditions: ReturnType<typeof eq>[] = [
+      eq(blogPosts.status, "published"),
+      ne(blogPosts.id, postId),
+    ];
+
+    if (categoryId) {
+      conditions.push(eq(blogPosts.categoryId, categoryId));
+    }
+
+    const baseWhere = and(...conditions);
+
+    // If there are tags, score by overlap count and order by that + recency
+    if (tags && tags.length > 0) {
+      const tagMatchCount = sql<number>`coalesce(array_length(${blogPosts.tags} & ${sql`ARRAY[${sql.join(
+        tags.map((t) => sql`${t}`),
+        sql`,`,
+      )}]::text[]`}, 1), 0)`;
+
+      return db
+        .select({
+          id: blogPosts.id,
+          title: blogPosts.title,
+          slug: blogPosts.slug,
+          excerpt: blogPosts.excerpt,
+          coverImage: blogPosts.coverImage,
+          postType: blogPosts.postType,
+          tags: blogPosts.tags,
+          readingTimeMinutes: blogPosts.readingTimeMinutes,
+          viewsCount: blogPosts.viewsCount,
+          likesCount: blogPosts.likesCount,
+          publishedAt: blogPosts.publishedAt,
+          authorName: users.discordUsername,
+          authorDisplayName: users.displayName,
+          authorImage: users.image,
+          authorRole: users.role,
+          categoryName: blogCategories.name,
+          categorySlug: blogCategories.slug,
+          categoryColor: blogCategories.color,
+          commentsCount:
+            sql<number>`(SELECT count(*)::int FROM blog_comment WHERE blog_comment.post_id = blog_post.id AND blog_comment.is_approved = true)`.as(
+              "comments_count",
+            ),
+        })
+        .from(blogPosts)
+        .leftJoin(users, eq(blogPosts.authorId, users.id))
+        .leftJoin(blogCategories, eq(blogPosts.categoryId, blogCategories.id))
+        .where(baseWhere)
+        .orderBy(desc(tagMatchCount), desc(blogPosts.publishedAt))
+        .limit(limit);
+    }
+
+    // No tags — just match by category + recency
+    return db
+      .select({
+        id: blogPosts.id,
+        title: blogPosts.title,
+        slug: blogPosts.slug,
+        excerpt: blogPosts.excerpt,
+        coverImage: blogPosts.coverImage,
+        postType: blogPosts.postType,
+        tags: blogPosts.tags,
+        readingTimeMinutes: blogPosts.readingTimeMinutes,
+        viewsCount: blogPosts.viewsCount,
+        likesCount: blogPosts.likesCount,
+        publishedAt: blogPosts.publishedAt,
+        authorName: users.discordUsername,
+        authorDisplayName: users.displayName,
+        authorImage: users.image,
+        authorRole: users.role,
+        categoryName: blogCategories.name,
+        categorySlug: blogCategories.slug,
+        categoryColor: blogCategories.color,
+        commentsCount:
+          sql<number>`(SELECT count(*)::int FROM blog_comment WHERE blog_comment.post_id = blog_post.id AND blog_comment.is_approved = true)`.as(
+            "comments_count",
+          ),
+      })
+      .from(blogPosts)
+      .leftJoin(users, eq(blogPosts.authorId, users.id))
+      .leftJoin(blogCategories, eq(blogPosts.categoryId, blogCategories.id))
+      .where(baseWhere)
+      .orderBy(desc(blogPosts.publishedAt))
+      .limit(limit);
+  },
+);
+
+export const getPostsByTag = cache(async (tag: string, page = 1) => {
+  const whereClause = and(
+    eq(blogPosts.status, "published"),
+    sql`${blogPosts.tags} @> ARRAY[${tag}]::text[]`,
+  );
+
+  const offset = (page - 1) * POSTS_PER_PAGE;
+
+  const [postsResult, totalResult] = await Promise.all([
+    db
+      .select({
+        id: blogPosts.id,
+        title: blogPosts.title,
+        slug: blogPosts.slug,
+        excerpt: blogPosts.excerpt,
+        coverImage: blogPosts.coverImage,
+        postType: blogPosts.postType,
+        tags: blogPosts.tags,
+        readingTimeMinutes: blogPosts.readingTimeMinutes,
+        viewsCount: blogPosts.viewsCount,
+        likesCount: blogPosts.likesCount,
+        publishedAt: blogPosts.publishedAt,
+        authorName: users.discordUsername,
+        authorDisplayName: users.displayName,
+        authorImage: users.image,
+        authorRole: users.role,
+        categoryName: blogCategories.name,
+        categorySlug: blogCategories.slug,
+        categoryColor: blogCategories.color,
+        commentsCount:
+          sql<number>`(SELECT count(*)::int FROM blog_comment WHERE blog_comment.post_id = blog_post.id AND blog_comment.is_approved = true)`.as(
+            "comments_count",
+          ),
+      })
+      .from(blogPosts)
+      .leftJoin(users, eq(blogPosts.authorId, users.id))
+      .leftJoin(blogCategories, eq(blogPosts.categoryId, blogCategories.id))
+      .where(whereClause)
+      .orderBy(desc(blogPosts.publishedAt))
+      .limit(POSTS_PER_PAGE)
+      .offset(offset),
+    db.select({ count: count() }).from(blogPosts).where(whereClause),
+  ]);
+
+  const total = totalResult[0]?.count ?? 0;
+
+  return {
+    posts: postsResult,
+    total,
+    totalPages: Math.ceil(total / POSTS_PER_PAGE),
+    currentPage: page,
+  };
 });
 
 export type BlogPost = Awaited<ReturnType<typeof getPublishedPosts>>["posts"][number];
