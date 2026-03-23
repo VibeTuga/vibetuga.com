@@ -93,7 +93,7 @@ vibetuga-web/
 | `newsletter_subscribers` | email, user_id (optional), status, source                                                                                                                                                        | Email list                             |
 | `newsletter_campaigns`   | subject, content, status, sent/open/click counts                                                                                                                                                 | Email campaigns                        |
 
-### Store Tables (Phase 4 — Low Priority)
+### Store Tables (Phase 4)
 
 | Table             | Key Fields                                                                                                                                                       | Purpose             |
 | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
@@ -101,6 +101,46 @@ vibetuga-web/
 | `subscriptions`   | user_id, plan (`monthly`/`yearly`), stripe_subscription_id, current_period_start/end                                                                             | Premium access      |
 | `store_purchases` | buyer_id, product_id, price_paid_cents, stripe_payment_id                                                                                                        | Purchase records    |
 | `store_reviews`   | product_id, reviewer_id, rating (1-5), is_verified_purchase                                                                                                      | Product reviews     |
+
+### Social & Engagement Tables (Phases 5-6)
+
+| Table              | Key Fields                                                                                  | Purpose                          |
+| ------------------ | ------------------------------------------------------------------------------------------- | -------------------------------- |
+| `user_follows`     | follower_id, following_id, created_at                                                       | User follow relationships        |
+| `user_settings`    | user_id, email_notifications, in_app_notifications, privacy_level, locale                   | Per-user preferences             |
+| `notifications`    | user_id, type, title, body, link, is_read, actor_id, reference_id, created_at               | In-app notification feed         |
+| `reports`          | reporter_id, content_type, content_id, reason, status, resolved_by                          | Content reporting & moderation   |
+| `admin_audit_log`  | actor_id, action, target_type, target_id, details (jsonb), ip_address, created_at           | Admin action tracking            |
+| `role_requests`    | user_id, requested_role, reason, status, reviewed_by                                        | Self-service role upgrade        |
+| `direct_messages`  | sender_id, recipient_id, content, is_read, created_at                                       | Private messaging                |
+| `referrals`        | referrer_id, referred_user_id, referral_code, status, xp_awarded                            | Referral tracking                |
+| `collections`      | user_id, name, description, is_public                                                       | User bookmark collections        |
+| `collection_items` | collection_id, item_type, item_id, added_at                                                 | Items within a collection        |
+| `project_votes`    | project_id, user_id, vote_type (`up`/`down`), created_at                                    | Showcase project voting          |
+
+### Content & Marketplace Enhancement Tables (Phases 7-8)
+
+| Table               | Key Fields                                                                                  | Purpose                          |
+| ------------------- | ------------------------------------------------------------------------------------------- | -------------------------------- |
+| `blog_series`       | title, slug, description, cover_image, author_id, sort_order                                | Group posts into ordered series  |
+| `blog_series_posts` | series_id, post_id, order                                                                   | Posts within a series            |
+| `blog_revisions`    | post_id, content, title, edited_by, revision_number, created_at                             | Post version history             |
+| `content_analytics` | content_type, content_id, date, views, unique_views, referral_source                        | Per-content daily analytics      |
+| `store_coupons`     | code, discount_percent, discount_amount_cents, max_uses, expires_at, seller_id              | Discount codes                   |
+| `store_refunds`     | purchase_id, buyer_id, reason, status, stripe_refund_id                                     | Refund requests                  |
+| `store_wishlists`   | user_id, product_id, created_at                                                             | Product wishlists                |
+| `product_updates`   | product_id, version, changelog, download_key, created_at                                    | Product version updates          |
+| `store_collections` | name, slug, description, cover_image, is_featured, sort_order                               | Admin-curated product collections |
+
+### Community & Growth Tables (Phase 10)
+
+| Table               | Key Fields                                                                                  | Purpose                          |
+| ------------------- | ------------------------------------------------------------------------------------------- | -------------------------------- |
+| `community_events`  | title, description, event_type, start_at, end_at, link, created_by                         | Events calendar                  |
+| `challenges`        | title, description, start_at, end_at, badge_reward_id, status                               | Community challenges             |
+| `challenge_entries`  | challenge_id, user_id, submission_url, description, votes_count, status                     | Challenge submissions            |
+| `feature_flags`     | key, is_enabled, rollout_percentage, description                                            | Gradual feature rollouts         |
+| `api_keys`          | user_id, key_hash, name, scopes[], last_used_at, expires_at                                 | Public API authentication        |
 
 ---
 
@@ -124,19 +164,21 @@ vibetuga-web/
 
 Auth: Discord OAuth via NextAuth → `/api/auth/callback/discord` → create/update user in DB → redirect to dashboard.
 
-| Role        | Blog                   | Store            | Showcase         | Admin      |
-| ----------- | ---------------------- | ---------------- | ---------------- | ---------- |
-| `member`    | Comment, submit post   | Buy, review      | Submit project   | —          |
-| `author`    | Publish posts directly | Buy, review      | Submit project   | —          |
-| `seller`    | Comment, submit post   | Sell + buy       | Submit project   | —          |
-| `moderator` | Approve posts, edit    | Approve products | Approve projects | Partial    |
-| `admin`     | Everything             | Everything       | Everything       | Everything |
+| Role        | Blog                   | Store            | Showcase         | Social              | Admin      |
+| ----------- | ---------------------- | ---------------- | ---------------- | ------------------- | ---------- |
+| `member`    | Comment, submit post   | Buy, review      | Submit project   | Follow, DM, report  | —          |
+| `author`    | Publish posts directly | Buy, review      | Submit project   | Follow, DM, report  | —          |
+| `seller`    | Comment, submit post   | Sell + buy       | Submit project   | Follow, DM, report  | —          |
+| `moderator` | Approve posts, edit    | Approve products | Approve projects | Resolve reports     | Partial    |
+| `admin`     | Everything             | Everything       | Everything       | Everything          | Everything |
 
-Users can have multiple sub-roles via upgrade (e.g. member → seller).
+Users can request role upgrades (member → seller, member → author) via self-service form, approved by admin.
 
 ---
 
 ## API Routes
+
+### Existing Routes
 
 ```
 POST   /api/auth/[...nextauth]      — Auth endpoints (NextAuth)
@@ -145,34 +187,111 @@ POST   /api/blog/posts               — Create post (auth: author+)
 PATCH  /api/blog/posts/[id]          — Edit post
 DELETE /api/blog/posts/[id]          — Delete post
 POST   /api/blog/posts/[id]/like     — Like/unlike post
-POST   /api/blog/comments            — Create comment
-GET    /api/showcase/projects         — List projects
+POST   /api/blog/posts/[id]/bookmark — Bookmark/unbookmark post
+POST   /api/blog/posts/[id]/view     — Track post view
+GET    /api/blog/posts/[id]/comments — Get comments for post
+POST   /api/blog/posts/[id]/comments — Create comment on post
+POST   /api/blog/comments            — Create comment (legacy)
+GET    /api/blog/categories          — List categories
+POST   /api/blog/categories          — Create category (auth: admin)
+PATCH  /api/blog/categories/[id]     — Edit category
+DELETE /api/blog/categories/[id]     — Delete category
+GET    /api/showcase/projects         — List approved projects
 POST   /api/showcase/projects         — Submit project
+PATCH  /api/showcase/projects/[id]   — Edit/approve project
+DELETE /api/showcase/projects/[id]   — Delete project
 GET    /api/leaderboard               — Rankings
 GET    /api/users/[id]/profile        — Public profile
 PATCH  /api/users/me                  — Edit own profile
 POST   /api/newsletter/subscribe      — Subscribe to newsletter
+GET    /api/newsletter/unsubscribe    — Unsubscribe link
+GET    /api/newsletter/campaigns      — List campaigns
 POST   /api/newsletter/campaigns      — Create campaign (auth: admin)
-GET    /api/store/products            — List products (Phase 4)
+POST   /api/newsletter/digest         — Send digest email (scheduled)
+GET    /api/store/products            — List approved products
 POST   /api/store/products            — Create product (auth: seller+)
+PATCH  /api/store/products/[id]      — Edit product
+DELETE /api/store/products/[id]      — Delete product
 POST   /api/store/checkout            — Start Stripe checkout
 POST   /api/store/reviews             — Submit review
 POST   /api/webhook/stripe            — Stripe webhook
-POST   /api/webhook/discord           — Discord webhook (optional)
 POST   /api/upload/presign            — Generate R2 presigned upload URL
+POST   /api/upload                    — Fallback upload
 GET    /api/upload/[key]              — Serve private R2 assets (auth-gated)
 GET    /api/search                    — Global search
+```
+
+### Planned Routes (Phases 5-10)
+
+```
+# User Management & Account (Phase 5)
+GET    /api/users/me/activity         — User's activity feed (XP events, comment replies)
+PATCH  /api/users/me/settings         — Update notification/privacy preferences
+DELETE /api/users/me                  — Delete account (GDPR)
+GET    /api/users/me/export           — Export user data (JSON)
+POST   /api/users/[id]/follow         — Follow/unfollow user
+GET    /api/users/[id]/followers      — List user's followers
+GET    /api/users/[id]/following      — List who user follows
+POST   /api/users/me/role-request     — Request role upgrade (seller/author)
+POST   /api/reports                   — Report content (post, comment, project, product)
+GET    /api/admin/reports             — Admin: list reported content
+PATCH  /api/admin/reports/[id]        — Admin: resolve report
+GET    /api/admin/audit-log           — Admin: audit log of all actions
+GET    /api/admin/users/export        — Admin: export users CSV
+PATCH  /api/admin/users/bulk          — Admin: bulk role change / bulk email
+
+# Social & Engagement (Phase 6)
+GET    /api/notifications             — List user's notifications (paginated)
+PATCH  /api/notifications/read        — Mark notifications as read
+POST   /api/showcase/projects/[id]/vote — Upvote/downvote project
+POST   /api/referrals                 — Generate referral link
+GET    /api/referrals/stats           — Referral stats for user
+GET    /api/challenges                — List active community challenges
+POST   /api/challenges/[id]/submit    — Submit entry for challenge
+GET    /api/users/me/collections      — List user's collections
+POST   /api/users/me/collections      — Create collection
+PATCH  /api/users/me/collections/[id] — Add/remove items from collection
+
+# Content & Discovery (Phase 7)
+GET    /api/blog/posts/[id]/related   — Related posts suggestions
+GET    /api/blog/series               — List content series
+GET    /api/blog/posts/[id]/revisions — Post revision history
+POST   /api/blog/posts/[id]/autosave  — Autosave draft
+GET    /api/analytics/posts/[id]      — Per-post analytics (auth: author+)
+GET    /api/analytics/projects/[id]   — Per-project analytics
+
+# Marketplace Enhancements (Phase 8)
+POST   /api/store/subscriptions       — Create subscription checkout
+DELETE /api/store/subscriptions       — Cancel subscription
+GET    /api/store/seller/analytics    — Seller analytics (sales, revenue)
+POST   /api/store/products/[id]/update — Push product update
+POST   /api/store/coupons             — Create coupon code
+POST   /api/store/refunds             — Request refund
+PATCH  /api/store/refunds/[id]        — Approve/reject refund
+GET    /api/store/wishlist            — Get user's wishlist
+POST   /api/store/wishlist            — Add/remove product from wishlist
+
+# Growth & Community (Phase 10)
+GET    /api/v1/leaderboard            — Public API: leaderboard
+GET    /api/v1/users/[id]             — Public API: user profile
+GET    /api/v1/projects               — Public API: project gallery
+GET    /api/events                    — Community events calendar
+POST   /api/admin/events              — Create community event
 ```
 
 ---
 
 ## Gamification System
 
-**XP Values:** blog_post_published (50), blog_comment (5), project_submitted (30), project_featured (100), product_sold (20), product_reviewed (10), daily_login (5), streak_7_days (50), streak_30_days (200), referred_user (25), community_helper (15).
+**XP Values (existing):** blog_post_published (50), blog_comment (5), project_submitted (30), project_featured (100), product_sold (20), product_reviewed (10), daily_login (5), streak_7_days (50), streak_30_days (200), referred_user (25), community_helper (15).
+
+**XP Values (planned):** challenge_entry (20), challenge_winner (200), first_follower (10), 10_followers (50), 100_followers (200), helpful_report (10), series_completed (75), profile_verified (50).
 
 **Levels:** 1-Noob (0), 2-Script Kiddie (100), 3-Vibe Coder (300), 4-Prompt Whisperer (600), 5-AI Tamer (1000), 6-Code Wizard (2000), 7-Agent Builder (4000), 8-Tuga Master (8000), 9-Vibe Lord (15000), 10-Lenda (30000).
 
-**Badges:** First Post, First Sale, 7-Day Streak, 30-Day Streak, Top Seller, Community Star, OG Member, etc.
+**Badges (existing):** First Post, First Sale, 7-Day Streak, 30-Day Streak, Top Seller, Community Star, OG Member, etc.
+
+**Badges (planned):** Challenge Champion, Social Butterfly (50 followers), Curator (10 collections), Mentor (50 helpful reports), Referral King (10 referrals), Series Author (complete a content series), Verified Member, Event Organizer.
 
 ---
 
@@ -224,53 +343,157 @@ main                    ← Production (automatic deploy via Vercel)
 
 > **Priority:** Community first, monetization last. The store/marketplace is the final phase.
 
-### Phase 1: Foundation (#1-#8)
+### Phase 1: Foundation (#1-#8) ✅ COMPLETE
 
 **Goal:** Deployed site with Discord login, neon-hacker layout, and working navigation.
 
-- #1 Initialize Next.js 16 + TypeScript + Tailwind + shadcn/ui
-- #2 Configure Neon DB + Drizzle ORM + base schema (users)
-- #3 Implement NextAuth with Discord OAuth
-- #4 Create base layout: Header, Footer, dark neon theme
-- #5 Create placeholder pages (home, blog, showcase, leaderboard, newsletter)
-- #6 Setup Vercel deployment (automatic CI/CD)
-- #7 Configure ESLint, Prettier, Husky pre-commit hooks
-- #8 Implement basic role system (auth middleware)
+- ✅ #1 Initialize Next.js 16 + TypeScript + Tailwind + shadcn/ui
+- ✅ #2 Configure Neon DB + Drizzle ORM + base schema (users)
+- ✅ #3 Implement NextAuth with Discord OAuth
+- ✅ #4 Create base layout: Header, Footer, dark neon theme
+- ✅ #5 Create placeholder pages (home, blog, showcase, leaderboard, newsletter)
+- ✅ #6 Setup Vercel deployment (automatic CI/CD)
+- ✅ #7 Configure ESLint, Prettier, Husky pre-commit hooks
+- ✅ #8 Implement basic role system (auth middleware)
 
-### Phase 2: Blog & Admin (#9-#22)
+### Phase 2: Blog & Admin (#9-#22) ✅ COMPLETE
 
 **Goal:** Publishable blog with admin panel, 3 author types, and polished UX.
 
-- #9 Complete blog schema (posts, categories, comments) + migrations
-- #10 Admin dashboard with stats overview
-- #11 Admin blog posts CRUD with Tiptap editor
-- #12 Public post listing page (filters, pagination)
-- #13 Individual post page (SEO, dynamic OG image)
-- #14 Categories and tags system
-- #15 Threaded comments system
-- #16 Post likes/bookmarks
-- #17 Community/guest post submission flow
-- #18 Admin: approve/reject community posts
-- #19 User management in admin (roles, ban)
-- #20 Automatic RSS feed and sitemap
-- #21 Full-text search on posts
-- #22 Complete responsive design for blog
+- ✅ #9 Complete blog schema (posts, categories, comments) + migrations
+- ✅ #10 Admin dashboard with stats overview
+- ✅ #11 Admin blog posts CRUD with Tiptap editor
+- ✅ #12 Public post listing page (filters, pagination)
+- ✅ #13 Individual post page (SEO, dynamic OG image)
+- ✅ #14 Categories and tags system
+- ✅ #15 Threaded comments system
+- ✅ #16 Post likes/bookmarks
+- ✅ #17 Community/guest post submission flow
+- ✅ #18 Admin: approve/reject community posts
+- ✅ #19 User management in admin (roles, ban)
+- ✅ #20 Automatic RSS feed and sitemap
+- ✅ #21 Full-text search on posts
+- ✅ #22 Complete responsive design for blog
 
-### Phase 3: Community — Showcase, Gamification & Newsletter (#23-#40)
+### Phase 3: Community — Showcase, Gamification & Newsletter (#23-#40) ✅ COMPLETE
 
 **Goal:** Living community with showcase, gamification, newsletter, and impactful homepage.
 
-- #23-#28 Project showcase: schema, gallery, project page, submission flow, admin, R2 image upload
-- #29-#34 Gamification: XP/badges/levels schema, XP triggers, leaderboard page, badges system, public profile, level-colored avatar rings
-- #35-#39 Newsletter: schema, landing page, subscription, admin campaigns (Resend), automation (welcome, digest)
-- #40 Complete homepage: animated hero, community stats, featured content, leaderboard widget, Discord CTA
+- ✅ #23-#28 Project showcase: schema, gallery, project page, submission flow, admin, R2 image upload
+- ✅ #29-#34 Gamification: XP/badges/levels schema, XP triggers, leaderboard page, badges system, public profile, level-colored avatar rings
+- ✅ #35-#39 Newsletter: schema, landing page, subscription, admin campaigns (Resend), automation (welcome, digest)
+- ✅ #40 Complete homepage: animated hero, community stats, featured content, leaderboard widget, Discord CTA
 
-### Phase 4: Marketplace & Polish (#41-#55)
+### Phase 4: Marketplace & Polish (#41-#55) ⚠️ PARTIAL
 
 **Goal:** Complete application with marketplace, polished, secure, and production-ready.
 
-- #41-#50 Store: schema, Stripe integration, product listing/detail, checkout, download (R2 presigned), seller dashboard, reviews, admin, webhooks
-- #51-#55 Polish: animations/effects, complete SEO, error/loading/empty states, performance audit (Core Web Vitals), security audit (rate limiting, CSRF, XSS)
+- ✅ #41-#50 Store: schema, Stripe integration, product listing/detail, checkout, download (R2 presigned), seller dashboard, reviews, admin, webhooks
+- #51 Animations/effects polish (page transitions, micro-interactions)
+- #52 Complete SEO (dynamic OG images, structured data/JSON-LD, canonical URLs)
+- #53 Error/loading/empty states for all pages
+- #54 Performance audit (Core Web Vitals, image optimization, bundle analysis)
+- #55 Security audit (rate limiting, CSRF, XSS, input sanitization)
+
+### Phase 5: User Management & Moderation (#56-#68)
+
+**Goal:** Robust user management, self-service account features, and moderation tools.
+
+- #56 User dashboard home — activity feed showing recent XP events, comments on user's posts, new followers
+- #57 User settings page — email preferences, notification toggles, privacy settings, theme preference
+- #58 Account deletion / data export — GDPR-compliant self-service account deletion and data export (JSON)
+- #59 User-to-user follow system — follow/unfollow users, followers/following lists on profile
+- #60 User activity log — admin view of all actions per user (posts, comments, purchases, reports)
+- #61 Content reporting system — users can report posts, comments, projects, products, and reviews with reason categories
+- #62 Admin moderation queue — unified queue for all reported content (posts, comments, projects, reviews) with bulk actions
+- #63 Comment moderation — edit/delete any comment, auto-flag comments with links or profanity, shadow-ban capability
+- #64 IP-based rate limiting — per-endpoint rate limits (auth, comments, submissions) using upstash/ratelimit or similar
+- #65 Admin audit log — track all admin/moderator actions (role changes, bans, approvals, deletions) with timestamps and actor
+- #66 User role upgrade requests — members can request seller/author role via form, admin approves/rejects
+- #67 Bulk user management — admin bulk actions: mass email, mass role change, export user list (CSV)
+- #68 User profile verification — verified badge for recognized community members (manual admin grant)
+
+### Phase 6: Social & Engagement (#69-#80)
+
+**Goal:** Social features that increase retention, engagement, and community interaction.
+
+- #69 Notification system — in-app notifications (bell icon) for: new followers, replies to comments, post approved, XP milestones, badge earned
+- #70 Notification preferences API — per-type toggle (in-app, email) for each notification category
+- #71 Real-time notifications — WebSocket or SSE for live notification delivery without page refresh
+- #72 User mentions — @username in comments and posts, triggers notification to mentioned user
+- #73 Direct messaging — private messages between users (inbox page, unread count in header)
+- #74 Showcase project voting — upvote/downvote projects, sort by votes, prevent vote manipulation
+- #75 Blog post sharing — native share button (Web Share API), copy link, share to Twitter/LinkedIn/Discord
+- #76 Weekly digest email — automated weekly email summarizing new posts, top projects, leaderboard changes
+- #77 Referral system — unique referral links per user, XP reward for referred signups, referral leaderboard
+- #78 Community challenges — time-limited challenges (e.g. "build X in 48h"), submission + voting, prize badges
+- #79 User collections — save/organize bookmarked posts and projects into named collections
+- #80 Activity streaks enhancement — visual streak calendar (GitHub-style), streak freeze (1 per month), streak recovery challenges
+
+### Phase 7: Content & Discovery (#81-#92)
+
+**Goal:** Rich content experience with better discovery, SEO, and editorial tools.
+
+- #81 Dynamic OG images — auto-generated OG images for posts, projects, and profiles using @vercel/og or satori
+- #82 Structured data / JSON-LD — Article, Product, Person, BreadcrumbList schema markup on all relevant pages
+- #83 Related content suggestions — "You might also like" on post pages and project pages based on tags/category
+- #84 Content series/playlists — group blog posts into ordered series (e.g. "Intro to Vibe Coding" parts 1-5)
+- #85 Table of contents — auto-generated TOC for long blog posts, sticky sidebar on desktop
+- #86 Code syntax highlighting — proper syntax highlighting in blog posts with copy button and language badge
+- #87 Blog post versioning — revision history for posts, diff view in admin, restore previous versions
+- #88 Draft autosave — periodic autosave for blog post editor and product editor (localStorage + server)
+- #89 Scheduled publishing — set future publish date for posts and newsletter campaigns
+- #90 Content analytics dashboard — per-post/project analytics: views over time, referral sources, engagement rate
+- #91 Tag pages — dedicated /blog/tag/[tag] pages with tag cloud on blog index
+- #92 Multi-language support (i18n) — PT/EN language toggle, translated UI strings, posts can have language metadata
+
+### Phase 8: Marketplace Enhancements (#93-#104)
+
+**Goal:** Mature marketplace with subscriptions, seller tools, and buyer protections.
+
+- #93 Stripe webhook hardening — idempotent webhook processing, retry handling, event logging, signature verification
+- #94 Subscription/premium tier — recurring payments via Stripe, premium member perks (early access, exclusive content, no ads)
+- #95 Seller analytics dashboard — sales over time chart, revenue breakdown, top products, buyer demographics
+- #96 Product versioning & updates — sellers can push updates to existing products, buyers get notified
+- #97 Product bundles — sellers can create bundles of multiple products at a discount
+- #98 Coupon/discount codes — seller-created or admin-created discount codes with usage limits and expiry
+- #99 Buyer purchase receipts — email receipt on purchase (Resend), downloadable invoice PDF
+- #100 Refund flow — buyer can request refund within 14 days, seller/admin approves, Stripe refund API
+- #101 Seller payout management — Stripe Connect for seller payouts, payout history, tax info collection
+- #102 Product preview/demo — free preview content or demo for products before purchase
+- #103 Wishlist — save products to wishlist, get notified on price changes or new products from followed sellers
+- #104 Store categories & collections — admin-curated collections (e.g. "Best Agent Kits"), product categories with icons
+
+### Phase 9: Infrastructure & DevOps (#105-#114)
+
+**Goal:** Production-hardened infrastructure with monitoring, testing, and CI/CD.
+
+- #105 Error monitoring — Sentry integration for client and server error tracking with source maps
+- #106 Logging & observability — structured logging (pino), request tracing, Vercel analytics integration
+- #107 Automated testing — unit tests (Vitest) for critical paths: auth, payments, XP calculations, API routes
+- #108 E2E testing — Playwright tests for critical user flows: login, post creation, purchase, profile edit
+- #109 Database backups & branching strategy — automated Neon backups, staging branch for testing migrations
+- #110 CI/CD pipeline — GitHub Actions: lint, type-check, test, build on PR; auto-deploy preview on Vercel
+- #111 Feature flags — simple feature flag system (DB or env-based) for gradual rollouts
+- #112 CDN & caching strategy — Vercel Edge Config, stale-while-revalidate headers, R2 public bucket CDN
+- #113 Database query optimization — add indexes for common queries, N+1 detection, connection pool tuning
+- #114 Environment management — staging environment on Vercel, Neon branch per preview deploy
+
+### Phase 10: Growth & Community Tools (#115-#125)
+
+**Goal:** Tools for community growth, analytics, and self-sustaining engagement loops.
+
+- #115 Admin analytics dashboard — site-wide metrics: DAU/MAU, new signups, content published, revenue, retention curves
+- #116 Discord bot integration — sync roles/XP between VibeTuga and Discord, post notifications to channels
+- #117 Public API — versioned REST API (v1) for community-built tools: user stats, leaderboard, project gallery
+- #118 Embed widgets — embeddable leaderboard/profile/badge widgets for users' personal sites
+- #119 Contributor program — formalized contributor roles, contributor page, special badges, monthly highlights
+- #120 Community events calendar — events page with upcoming streams, workshops, challenges, meetups
+- #121 Twitch/YouTube integration — auto-import stream schedule, live indicator in header, VOD links
+- #122 SEO landing pages — dedicated landing pages for key terms: "vibe coding Portugal", "AI programming community PT"
+- #123 Onboarding flow — guided first-time experience: connect Discord, set display name, pick interests, earn welcome badge
+- #124 Privacy & legal pages — privacy policy, terms of service, cookie consent banner (GDPR-compliant)
+- #125 Accessibility audit — full WCAG AA compliance review, screen reader testing, keyboard navigation for all flows
 
 ---
 
@@ -294,7 +517,7 @@ main                    ← Production (automatic deploy via Vercel)
 
 1. **Neon DB branching** — Use Neon branches to test migrations without affecting production
 2. **Stripe Test Mode** — Always develop in test mode, only switch to live before launch
-3. **i18n** — Site initially in Portuguese (PT), structure prepared for future English support
+3. **i18n** — Site initially in Portuguese (PT), Phase 7 adds EN language toggle
 4. **Accessibility** — WCAG AA contrast and keyboard navigation despite neon/dark design
 5. **Edge Cases** — Always handle: loading, empty, error, and offline states
 6. **Caching** — Use Next.js ISR for blog posts and products (revalidate every 60s)
@@ -303,6 +526,11 @@ main                    ← Production (automatic deploy via Vercel)
 9. **R2 private files** — Product downloads in private bucket; short-lived presigned URLs after purchase verification
 10. **Environment variables** — All vars documented in `.env.example`
 11. **Documentation verification:** When in doubt about any library API, usage pattern, or breaking change — especially for Next.js 16, Drizzle ORM, NextAuth v5, or any other dependency — use **context7** MCP to fetch up-to-date documentation before writing code. Do not rely solely on training data; always verify against current docs.
+12. **GDPR compliance** — Phase 5 adds account deletion and data export; collect only necessary data, respect unsubscribe
+13. **Rate limiting** — Phase 5 adds per-endpoint rate limits; critical for auth, comments, submissions, and API endpoints
+14. **Notifications** — Phase 6 introduces in-app + email notifications; always respect user preferences from `user_settings`
+15. **Public API** — Phase 10 adds versioned REST API (v1); design with rate limits and API keys from the start
+16. **Real-time features** — Phase 6 uses SSE for notifications; consider WebSocket upgrade if DMs require real-time chat
 
 ---
 
