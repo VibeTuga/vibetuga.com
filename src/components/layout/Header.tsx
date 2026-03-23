@@ -6,6 +6,8 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { Logo } from "@/components/shared/Logo";
 import { SearchDialog, SearchTrigger } from "@/components/shared/SearchDialog";
+import { UserMenu, MobileUserMenu } from "@/components/layout/UserMenu";
+import type { SessionUser } from "@/components/layout/UserMenu";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -16,7 +18,7 @@ const navLinks = [
   { href: "/store", label: "Store" },
 ] as const;
 
-export function Header() {
+export function Header({ user }: { user?: SessionUser | null }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -52,12 +54,20 @@ export function Header() {
         <div className="flex items-center gap-4">
           <SearchTrigger />
           <SearchDialog />
-          <Link
-            href="/api/auth/signin"
-            className="hidden sm:inline-flex items-center gap-2 px-4 py-2 bg-primary text-on-primary font-bold text-sm hover:shadow-[0_0_15px_rgba(161,255,194,0.4)] transition-all"
-          >
-            Entrar
-          </Link>
+
+          {/* Auth: user menu or login button */}
+          {user ? (
+            <div className="hidden sm:block">
+              <UserMenu user={user} />
+            </div>
+          ) : (
+            <Link
+              href="/login"
+              className="hidden sm:inline-flex items-center gap-2 px-4 py-2 bg-primary text-on-primary font-bold text-sm hover:shadow-[0_0_15px_rgba(161,255,194,0.4)] transition-all"
+            >
+              Entrar
+            </Link>
+          )}
 
           {/* Mobile hamburger */}
           <button
@@ -87,13 +97,19 @@ export function Header() {
                 {link.label}
               </Link>
             ))}
-            <Link
-              href="/api/auth/signin"
-              onClick={() => setMobileOpen(false)}
-              className="mt-2 py-3 text-center bg-primary text-on-primary font-bold text-sm"
-            >
-              Entrar com Discord
-            </Link>
+
+            {/* Mobile auth section */}
+            {user ? (
+              <MobileUserMenu user={user} onNavigate={() => setMobileOpen(false)} />
+            ) : (
+              <Link
+                href="/login"
+                onClick={() => setMobileOpen(false)}
+                className="mt-2 py-3 text-center bg-primary text-on-primary font-bold text-sm"
+              >
+                Entrar com Discord
+              </Link>
+            )}
           </div>
         </nav>
       )}
