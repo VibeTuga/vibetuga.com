@@ -39,6 +39,20 @@ export const projectStatusEnum = pgEnum("project_status", [
   "rejected",
 ]);
 
+export const subscriberStatusEnum = pgEnum("subscriber_status", [
+  "active",
+  "unsubscribed",
+  "bounced",
+]);
+
+export const campaignStatusEnum = pgEnum("campaign_status", [
+  "draft",
+  "scheduled",
+  "sending",
+  "sent",
+  "failed",
+]);
+
 // ─── Users ──────────────────────────────────────────────────
 
 export const users = pgTable("user", {
@@ -70,6 +84,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   showcaseProjects: many(showcaseProjects),
   xpEvents: many(xpEvents),
   userBadges: many(userBadges),
+  newsletterSubscriptions: many(newsletterSubscribers),
 }));
 
 // ─── NextAuth Required Tables ───────────────────────────────
@@ -371,4 +386,39 @@ export const levels = pgTable("level", {
   name: varchar("name", { length: 100 }).notNull(),
   xpRequired: integer("xp_required").notNull(),
   perks: text("perks"),
+});
+
+// ─── Newsletter Subscribers ──────────────────────────────────
+
+export const newsletterSubscribers = pgTable("newsletter_subscriber", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  email: varchar("email", { length: 255 }).unique().notNull(),
+  userId: uuid("user_id").references(() => users.id, { onDelete: "set null" }),
+  status: subscriberStatusEnum("status").default("active").notNull(),
+  source: varchar("source", { length: 100 }).default("website").notNull(),
+  subscribedAt: timestamp("subscribed_at", { mode: "date" }).defaultNow().notNull(),
+  unsubscribedAt: timestamp("unsubscribed_at", { mode: "date" }),
+});
+
+export const newsletterSubscribersRelations = relations(newsletterSubscribers, ({ one }) => ({
+  user: one(users, {
+    fields: [newsletterSubscribers.userId],
+    references: [users.id],
+  }),
+}));
+
+// ─── Newsletter Campaigns ────────────────────────────────────
+
+export const newsletterCampaigns = pgTable("newsletter_campaign", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  subject: varchar("subject", { length: 255 }).notNull(),
+  content: text("content").notNull(),
+  status: campaignStatusEnum("status").default("draft").notNull(),
+  sentCount: integer("sent_count").default(0).notNull(),
+  openCount: integer("open_count").default(0).notNull(),
+  clickCount: integer("click_count").default(0).notNull(),
+  scheduledAt: timestamp("scheduled_at", { mode: "date" }),
+  sentAt: timestamp("sent_at", { mode: "date" }),
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
 });
