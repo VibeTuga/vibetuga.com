@@ -24,73 +24,77 @@ type StoreFilters = {
 export const getApprovedProducts = cache(async (filters: StoreFilters) => {
   const { productType, q, page = 1 } = filters;
 
-  const conditions: ReturnType<typeof eq>[] = [eq(storeProducts.status, "approved")];
+  try {
+    const conditions: ReturnType<typeof eq>[] = [eq(storeProducts.status, "approved")];
 
-  if (productType) {
-    conditions.push(
-      eq(
-        storeProducts.productType,
-        productType as
-          | "skill"
-          | "auto_runner"
-          | "agent_kit"
-          | "prompt_pack"
-          | "template"
-          | "course"
-          | "guide"
-          | "other",
-      ),
-    );
-  }
-
-  if (q) {
-    conditions.push(
-      or(ilike(storeProducts.title, `%${q}%`), ilike(storeProducts.description, `%${q}%`))!,
-    );
-  }
-
-  const whereClause = and(...conditions);
-  const offset = (page - 1) * PRODUCTS_PER_PAGE;
-
-  const [productsResult, totalResult] = await Promise.all([
-    db
-      .select({
-        id: storeProducts.id,
-        title: storeProducts.title,
-        slug: storeProducts.slug,
-        description: storeProducts.description,
-        priceCents: storeProducts.priceCents,
-        productType: storeProducts.productType,
-        coverImage: storeProducts.coverImage,
-        tags: storeProducts.tags,
-        createdAt: storeProducts.createdAt,
-        sellerName: users.discordUsername,
-        sellerDisplayName: users.displayName,
-        sellerImage: users.image,
-        avgRating: sql<number>`coalesce(avg(${storeReviews.rating})::numeric(2,1), 0)`.as(
-          "avg_rating",
+    if (productType) {
+      conditions.push(
+        eq(
+          storeProducts.productType,
+          productType as
+            | "skill"
+            | "auto_runner"
+            | "agent_kit"
+            | "prompt_pack"
+            | "template"
+            | "course"
+            | "guide"
+            | "other",
         ),
-        reviewCount: sql<number>`count(${storeReviews.id})::int`.as("review_count"),
-      })
-      .from(storeProducts)
-      .leftJoin(users, eq(storeProducts.sellerId, users.id))
-      .leftJoin(storeReviews, eq(storeProducts.id, storeReviews.productId))
-      .where(whereClause)
-      .groupBy(storeProducts.id, users.id)
-      .orderBy(desc(storeProducts.createdAt))
-      .limit(PRODUCTS_PER_PAGE)
-      .offset(offset),
-    db.select({ count: count() }).from(storeProducts).where(whereClause),
-  ]);
+      );
+    }
 
-  const total = totalResult[0]?.count ?? 0;
+    if (q) {
+      conditions.push(
+        or(ilike(storeProducts.title, `%${q}%`), ilike(storeProducts.description, `%${q}%`))!,
+      );
+    }
 
-  return {
-    products: productsResult,
-    total,
-    totalPages: Math.ceil(total / PRODUCTS_PER_PAGE),
-    currentPage: page,
-  };
+    const whereClause = and(...conditions);
+    const offset = (page - 1) * PRODUCTS_PER_PAGE;
+
+    const [productsResult, totalResult] = await Promise.all([
+      db
+        .select({
+          id: storeProducts.id,
+          title: storeProducts.title,
+          slug: storeProducts.slug,
+          description: storeProducts.description,
+          priceCents: storeProducts.priceCents,
+          productType: storeProducts.productType,
+          coverImage: storeProducts.coverImage,
+          tags: storeProducts.tags,
+          createdAt: storeProducts.createdAt,
+          sellerName: users.discordUsername,
+          sellerDisplayName: users.displayName,
+          sellerImage: users.image,
+          avgRating: sql<number>`coalesce(avg(${storeReviews.rating})::numeric(2,1), 0)`.as(
+            "avg_rating",
+          ),
+          reviewCount: sql<number>`count(${storeReviews.id})::int`.as("review_count"),
+        })
+        .from(storeProducts)
+        .leftJoin(users, eq(storeProducts.sellerId, users.id))
+        .leftJoin(storeReviews, eq(storeProducts.id, storeReviews.productId))
+        .where(whereClause)
+        .groupBy(storeProducts.id, users.id)
+        .orderBy(desc(storeProducts.createdAt))
+        .limit(PRODUCTS_PER_PAGE)
+        .offset(offset),
+      db.select({ count: count() }).from(storeProducts).where(whereClause),
+    ]);
+
+    const total = totalResult[0]?.count ?? 0;
+
+    return {
+      products: productsResult,
+      total,
+      totalPages: Math.ceil(total / PRODUCTS_PER_PAGE),
+      currentPage: page,
+    };
+  } catch {
+    return { products: [], total: 0, totalPages: 0, currentPage: page };
+  }
 });
 
 export const getProductBySlug = cache(async (slug: string) => {
@@ -327,26 +331,30 @@ export const getCollections = cache(async () => {
 });
 
 export const getFeaturedCollections = cache(async (limit = 3) => {
-  return db
-    .select({
-      id: storeCollections.id,
-      name: storeCollections.name,
-      slug: storeCollections.slug,
-      description: storeCollections.description,
-      coverImage: storeCollections.coverImage,
-      productCount: sql<number>`count(${storeCollectionProducts.productId})::int`.as(
-        "product_count",
-      ),
-    })
-    .from(storeCollections)
-    .leftJoin(
-      storeCollectionProducts,
-      eq(storeCollections.id, storeCollectionProducts.collectionId),
-    )
-    .where(eq(storeCollections.isFeatured, true))
-    .groupBy(storeCollections.id)
-    .orderBy(asc(storeCollections.sortOrder))
-    .limit(limit);
+  try {
+    return await db
+      .select({
+        id: storeCollections.id,
+        name: storeCollections.name,
+        slug: storeCollections.slug,
+        description: storeCollections.description,
+        coverImage: storeCollections.coverImage,
+        productCount: sql<number>`count(${storeCollectionProducts.productId})::int`.as(
+          "product_count",
+        ),
+      })
+      .from(storeCollections)
+      .leftJoin(
+        storeCollectionProducts,
+        eq(storeCollections.id, storeCollectionProducts.collectionId),
+      )
+      .where(eq(storeCollections.isFeatured, true))
+      .groupBy(storeCollections.id)
+      .orderBy(asc(storeCollections.sortOrder))
+      .limit(limit);
+  } catch {
+    return [];
+  }
 });
 
 export const getCollectionBySlug = cache(async (slug: string) => {
