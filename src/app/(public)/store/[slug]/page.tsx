@@ -9,6 +9,7 @@ import { ProductReviews } from "@/components/store/ProductReviews";
 import { ReportButton } from "@/components/shared/ReportButton";
 import { getProductJsonLd } from "@/lib/jsonld";
 import { auth } from "@/lib/auth";
+import { ExternalLink } from "lucide-react";
 
 export const revalidate = 60;
 
@@ -159,6 +160,36 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
                 content={product.description}
                 className="prose prose-invert prose-sm max-w-none text-white/70 leading-relaxed"
               />
+            </div>
+          )}
+
+          {/* Preview Content */}
+          {product.previewContent && (
+            <div className="mb-8">
+              <h2 className="text-lg font-headline font-bold tracking-tight uppercase mb-4">
+                Pré-visualização
+              </h2>
+              <div className="p-6 bg-surface-container border border-white/5 rounded-xl">
+                <MarkdownContent
+                  content={product.previewContent}
+                  className="prose prose-invert prose-sm max-w-none text-white/70 leading-relaxed"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Demo URL */}
+          {product.demoUrl && (
+            <div className="mb-8">
+              <a
+                href={product.demoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-on-primary font-bold text-xs uppercase tracking-widest hover:shadow-[0_0_20px_rgba(161,255,194,0.4)] transition-all"
+              >
+                <ExternalLink size={16} />
+                Experimentar Demo
+              </a>
             </div>
           )}
 

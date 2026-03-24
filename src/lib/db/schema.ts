@@ -541,6 +541,8 @@ export const storeProducts = pgTable(
     downloadKey: varchar("download_key", { length: 512 }),
     coverImage: text("cover_image"),
     tags: text("tags").array(),
+    previewContent: text("preview_content"),
+    demoUrl: varchar("demo_url", { length: 512 }),
     createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
   },

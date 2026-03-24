@@ -36,6 +36,8 @@ interface ProductData {
   coverImage: string | null;
   tags: string[] | null;
   downloadKey?: string | null;
+  previewContent?: string | null;
+  demoUrl?: string | null;
   sellerId: string;
 }
 
@@ -58,6 +60,8 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const [coverImage, setCoverImage] = useState("");
   const [tags, setTags] = useState("");
   const [downloadKey, setDownloadKey] = useState("");
+  const [previewContent, setPreviewContent] = useState("");
+  const [demoUrl, setDemoUrl] = useState("");
 
   useEffect(() => {
     async function fetchProduct() {
@@ -87,6 +91,8 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         setCoverImage(data.coverImage ?? "");
         setTags(data.tags ? data.tags.join(", ") : "");
         setDownloadKey(data.downloadKey ?? "");
+        setPreviewContent(data.previewContent ?? "");
+        setDemoUrl(data.demoUrl ?? "");
       } catch {
         setError("Erro ao carregar produto.");
       } finally {
@@ -142,6 +148,8 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           coverImage: coverImage.trim() || null,
           tags: tagsArr,
           downloadKey: downloadKey.trim() || null,
+          previewContent: previewContent.trim() || null,
+          demoUrl: demoUrl.trim() || null,
         }),
       });
 
@@ -391,6 +399,42 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           />
           <p className="mt-1 text-[10px] font-mono text-white/20">
             Caminho do ficheiro no bucket R2 (para entrega após compra)
+          </p>
+        </div>
+
+        {/* Preview Content */}
+        <div>
+          <label className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2">
+            Conteúdo de Pré-visualização
+          </label>
+          <textarea
+            value={previewContent}
+            onChange={(e) => setPreviewContent(e.target.value)}
+            rows={4}
+            disabled={!isDraft}
+            className="w-full bg-surface-container-lowest border border-white/5 focus:border-tertiary/50 focus:shadow-[0_0_8px_rgba(129,233,255,0.15)] text-white text-sm p-4 font-body placeholder:text-white/20 resize-y transition-all outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+            placeholder="Introdução, índice, ou excerto do conteúdo..."
+          />
+          <p className="mt-1 text-[10px] font-mono text-white/20">
+            Texto ou markdown visível para todos antes da compra
+          </p>
+        </div>
+
+        {/* Demo URL */}
+        <div>
+          <label className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2">
+            URL de Demo
+          </label>
+          <input
+            type="url"
+            value={demoUrl}
+            onChange={(e) => setDemoUrl(e.target.value)}
+            disabled={!isDraft}
+            className="w-full bg-surface-container-lowest border border-white/5 focus:border-tertiary/50 focus:shadow-[0_0_8px_rgba(129,233,255,0.15)] text-white text-sm p-4 font-mono placeholder:text-white/20 transition-all outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+            placeholder="https://demo.exemplo.com"
+          />
+          <p className="mt-1 text-[10px] font-mono text-white/20">
+            Link externo para demonstração ou versão de teste
           </p>
         </div>
 
