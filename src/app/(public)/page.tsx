@@ -48,7 +48,7 @@ function HeroSection() {
         src="/images/hero-bg.svg"
         alt=""
         aria-hidden="true"
-        className="absolute inset-0 w-full h-full object-cover"
+        className="absolute inset-0 w-full h-full object-cover animate-hero-float"
       />
       <div className="absolute inset-0 hero-gradient" />
       <div className="relative z-10 max-w-4xl mx-auto">
@@ -83,13 +83,13 @@ function HeroSection() {
               href="https://discord.vibetuga.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full sm:w-auto px-8 py-4 bg-primary text-on-primary font-bold flex items-center justify-center gap-3 hover:shadow-[0_0_20px_rgba(161,255,194,0.4)] transition-all"
+              className="w-full sm:w-auto px-8 py-4 bg-primary text-on-primary font-bold flex items-center justify-center gap-3 hover:shadow-[0_0_20px_rgba(161,255,194,0.4)] active:scale-95 transition-all"
             >
               Junta-te ao Discord
             </a>
             <Link
               href="/showcase"
-              className="w-full sm:w-auto px-8 py-4 bg-transparent border border-tertiary/40 text-tertiary font-bold hover:bg-tertiary/5 hover:border-tertiary transition-all"
+              className="w-full sm:w-auto px-8 py-4 bg-transparent border border-tertiary/40 text-tertiary font-bold hover:bg-tertiary/5 hover:border-tertiary active:scale-95 transition-all"
             >
               Explora Projetos
             </Link>

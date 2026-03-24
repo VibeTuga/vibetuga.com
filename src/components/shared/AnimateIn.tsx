@@ -1,7 +1,6 @@
 "use client";
 
-import { useReducedMotion, motion } from "framer-motion";
-import type { ReactNode } from "react";
+import { useRef, useEffect, useState, type ReactNode } from "react";
 
 type Direction = "up" | "down" | "left" | "right" | "none";
 
@@ -14,12 +13,12 @@ interface AnimateInProps {
   once?: boolean;
 }
 
-const OFFSETS: Record<Direction, { x: number; y: number }> = {
-  up: { x: 0, y: 20 },
-  down: { x: 0, y: -20 },
-  left: { x: 20, y: 0 },
-  right: { x: -20, y: 0 },
-  none: { x: 0, y: 0 },
+const ANIMATION_MAP: Record<Direction, string> = {
+  up: "fade-up",
+  down: "fade-down",
+  left: "fade-left",
+  right: "fade-right",
+  none: "fade-in",
 };
 
 export function AnimateIn({
@@ -30,22 +29,57 @@ export function AnimateIn({
   className,
   once = true,
 }: AnimateInProps) {
-  const prefersReduced = useReducedMotion();
-  const offset = OFFSETS[direction];
+  const ref = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const [prefersReduced, setPrefersReduced] = useState(() =>
+    typeof window !== "undefined"
+      ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      : false,
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const handler = (e: MediaQueryListEvent) => setPrefersReduced(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || prefersReduced) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          if (once) observer.unobserve(el);
+        } else if (!once) {
+          setIsVisible(false);
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [once, prefersReduced]);
 
   if (prefersReduced) {
     return <div className={className}>{children}</div>;
   }
 
+  const animationName = ANIMATION_MAP[direction];
+
   return (
-    <motion.div
-      initial={{ opacity: 0, x: offset.x, y: offset.y }}
-      whileInView={{ opacity: 1, x: 0, y: 0 }}
-      viewport={{ once }}
-      transition={{ delay, duration, ease: "easeOut" }}
+    <div
+      ref={ref}
       className={className}
+      style={{
+        opacity: isVisible ? undefined : 0,
+        animation: isVisible ? `${animationName} ${duration}s ease-out ${delay}s both` : "none",
+      }}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }

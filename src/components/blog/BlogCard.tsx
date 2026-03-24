@@ -9,7 +9,7 @@ export function BlogCard({ post }: { post: BlogPost }) {
 
   return (
     <article
-      className={`group relative bg-surface-container rounded-sm overflow-hidden transition-all duration-300 hover:-translate-y-[4px] hover:shadow-[0_12px_32px_rgba(0,0,0,0.5)] flex flex-col h-full ${accent.hoverShadow}`}
+      className={`group relative bg-surface-container rounded-sm overflow-hidden card-hover-glow flex flex-col h-full ${accent.hoverShadow}`}
     >
       {/* Full-card link overlay */}
       <Link href={`/blog/${post.slug}`} className="absolute inset-0 z-0" aria-label={post.title} />

@@ -1,43 +1,50 @@
 "use client";
 
-import { useReducedMotion, motion } from "framer-motion";
-import { Children, type ReactNode } from "react";
-
-const containerVariants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.05,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.3 },
-  },
-};
+import { useRef, useEffect, useState, Children, type ReactNode } from "react";
 
 export function StaggerGrid({ children, className }: { children: ReactNode; className?: string }) {
-  const prefersReduced = useReducedMotion();
+  const ref = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const [prefersReduced] = useState(() =>
+    typeof window !== "undefined"
+      ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      : false,
+  );
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || prefersReduced) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [prefersReduced]);
 
   if (prefersReduced) {
     return <div className={className}>{children}</div>;
   }
 
   return (
-    <motion.div
-      className={className}
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
-      {Children.map(children, (child) => (
-        <motion.div variants={itemVariants}>{child}</motion.div>
+    <div ref={ref} className={className}>
+      {Children.map(children, (child, index) => (
+        <div
+          style={{
+            opacity: isVisible ? undefined : 0,
+            animation: isVisible ? `fade-up 0.3s ease-out ${index * 0.05}s both` : "none",
+          }}
+        >
+          {child}
+        </div>
       ))}
-    </motion.div>
+    </div>
   );
 }

@@ -4,8 +4,11 @@ import { db } from "@/lib/db";
 import { users, showcaseProjects } from "@/lib/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth";
+import dynamic from "next/dynamic";
 import { AnimatedPodiumItem, AnimatedTableRow } from "@/components/leaderboard/AnimatedLeaderboard";
 import { VerifiedBadge } from "@/components/shared/VerifiedBadge";
+
+const CountUp = dynamic(() => import("@/components/shared/CountUp").then((m) => m.CountUp));
 
 export const revalidate = 30;
 
@@ -278,7 +281,7 @@ export default async function LeaderboardPage() {
                 <div
                   className={`font-label ${config.xpSize} font-black text-white ${config.isFirst ? "tracking-tighter drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]" : ""}`}
                 >
-                  {formatXP(user.xpPoints)} XP
+                  <CountUp end={user.xpPoints} duration={1.8} className="tabular-nums" /> XP
                 </div>
               </AnimatedPodiumItem>
             );
@@ -322,7 +325,7 @@ export default async function LeaderboardPage() {
                           <img
                             src={user.image}
                             alt={username}
-                            className="w-10 h-10 rounded-full object-cover border border-outline-variant/30"
+                            className="w-10 h-10 rounded-full object-cover border border-outline-variant/30 avatar-glow"
                           />
                         ) : (
                           <div className="w-10 h-10 rounded-full bg-surface-container-highest border border-outline-variant/30 flex items-center justify-center font-headline font-bold text-xs text-white/60">
@@ -398,7 +401,7 @@ export default async function LeaderboardPage() {
                 </div>
                 <Link
                   href={`/profile/${session.user.id}`}
-                  className="bg-primary text-on-primary font-label text-[10px] font-bold uppercase px-4 py-2 hover:shadow-[0_0_15px_rgba(161,255,194,0.4)] transition-all"
+                  className="bg-primary text-on-primary font-label text-[10px] font-bold uppercase px-4 py-2 hover:shadow-[0_0_15px_rgba(161,255,194,0.4)] active:scale-95 transition-all"
                 >
                   Ver Perfil
                 </Link>
