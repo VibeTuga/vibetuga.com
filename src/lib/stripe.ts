@@ -3,14 +3,25 @@ import { db } from "@/lib/db";
 import { storeProducts } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 
-const secretKey = process.env.STRIPE_SECRET_KEY;
+let _stripe: Stripe | null = null;
 
-if (!secretKey && process.env.NODE_ENV === "production") {
-  throw new Error("STRIPE_SECRET_KEY is required in production");
+function getStripeClient(): Stripe {
+  if (!_stripe) {
+    const secretKey = process.env.STRIPE_SECRET_KEY;
+    if (!secretKey && process.env.NODE_ENV === "production") {
+      throw new Error("STRIPE_SECRET_KEY is required in production");
+    }
+    _stripe = new Stripe(secretKey ?? "sk_test_placeholder", {
+      typescript: true,
+    });
+  }
+  return _stripe;
 }
 
-export const stripe = new Stripe(secretKey ?? "sk_test_placeholder", {
-  typescript: true,
+export const stripe = new Proxy({} as Stripe, {
+  get(_, prop) {
+    return (getStripeClient() as unknown as Record<string | symbol, unknown>)[prop];
+  },
 });
 
 export async function createCheckoutSession(
