@@ -11,7 +11,8 @@
     "format:check": "prettier --check src/",
     "prepare": "husky || true",
     "db:seed-blog": "npx tsx --env-file=.env.local src/lib/db/seed-blog.ts",
-    "db:merge-seed-users": "npx tsx --env-file=.env.local src/lib/db/merge-seed-users.ts"
+    "db:merge-seed-users": "npx tsx --env-file=.env.local src/lib/db/merge-seed-users.ts",
+    "analyze": "ANALYZE=true next build"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
@@ -25,7 +26,9 @@
     "@aws-sdk/client-s3": "^3.1014.0",
     "@aws-sdk/s3-request-presigner": "^3.1014.0",
     "@neondatabase/serverless": "^1.0.2",
+    "@next/bundle-analyzer": "^16.2.1",
     "@vercel/og": "^0.11.1",
+    "@vercel/speed-insights": "^2.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.1",
