@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Space_Grotesk, Inter } from "next/font/google";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { cn } from "@/lib/utils";
 import "./globals.css";
 
@@ -49,6 +50,7 @@ export default function RootLayout({
     >
       <body className="scanlines min-h-full flex flex-col bg-background text-on-background font-body selection:bg-primary selection:text-on-primary">
         {children}
+        <SpeedInsights />
       </body>
     </html>
   );
