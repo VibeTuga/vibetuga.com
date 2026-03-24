@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { LayoutDashboard, LogOut, PenLine, Shield, User } from "lucide-react";
 import {
   DropdownMenu,
@@ -11,6 +10,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Link } from "@/lib/navigation";
+import { useTranslations } from "@/lib/i18n-context";
 import { signOutAction } from "@/app/actions/auth";
 
 export interface SessionUser {
@@ -20,17 +21,6 @@ export interface SessionUser {
   role: "admin" | "moderator" | "author" | "seller" | "member";
   discordUsername: string;
 }
-
-const ROLE_STYLES: Record<SessionUser["role"], { label: string; className: string }> = {
-  admin: { label: "Admin", className: "bg-red-500/20 text-red-400 border-red-500/30" },
-  moderator: {
-    label: "Moderador",
-    className: "bg-purple-500/20 text-purple-400 border-purple-500/30",
-  },
-  author: { label: "Autor", className: "bg-blue-500/20 text-blue-400 border-blue-500/30" },
-  seller: { label: "Vendedor", className: "bg-amber-500/20 text-amber-400 border-amber-500/30" },
-  member: { label: "Membro", className: "bg-primary/20 text-primary border-primary/30" },
-};
 
 function UserAvatar({ user }: { user: SessionUser }) {
   const initials = (user.discordUsername || user.name || "?").slice(0, 2).toUpperCase();
@@ -51,15 +41,24 @@ function UserAvatar({ user }: { user: SessionUser }) {
 }
 
 export function UserMenu({ user }: { user: SessionUser }) {
-  const roleStyle = ROLE_STYLES[user.role];
+  const t = useTranslations("userMenu");
+  const roleLabel = t(`roles.${user.role}`);
   const isStaff = user.role === "admin" || user.role === "moderator";
+
+  const ROLE_STYLES: Record<SessionUser["role"], string> = {
+    admin: "bg-red-500/20 text-red-400 border-red-500/30",
+    moderator: "bg-purple-500/20 text-purple-400 border-purple-500/30",
+    author: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+    seller: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+    member: "bg-primary/20 text-primary border-primary/30",
+  };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
           className="cursor-pointer rounded-full transition-shadow hover:shadow-[0_0_12px_rgba(161,255,194,0.3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
-          aria-label="Menu do utilizador"
+          aria-label={t("ariaLabel")}
         >
           <UserAvatar user={user} />
         </button>
@@ -74,9 +73,9 @@ export function UserMenu({ user }: { user: SessionUser }) {
             {user.discordUsername || user.name}
           </span>
           <span
-            className={`inline-flex w-fit items-center rounded-sm border px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${roleStyle.className}`}
+            className={`inline-flex w-fit items-center rounded-sm border px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${ROLE_STYLES[user.role]}`}
           >
-            {roleStyle.label}
+            {roleLabel}
           </span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-white/10" />
@@ -87,7 +86,7 @@ export function UserMenu({ user }: { user: SessionUser }) {
           >
             <Link href={`/profile/${user.id}`}>
               <User className="size-4" />
-              Meu Perfil
+              {t("myProfile")}
             </Link>
           </DropdownMenuItem>
         )}
@@ -97,7 +96,7 @@ export function UserMenu({ user }: { user: SessionUser }) {
         >
           <Link href="/dashboard/profile">
             <LayoutDashboard className="size-4" />
-            Dashboard
+            {t("dashboard")}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem
@@ -106,7 +105,7 @@ export function UserMenu({ user }: { user: SessionUser }) {
         >
           <Link href="/dashboard/submit-post">
             <PenLine className="size-4" />
-            Submeter Post
+            {t("submitPost")}
           </Link>
         </DropdownMenuItem>
         {isStaff && (
@@ -116,7 +115,7 @@ export function UserMenu({ user }: { user: SessionUser }) {
           >
             <Link href="/admin">
               <Shield className="size-4" />
-              Painel Admin
+              {t("adminPanel")}
             </Link>
           </DropdownMenuItem>
         )}
@@ -128,7 +127,7 @@ export function UserMenu({ user }: { user: SessionUser }) {
           }}
         >
           <LogOut className="size-4" />
-          Sair
+          {t("signOut")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -142,8 +141,17 @@ export function MobileUserMenu({
   user: SessionUser;
   onNavigate: () => void;
 }) {
-  const roleStyle = ROLE_STYLES[user.role];
+  const t = useTranslations("userMenu");
+  const roleLabel = t(`roles.${user.role}`);
   const isStaff = user.role === "admin" || user.role === "moderator";
+
+  const ROLE_STYLES: Record<SessionUser["role"], string> = {
+    admin: "bg-red-500/20 text-red-400 border-red-500/30",
+    moderator: "bg-purple-500/20 text-purple-400 border-purple-500/30",
+    author: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+    seller: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+    member: "bg-primary/20 text-primary border-primary/30",
+  };
 
   return (
     <div className="space-y-1 border-t border-white/10 pt-3 mt-2">
@@ -154,9 +162,9 @@ export function MobileUserMenu({
             {user.discordUsername || user.name}
           </span>
           <span
-            className={`inline-flex w-fit items-center rounded-sm border px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${roleStyle.className}`}
+            className={`inline-flex w-fit items-center rounded-sm border px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${ROLE_STYLES[user.role]}`}
           >
-            {roleStyle.label}
+            {roleLabel}
           </span>
         </div>
       </div>
@@ -167,7 +175,7 @@ export function MobileUserMenu({
           className="flex items-center gap-2 py-2.5 text-sm text-white/60 hover:text-white transition-colors"
         >
           <User className="size-4" />
-          Meu Perfil
+          {t("myProfile")}
         </Link>
       )}
       <Link
@@ -176,7 +184,7 @@ export function MobileUserMenu({
         className="flex items-center gap-2 py-2.5 text-sm text-white/60 hover:text-white transition-colors"
       >
         <LayoutDashboard className="size-4" />
-        Dashboard
+        {t("dashboard")}
       </Link>
       <Link
         href="/dashboard/submit-post"
@@ -184,7 +192,7 @@ export function MobileUserMenu({
         className="flex items-center gap-2 py-2.5 text-sm text-white/60 hover:text-white transition-colors"
       >
         <PenLine className="size-4" />
-        Submeter Post
+        {t("submitPost")}
       </Link>
       {isStaff && (
         <Link
@@ -193,7 +201,7 @@ export function MobileUserMenu({
           className="flex items-center gap-2 py-2.5 text-sm text-white/60 hover:text-white transition-colors"
         >
           <Shield className="size-4" />
-          Painel Admin
+          {t("adminPanel")}
         </Link>
       )}
       <form action={signOutAction}>
@@ -202,7 +210,7 @@ export function MobileUserMenu({
           className="flex w-full cursor-pointer items-center gap-2 py-2.5 text-sm text-red-400 hover:text-red-300 transition-colors"
         >
           <LogOut className="size-4" />
-          Sair
+          {t("signOut")}
         </button>
       </form>
     </div>

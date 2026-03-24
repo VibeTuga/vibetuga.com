@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/lib/navigation";
 import { usePathname } from "next/navigation";
 import { Home, FileText, LayoutGrid, Trophy, User } from "lucide-react";
 import { Logo } from "@/components/shared/Logo";

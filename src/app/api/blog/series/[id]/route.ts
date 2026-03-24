@@ -62,7 +62,14 @@ export async function GET(_request: Request, context: RouteContext) {
       .where(eq(blogSeriesPosts.seriesId, seriesId))
       .orderBy(asc(blogSeriesPosts.order));
 
-    return NextResponse.json({ ...series, posts });
+    return NextResponse.json(
+      { ...series, posts },
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
+        },
+      },
+    );
   } catch {
     return NextResponse.json({ error: "Erro ao buscar série" }, { status: 500 });
   }

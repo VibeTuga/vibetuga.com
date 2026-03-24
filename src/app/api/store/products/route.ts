@@ -74,12 +74,19 @@ export async function GET(request: Request) {
 
     const total = totalResult[0]?.count ?? 0;
 
-    return NextResponse.json({
-      products: productsResult,
-      total,
-      totalPages: Math.ceil(total / PRODUCTS_PER_PAGE),
-      currentPage: page,
-    });
+    return NextResponse.json(
+      {
+        products: productsResult,
+        total,
+        totalPages: Math.ceil(total / PRODUCTS_PER_PAGE),
+        currentPage: page,
+      },
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
+        },
+      },
+    );
   } catch {
     return NextResponse.json({ error: "Failed to fetch products" }, { status: 500 });
   }

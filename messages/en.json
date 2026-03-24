@@ -1,0 +1,84 @@
+{
+  "nav": {
+    "home": "Home",
+    "blog": "Blog",
+    "showcase": "Showcase",
+    "challenges": "Challenges",
+    "leaderboard": "Leaderboard",
+    "store": "Store",
+    "login": "Sign in",
+    "loginWithDiscord": "Sign in with Discord",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
+  },
+  "userMenu": {
+    "ariaLabel": "User menu",
+    "myProfile": "My Profile",
+    "dashboard": "Dashboard",
+    "submitPost": "Submit Post",
+    "adminPanel": "Admin Panel",
+    "signOut": "Sign out",
+    "roles": {
+      "admin": "Admin",
+      "moderator": "Moderator",
+      "author": "Author",
+      "seller": "Seller",
+      "member": "Member"
+    }
+  },
+  "footer": {
+    "tagline": "Made with vibe in Portugal",
+    "newsletter": "Newsletter",
+    "emailPlaceholder": "your@email.com",
+    "subscribe": "Sub",
+    "subscribing": "...",
+    "subscribed": "Subscribed!",
+    "subscribeError": "Failed to subscribe.",
+    "connectionError": "Connection error.",
+    "copyright": "VIBETUGA_SYSTEM"
+  },
+  "notFound": {
+    "errorCode": "ERROR_CODE: PAGE_NOT_FOUND",
+    "title": "Page not found",
+    "description": "This page doesn't exist or has been moved. Check the URL or go back home.",
+    "backHome": "Back to home"
+  },
+  "login": {
+    "pageTitle": "Sign in | VibeTuga",
+    "heading": "Join the Vibe",
+    "description": "Sign in with your Discord account to join the community.",
+    "discordButton": "Sign in with Discord",
+    "back": "Go back",
+    "errors": {
+      "OAuthSignin": "Error starting Discord login.",
+      "OAuthCallback": "Error in Discord response.",
+      "OAuthAccountNotLinked": "This email is already linked to another account. Use the original login method.",
+      "Callback": "Authentication callback error.",
+      "Default": "An error occurred while logging in. Please try again."
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred.",
+    "retry": "Try again",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "noResults": "No results.",
+    "seeAll": "See all",
+    "seeMore": "See more",
+    "back": "Back"
+  },
+  "metadata": {
+    "siteTitle": "VibeTuga | Where code meets the vibe",
+    "siteDescription": "The Portuguese vibe coding community — AI tooling and agent-assisted development. Learn, share, and build the future of AI-powered programming."
+  },
+  "languageToggle": {
+    "switchTo": "Switch to {language}",
+    "pt": "Português",
+    "en": "English"
+  }
+}

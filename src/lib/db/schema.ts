@@ -83,6 +83,7 @@ export const subscriptionStatusEnum = pgEnum("subscription_status", [
   "active",
   "canceled",
   "past_due",
+  "trialing",
 ]);
 
 export const roleRequestStatusEnum = pgEnum("role_request_status", [
@@ -241,6 +242,7 @@ export const blogPosts = pgTable("blog_post", {
   likesCount: integer("likes_count").default(0).notNull(),
   publishedAt: timestamp("published_at", { mode: "date" }),
   scheduledPublishAt: timestamp("scheduled_publish_at", { mode: "date" }),
+  language: varchar("language", { length: 10 }).default("pt").notNull(),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
 });
@@ -559,6 +561,7 @@ export const storeProductsRelations = relations(storeProducts, ({ one, many }) =
   }),
   purchases: many(storePurchases),
   reviews: many(storeReviews),
+  updates: many(productUpdates),
 }));
 
 // ─── Store Purchases ───────────────────────────────────────
@@ -643,6 +646,7 @@ export const subscriptions = pgTable(
     status: subscriptionStatusEnum("status").default("active").notNull(),
     currentPeriodStart: timestamp("current_period_start", { mode: "date" }).notNull(),
     currentPeriodEnd: timestamp("current_period_end", { mode: "date" }).notNull(),
+    canceledAt: timestamp("canceled_at", { mode: "date" }),
     createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
   },
@@ -1222,5 +1226,50 @@ export const contentAnalytics = pgTable(
       t.referralSource,
     ),
     index("content_analytics_content_idx").on(t.contentType, t.contentId),
+  ],
+);
+
+// ─── Product Updates (Versioning) ─────────────────────────
+
+export const productUpdates = pgTable(
+  "product_update",
+  {
+    id: serial("id").primaryKey(),
+    productId: uuid("product_id")
+      .notNull()
+      .references(() => storeProducts.id, { onDelete: "cascade" }),
+    version: varchar("version", { length: 50 }).notNull(),
+    changelog: text("changelog").notNull(),
+    downloadUrl: varchar("download_url", { length: 512 }),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [
+    index("product_update_product_idx").on(t.productId),
+    index("product_update_created_idx").on(t.createdAt),
+  ],
+);
+
+export const productUpdatesRelations = relations(productUpdates, ({ one }) => ({
+  product: one(storeProducts, {
+    fields: [productUpdates.productId],
+    references: [storeProducts.id],
+  }),
+}));
+
+// ─── Stripe Events (Webhook Idempotency) ────────────────
+
+export const stripeEvents = pgTable(
+  "stripe_event",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    stripeEventId: varchar("stripe_event_id", { length: 255 }).unique().notNull(),
+    eventType: varchar("event_type", { length: 100 }).notNull(),
+    processedAt: timestamp("processed_at", { mode: "date" }).defaultNow().notNull(),
+    payload: text("payload"),
+    error: text("error"),
+  },
+  (t) => [
+    index("stripe_event_type_idx").on(t.eventType),
+    index("stripe_event_processed_idx").on(t.processedAt),
   ],
 );

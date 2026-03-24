@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
-import Link from "next/link";
+import { Link } from "@/lib/navigation";
 
 const TECH_TABS = [
   { label: "Todos", value: "" },

@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { Link } from "@/lib/navigation";
 import { usePathname } from "next/navigation";
 import {
+  BarChart3,
   Bell,
   BookOpen,
   FileText,
@@ -36,6 +37,7 @@ const dashboardLinks = [
 const sellerLinks = [
   { href: "/dashboard/my-products", label: "Meus Produtos", icon: Package },
   { href: "/dashboard/submit-product", label: "Submeter Produto", icon: Plus },
+  { href: "/dashboard/seller-analytics", label: "Anlise de Vendas", icon: BarChart3 },
 ];
 
 export function DashboardNav({ canSell }: { canSell: boolean }) {

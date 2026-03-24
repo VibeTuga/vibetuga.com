@@ -32,7 +32,14 @@ export async function GET(request: NextRequest) {
       .groupBy(challenges.id)
       .orderBy(desc(challenges.startAt));
 
-    return NextResponse.json({ challenges: rows });
+    return NextResponse.json(
+      { challenges: rows },
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60",
+        },
+      },
+    );
   } catch {
     return NextResponse.json({ error: "Erro ao carregar desafios." }, { status: 500 });
   }

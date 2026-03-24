@@ -55,12 +55,19 @@ export async function GET(request: Request) {
 
     const total = totalResult[0]?.count ?? 0;
 
-    return NextResponse.json({
-      projects: projectsResult,
-      total,
-      totalPages: Math.ceil(total / PROJECTS_PER_PAGE),
-      currentPage: page,
-    });
+    return NextResponse.json(
+      {
+        projects: projectsResult,
+        total,
+        totalPages: Math.ceil(total / PROJECTS_PER_PAGE),
+        currentPage: page,
+      },
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
+        },
+      },
+    );
   } catch {
     return NextResponse.json({ error: "Failed to fetch projects" }, { status: 500 });
   }

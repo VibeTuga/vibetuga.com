@@ -1,9 +1,10 @@
-import Link from "next/link";
+import { Link } from "@/lib/navigation";
 import Image from "next/image";
 import type { BlogPost } from "@/lib/db/queries/blog";
 import { formatDatePT, formatCount, getCategoryAccent } from "@/lib/blog-utils";
+import { BLUR_DATA_URL } from "@/lib/utils";
 
-export function BlogCard({ post }: { post: BlogPost }) {
+export function BlogCard({ post, priority = false }: { post: BlogPost; priority?: boolean }) {
   const accent = getCategoryAccent(post.categoryColor);
   const authorName = post.authorDisplayName || post.authorName || "Anónimo";
 
@@ -25,7 +26,10 @@ export function BlogCard({ post }: { post: BlogPost }) {
             alt={post.title}
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-[1.04] opacity-80 group-hover:opacity-100"
-            sizes="(max-width: 1024px) 100vw, 50vw"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            placeholder="blur"
+            blurDataURL={BLUR_DATA_URL}
+            priority={priority}
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-surface-container-highest to-surface-container-low transition-transform duration-500 group-hover:scale-[1.04] opacity-80" />

@@ -32,7 +32,14 @@ export async function GET(request: Request) {
       .where(eq(storeReviews.productId, productId))
       .orderBy(desc(storeReviews.createdAt));
 
-    return NextResponse.json({ reviews });
+    return NextResponse.json(
+      { reviews },
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
+        },
+      },
+    );
   } catch {
     return NextResponse.json({ error: "Erro ao carregar avaliações" }, { status: 500 });
   }

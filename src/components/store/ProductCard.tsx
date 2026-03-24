@@ -1,6 +1,7 @@
-import Link from "next/link";
+import { Link } from "@/lib/navigation";
 import Image from "next/image";
 import type { StoreProduct } from "@/lib/db/queries/store";
+import { BLUR_DATA_URL } from "@/lib/utils";
 
 const TYPE_BADGE_COLORS: Record<string, string> = {
   skill: "bg-primary text-on-primary",
@@ -74,6 +75,8 @@ export function ProductCard({ product }: { product: StoreProduct }) {
             fill
             className="object-cover opacity-50 grayscale group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            placeholder="blur"
+            blurDataURL={BLUR_DATA_URL}
           />
         ) : (
           <div className={`absolute inset-0 bg-gradient-to-br ${gradientColor}`} />

@@ -11,7 +11,8 @@
     "format:check": "prettier --check src/",
     "prepare": "husky || true",
     "db:seed-blog": "npx tsx --env-file=.env.local src/lib/db/seed-blog.ts",
-    "db:merge-seed-users": "npx tsx --env-file=.env.local src/lib/db/merge-seed-users.ts"
+    "db:merge-seed-users": "npx tsx --env-file=.env.local src/lib/db/merge-seed-users.ts",
+    "analyze": "ANALYZE=true next build"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
@@ -50,6 +51,7 @@
     "@auth/core": "$@auth/core"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^16.2.1",
     "@tailwindcss/postcss": "^4.2.2",
     "@types/node": "^20",
     "@types/react": "^19",

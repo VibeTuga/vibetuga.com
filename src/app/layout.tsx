@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Space_Grotesk, Inter } from "next/font/google";
+import { cookies } from "next/headers";
 import { cn } from "@/lib/utils";
+import { isValidLocale } from "@/lib/i18n";
 import "./globals.css";
 
 const geist = Geist({
@@ -32,14 +34,18 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const localeCookie = cookieStore.get("NEXT_LOCALE")?.value;
+  const lang = localeCookie && isValidLocale(localeCookie) ? localeCookie : "pt";
+
   return (
     <html
-      lang="pt"
+      lang={lang}
       className={cn(
         "dark h-full antialiased",
         geist.variable,

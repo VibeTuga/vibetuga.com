@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { Link } from "@/lib/navigation";
 import { useRouter } from "next/navigation";
 import { Plus, Trophy, Users, Crown } from "lucide-react";
 

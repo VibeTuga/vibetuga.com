@@ -1,0 +1,84 @@
+{
+  "nav": {
+    "home": "Home",
+    "blog": "Blog",
+    "showcase": "Showcase",
+    "challenges": "Desafios",
+    "leaderboard": "Leaderboard",
+    "store": "Store",
+    "login": "Entrar",
+    "loginWithDiscord": "Entrar com Discord",
+    "openMenu": "Abrir menu",
+    "closeMenu": "Fechar menu"
+  },
+  "userMenu": {
+    "ariaLabel": "Menu do utilizador",
+    "myProfile": "Meu Perfil",
+    "dashboard": "Dashboard",
+    "submitPost": "Submeter Post",
+    "adminPanel": "Painel Admin",
+    "signOut": "Sair",
+    "roles": {
+      "admin": "Admin",
+      "moderator": "Moderador",
+      "author": "Autor",
+      "seller": "Vendedor",
+      "member": "Membro"
+    }
+  },
+  "footer": {
+    "tagline": "Feito com vibe em Portugal",
+    "newsletter": "Newsletter",
+    "emailPlaceholder": "teu@email.pt",
+    "subscribe": "Sub",
+    "subscribing": "...",
+    "subscribed": "Subscrito!",
+    "subscribeError": "Erro ao subscrever.",
+    "connectionError": "Erro de ligação.",
+    "copyright": "VIBETUGA_SYSTEM"
+  },
+  "notFound": {
+    "errorCode": "ERROR_CODE: PAGE_NOT_FOUND",
+    "title": "Página não encontrada",
+    "description": "Esta página não existe ou foi movida. Verifica o URL ou volta ao início.",
+    "backHome": "Voltar ao início"
+  },
+  "login": {
+    "pageTitle": "Entrar | VibeTuga",
+    "heading": "Entra na Vibe",
+    "description": "Faz login com a tua conta Discord para aceder à comunidade.",
+    "discordButton": "Entrar com Discord",
+    "back": "Voltar",
+    "errors": {
+      "OAuthSignin": "Erro ao iniciar login com Discord.",
+      "OAuthCallback": "Erro na resposta do Discord.",
+      "OAuthAccountNotLinked": "Este email já está associado a outra conta. Usa o método de login original.",
+      "Callback": "Erro no callback de autenticação.",
+      "Default": "Ocorreu um erro ao fazer login. Tenta novamente."
+    }
+  },
+  "common": {
+    "loading": "A carregar...",
+    "error": "Ocorreu um erro.",
+    "retry": "Tentar novamente",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Apagar",
+    "edit": "Editar",
+    "create": "Criar",
+    "search": "Pesquisar",
+    "noResults": "Sem resultados.",
+    "seeAll": "Ver todos",
+    "seeMore": "Ver mais",
+    "back": "Voltar"
+  },
+  "metadata": {
+    "siteTitle": "VibeTuga | Onde o código encontra a vibe",
+    "siteDescription": "A comunidade portuguesa de vibe coding, AI tooling e desenvolvimento assistido por agentes. Aprende, partilha e constrói o futuro da programação assistida por IA."
+  },
+  "languageToggle": {
+    "switchTo": "Mudar para {language}",
+    "pt": "Português",
+    "en": "English"
+  }
+}

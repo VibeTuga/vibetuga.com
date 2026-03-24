@@ -40,6 +40,22 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  experimental: {
+    optimizePackageImports: ["framer-motion"],
+  },
 };
 
-export default nextConfig;
+let config = nextConfig;
+
+if (process.env.ANALYZE === "true") {
+  import("@next/bundle-analyzer")
+    .then((mod) => {
+      const withBundleAnalyzer = mod.default ?? mod;
+      config = withBundleAnalyzer({ enabled: true })(nextConfig);
+    })
+    .catch(() => {
+      // @next/bundle-analyzer not installed — skip
+    });
+}
+
+export default config;

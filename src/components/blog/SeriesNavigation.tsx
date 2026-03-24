@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/lib/navigation";
 import { BookOpen, ChevronLeft, ChevronRight } from "lucide-react";
 
 type SeriesPost = {

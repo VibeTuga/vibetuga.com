@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Bell, Check, ExternalLink } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/lib/navigation";
 
 interface NotificationItem {
   id: string;

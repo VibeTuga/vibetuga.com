@@ -1,0 +1,1 @@
+ALTER TABLE "blog_post" ADD COLUMN "language" varchar(10) DEFAULT 'pt' NOT NULL;

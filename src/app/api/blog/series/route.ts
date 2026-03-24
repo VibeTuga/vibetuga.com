@@ -41,12 +41,19 @@ export async function GET(request: Request) {
 
     const total = totalResult[0]?.count ?? 0;
 
-    return NextResponse.json({
-      series: seriesResult,
-      total,
-      totalPages: Math.ceil(total / SERIES_PER_PAGE),
-      currentPage: page,
-    });
+    return NextResponse.json(
+      {
+        series: seriesResult,
+        total,
+        totalPages: Math.ceil(total / SERIES_PER_PAGE),
+        currentPage: page,
+      },
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
+        },
+      },
+    );
   } catch {
     return NextResponse.json({ error: "Erro ao buscar séries" }, { status: 500 });
   }

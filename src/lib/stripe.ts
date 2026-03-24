@@ -2,6 +2,7 @@ import Stripe from "stripe";
 import { db } from "@/lib/db";
 import { storeProducts } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { SUBSCRIPTION_PRICES } from "@/lib/subscription-plans";
 
 const secretKey = process.env.STRIPE_SECRET_KEY;
 
@@ -58,6 +59,60 @@ export async function createCheckoutSession(
   });
 
   return session;
+}
+
+export async function createSubscriptionCheckout(
+  userId: string,
+  plan: "monthly" | "yearly",
+  customerEmail: string | undefined,
+  successUrl: string,
+  cancelUrl: string,
+) {
+  const priceConfig = SUBSCRIPTION_PRICES[plan];
+
+  const session = await stripe.checkout.sessions.create({
+    mode: "subscription",
+    line_items: [
+      {
+        price_data: {
+          currency: "eur",
+          product_data: {
+            name: priceConfig.name,
+            description:
+              plan === "yearly"
+                ? "Acesso premium anual à VibeTuga — poupa 33%!"
+                : "Acesso premium mensal à VibeTuga",
+          },
+          unit_amount: priceConfig.amount,
+          recurring: {
+            interval: priceConfig.interval,
+          },
+        },
+        quantity: 1,
+      },
+    ],
+    subscription_data: {
+      metadata: {
+        userId,
+        plan,
+      },
+    },
+    customer_email: customerEmail,
+    metadata: {
+      userId,
+      plan,
+    },
+    success_url: successUrl,
+    cancel_url: cancelUrl,
+  });
+
+  return session;
+}
+
+export async function cancelStripeSubscription(stripeSubscriptionId: string) {
+  return stripe.subscriptions.update(stripeSubscriptionId, {
+    cancel_at_period_end: true,
+  });
 }
 
 export function constructWebhookEvent(body: string | Buffer, signature: string) {

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Logo } from "@/components/shared/Logo";
+import { useTranslations } from "@/lib/i18n-context";
 
 const socialLinks = [
   { href: "https://discord.vibetuga.com", label: "Discord" },
@@ -14,6 +15,7 @@ function FooterNewsletterForm() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
+  const t = useTranslations("footer");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -30,15 +32,15 @@ function FooterNewsletterForm() {
 
       if (res.ok && data.success) {
         setStatus("success");
-        setMessage(data.message ?? "Subscrito!");
+        setMessage(data.message ?? t("subscribed"));
         setEmail("");
       } else {
         setStatus("error");
-        setMessage(data.error ?? "Erro ao subscrever.");
+        setMessage(data.error ?? t("subscribeError"));
       }
     } catch {
       setStatus("error");
-      setMessage("Erro de ligação.");
+      setMessage(t("connectionError"));
     }
   }
 
@@ -51,7 +53,7 @@ function FooterNewsletterForm() {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-2">
       <p className="font-mono text-[10px] tracking-widest uppercase text-white/40 mb-1">
-        Newsletter
+        {t("newsletter")}
       </p>
       <div className="flex gap-2">
         <div className="relative flex-1">
@@ -62,7 +64,7 @@ function FooterNewsletterForm() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="teu@email.pt"
+            placeholder={t("emailPlaceholder")}
             required
             disabled={status === "loading"}
             className="w-full bg-surface-container-lowest border border-white/10 focus:border-primary/30 text-xs py-2 pl-6 pr-3 text-white placeholder:text-white/20 font-mono outline-none transition-all disabled:opacity-50"
@@ -73,7 +75,7 @@ function FooterNewsletterForm() {
           disabled={status === "loading"}
           className="px-4 py-2 bg-primary/10 border border-primary/20 text-primary font-mono text-[10px] uppercase tracking-widest hover:bg-primary/20 transition-all disabled:opacity-50 whitespace-nowrap"
         >
-          {status === "loading" ? "..." : "Sub"}
+          {status === "loading" ? t("subscribing") : t("subscribe")}
         </button>
       </div>
       {status === "error" && (
@@ -84,6 +86,8 @@ function FooterNewsletterForm() {
 }
 
 export function Footer() {
+  const t = useTranslations("footer");
+
   return (
     <footer className="bg-surface-container-lowest border-t border-white/5 py-12 px-6">
       <div className="max-w-[1440px] mx-auto">
@@ -91,7 +95,7 @@ export function Footer() {
           <div className="flex flex-col items-start gap-2">
             <Logo size="sm" className="text-white" />
             <span className="font-mono text-[10px] tracking-widest uppercase text-white/30">
-              Feito com vibe em Portugal
+              {t("tagline")}
             </span>
           </div>
 

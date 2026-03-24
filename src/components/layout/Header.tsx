@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
@@ -11,6 +10,10 @@ import { UserMenu, MobileUserMenu } from "@/components/layout/UserMenu";
 import type { SessionUser } from "@/components/layout/UserMenu";
 import { NotificationBell } from "@/components/shared/NotificationBell";
 import { MessageBadge } from "@/components/shared/MessageBadge";
+import { LanguageToggle } from "@/components/shared/LanguageToggle";
+import { Link } from "@/lib/navigation";
+import { useTranslations, useLocale } from "@/lib/i18n-context";
+import { LOCALES } from "@/lib/i18n-config";
 import { cn } from "@/lib/utils";
 
 const SearchDialog = dynamic(
@@ -18,18 +21,23 @@ const SearchDialog = dynamic(
   { ssr: false },
 );
 
-const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/blog", label: "Blog" },
-  { href: "/showcase", label: "Showcase" },
-  { href: "/challenges", label: "Desafios" },
-  { href: "/leaderboard", label: "Leaderboard" },
-  { href: "/store", label: "Store" },
+const NAV_KEYS = [
+  { href: "/", key: "home" },
+  { href: "/blog", key: "blog" },
+  { href: "/showcase", key: "showcase" },
+  { href: "/challenges", key: "challenges" },
+  { href: "/leaderboard", key: "leaderboard" },
+  { href: "/store", key: "store" },
 ] as const;
 
 export function Header({ user }: { user?: SessionUser | null }) {
-  const pathname = usePathname();
+  const rawPathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const t = useTranslations("nav");
+  const locale = useLocale();
+
+  // Strip locale prefix for active link detection
+  const pathname = stripLocalePrefix(rawPathname, locale);
 
   function isActive(href: string) {
     if (href === "/") return pathname === "/";
@@ -43,7 +51,7 @@ export function Header({ user }: { user?: SessionUser | null }) {
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-8 font-headline tracking-tight text-sm uppercase">
-          {navLinks.map((link) => (
+          {NAV_KEYS.map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -54,13 +62,16 @@ export function Header({ user }: { user?: SessionUser | null }) {
                   : "text-white/60 hover:text-white",
               )}
             >
-              {link.label}
+              {t(link.key)}
             </Link>
           ))}
         </nav>
 
-        {/* Right side: search + auth area + mobile toggle */}
+        {/* Right side: language toggle + search + auth area + mobile toggle */}
         <div className="flex items-center gap-4">
+          <div className="hidden sm:block">
+            <LanguageToggle />
+          </div>
           <SearchTrigger />
           <SearchDialog />
 
@@ -78,7 +89,7 @@ export function Header({ user }: { user?: SessionUser | null }) {
               href="/login"
               className="hidden sm:inline-flex items-center gap-2 px-4 py-2 bg-primary text-on-primary font-bold text-sm hover:shadow-[0_0_15px_rgba(161,255,194,0.4)] transition-all"
             >
-              Entrar
+              {t("login")}
             </Link>
           )}
 
@@ -86,7 +97,7 @@ export function Header({ user }: { user?: SessionUser | null }) {
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="md:hidden text-white/60 hover:text-primary transition-colors"
-            aria-label={mobileOpen ? "Fechar menu" : "Abrir menu"}
+            aria-label={mobileOpen ? t("closeMenu") : t("openMenu")}
           >
             {mobileOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -97,7 +108,7 @@ export function Header({ user }: { user?: SessionUser | null }) {
       {mobileOpen && (
         <nav className="md:hidden border-t border-primary/10 bg-[#0e0e0e]/95 backdrop-blur-xl">
           <div className="flex flex-col px-6 py-4 gap-1">
-            {navLinks.map((link) => (
+            {NAV_KEYS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -107,9 +118,14 @@ export function Header({ user }: { user?: SessionUser | null }) {
                   isActive(link.href) ? "text-primary" : "text-white/60 hover:text-white",
                 )}
               >
-                {link.label}
+                {t(link.key)}
               </Link>
             ))}
+
+            {/* Mobile language toggle */}
+            <div className="py-3">
+              <LanguageToggle />
+            </div>
 
             {/* Mobile auth section */}
             {user ? (
@@ -120,7 +136,7 @@ export function Header({ user }: { user?: SessionUser | null }) {
                 onClick={() => setMobileOpen(false)}
                 className="mt-2 py-3 text-center bg-primary text-on-primary font-bold text-sm"
               >
-                Entrar com Discord
+                {t("loginWithDiscord")}
               </Link>
             )}
           </div>
@@ -128,4 +144,12 @@ export function Header({ user }: { user?: SessionUser | null }) {
       )}
     </header>
   );
+}
+
+function stripLocalePrefix(pathname: string, _locale: string): string {
+  for (const loc of LOCALES) {
+    if (pathname === `/${loc}`) return "/";
+    if (pathname.startsWith(`/${loc}/`)) return pathname.slice(loc.length + 1);
+  }
+  return pathname;
 }

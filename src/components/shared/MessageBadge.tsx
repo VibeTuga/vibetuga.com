@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { MessageCircle } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/lib/navigation";
 
 export function MessageBadge() {
   const [unreadCount, setUnreadCount] = useState(0);
