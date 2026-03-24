@@ -5,6 +5,7 @@ import {
   storePurchases,
   storeReviews,
   storeWishlists,
+  storeRefunds,
   productUpdates,
   storeCollections,
   storeCollectionProducts,
@@ -384,6 +385,24 @@ export const getCollectionBySlug = cache(async (slug: string) => {
     .orderBy(asc(storeCollectionProducts.sortOrder));
 
   return { ...collection, products };
+});
+
+// ─── Purchase Refunds ─────────────────────────────────────
+
+export const getPurchaseRefunds = cache(async (userId: string) => {
+  return db
+    .select({
+      id: storeRefunds.id,
+      purchaseId: storeRefunds.purchaseId,
+      status: storeRefunds.status,
+      reason: storeRefunds.reason,
+      adminNotes: storeRefunds.adminNotes,
+      createdAt: storeRefunds.createdAt,
+      resolvedAt: storeRefunds.resolvedAt,
+    })
+    .from(storeRefunds)
+    .where(eq(storeRefunds.buyerId, userId))
+    .orderBy(desc(storeRefunds.createdAt));
 });
 
 // ─── Types ─────────────────────────────────────────────────

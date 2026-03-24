@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  BarChart3,
   Bell,
   BookOpen,
   FileText,
@@ -16,6 +17,7 @@ import {
   Plus,
   Settings,
   ShoppingBag,
+  Tag,
   User,
   Wallet,
   X,
@@ -37,6 +39,8 @@ const dashboardLinks = [
 const sellerLinks = [
   { href: "/dashboard/my-products", label: "Meus Produtos", icon: Package },
   { href: "/dashboard/submit-product", label: "Submeter Produto", icon: Plus },
+  { href: "/dashboard/seller-analytics", label: "Análise de Vendas", icon: BarChart3 },
+  { href: "/dashboard/coupons", label: "Cupões", icon: Tag },
   { href: "/dashboard/seller-payouts", label: "Pagamentos", icon: Wallet },
 ];
 
