@@ -134,6 +134,13 @@
       "when": 1774318566148,
       "tag": "0018_brainy_norman_osborn",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1774318940473,
+      "tag": "0019_groovy_silk_fever",
+      "breakpoints": true
     }
   ]
 }

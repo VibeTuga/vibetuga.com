@@ -17,6 +17,7 @@ import {
   Settings,
   ShoppingBag,
   User,
+  Wallet,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -36,6 +37,7 @@ const dashboardLinks = [
 const sellerLinks = [
   { href: "/dashboard/my-products", label: "Meus Produtos", icon: Package },
   { href: "/dashboard/submit-product", label: "Submeter Produto", icon: Plus },
+  { href: "/dashboard/seller-payouts", label: "Pagamentos", icon: Wallet },
 ];
 
 export function DashboardNav({ canSell }: { canSell: boolean }) {
