@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { getUserPurchases } from "@/lib/db/queries/store";
 import Link from "next/link";
-import { ShoppingBag, Download } from "lucide-react";
+import { ShoppingBag, Download, FileText } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -103,15 +103,26 @@ export default async function MyPurchasesPage() {
                   </div>
                 </div>
 
-                {purchase.downloadKey && (
-                  <Link
-                    href={`/api/upload/${purchase.downloadKey}`}
-                    className="shrink-0 flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary text-[10px] font-mono uppercase tracking-wider hover:bg-primary/20 transition-colors"
+                <div className="shrink-0 flex items-center gap-2">
+                  <a
+                    href={`/api/store/purchases/${purchase.id}/invoice`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 text-white/50 text-[10px] font-mono uppercase tracking-wider hover:bg-white/10 hover:text-white/70 transition-colors"
                   >
-                    <Download size={12} />
-                    Download
-                  </Link>
-                )}
+                    <FileText size={12} />
+                    Fatura
+                  </a>
+                  {purchase.downloadKey && (
+                    <Link
+                      href={`/api/upload/${purchase.downloadKey}`}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary text-[10px] font-mono uppercase tracking-wider hover:bg-primary/20 transition-colors"
+                    >
+                      <Download size={12} />
+                      Download
+                    </Link>
+                  )}
+                </div>
               </div>
             );
           })}
