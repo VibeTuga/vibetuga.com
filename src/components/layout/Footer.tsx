@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Logo } from "@/components/shared/Logo";
 
 const socialLinks = [
@@ -112,9 +113,23 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-white/5 pt-6 flex justify-between items-center">
+        <div className="border-t border-white/5 pt-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="text-primary font-mono text-[10px] tracking-widest uppercase">
             &copy; {new Date().getFullYear()} VIBETUGA_SYSTEM
+          </div>
+          <div className="flex gap-6 font-mono text-[10px] tracking-widest uppercase">
+            <Link
+              href="/privacy"
+              className="text-white/30 hover:text-tertiary transition-colors duration-300"
+            >
+              Privacidade
+            </Link>
+            <Link
+              href="/terms"
+              className="text-white/30 hover:text-tertiary transition-colors duration-300"
+            >
+              Termos
+            </Link>
           </div>
         </div>
       </div>
