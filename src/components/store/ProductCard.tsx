@@ -63,7 +63,7 @@ export function ProductCard({ product }: { product: StoreProduct }) {
   return (
     <Link
       href={`/store/${product.slug}`}
-      className="flex flex-col bg-surface-container border border-white/5 rounded-xl hover:bg-surface-container-high hover:border-primary/20 transition-all duration-300 group"
+      className="flex flex-col bg-surface-container border border-white/5 rounded-xl hover:bg-surface-container-high hover:border-primary/20 card-hover-glow group"
     >
       {/* Cover image */}
       <div className="relative aspect-video rounded-t-xl overflow-hidden bg-black">

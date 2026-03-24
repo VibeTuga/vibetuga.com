@@ -1,37 +1,43 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Heart } from "lucide-react";
 import { formatCount } from "@/lib/blog-utils";
-import { motion, useReducedMotion } from "framer-motion";
 
 export function LikeButton({ postId, initialCount }: { postId: string; initialCount: number }) {
   const [liked, setLiked] = useState(false);
   const [count, setCount] = useState(initialCount);
   const [loading, setLoading] = useState(false);
-  const [popKey, setPopKey] = useState(0);
-  const prefersReduced = useReducedMotion();
+  const iconRef = useRef<HTMLSpanElement>(null);
+  const prefersReducedRef = useRef(false);
 
-  // Check initial like state
   useEffect(() => {
+    prefersReducedRef.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const key = `vt-liked-${postId}`;
     setLiked(sessionStorage.getItem(key) === "1");
   }, [postId]);
+
+  function pop() {
+    const el = iconRef.current;
+    if (!el || prefersReducedRef.current) return;
+    el.animate(
+      [{ transform: "scale(1)" }, { transform: "scale(1.3)" }, { transform: "scale(1)" }],
+      { duration: 250, easing: "ease-out" },
+    );
+  }
 
   async function toggle() {
     if (loading) return;
     setLoading(true);
 
     const wasLiked = liked;
-    // Optimistic update
     setLiked(!wasLiked);
     setCount((c) => (wasLiked ? Math.max(0, c - 1) : c + 1));
-    setPopKey((k) => k + 1);
+    pop();
 
     try {
       const res = await fetch(`/api/blog/posts/${postId}/like`, { method: "POST" });
       if (res.status === 401) {
-        // Revert — user not logged in
         setLiked(wasLiked);
         setCount((c) => (wasLiked ? c + 1 : Math.max(0, c - 1)));
         return;
@@ -45,7 +51,6 @@ export function LikeButton({ postId, initialCount }: { postId: string; initialCo
           sessionStorage.removeItem(key);
         }
       } else {
-        // Revert
         setLiked(wasLiked);
         setCount((c) => (wasLiked ? c + 1 : Math.max(0, c - 1)));
       }
@@ -66,14 +71,9 @@ export function LikeButton({ postId, initialCount }: { postId: string; initialCo
       }`}
       aria-label={liked ? "Remover like" : "Dar like"}
     >
-      <motion.span
-        key={prefersReduced ? undefined : popKey}
-        animate={prefersReduced ? {} : { scale: [1, 1.3, 1] }}
-        transition={{ duration: 0.25, ease: "easeOut" }}
-        style={{ display: "inline-flex" }}
-      >
+      <span ref={iconRef} style={{ display: "inline-flex" }}>
         <Heart size={16} className={`transition-colors ${liked ? "fill-current" : ""}`} />
-      </motion.span>
+      </span>
       {formatCount(count)}
     </button>
   );

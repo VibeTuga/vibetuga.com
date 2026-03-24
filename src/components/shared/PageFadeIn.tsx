@@ -1,22 +1,25 @@
 "use client";
 
-import { useReducedMotion, motion } from "framer-motion";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 export function PageFadeIn({ children }: { children: ReactNode }) {
-  const prefersReduced = useReducedMotion();
+  const [prefersReduced] = useState(() =>
+    typeof window !== "undefined"
+      ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      : false,
+  );
 
   if (prefersReduced) {
     return <>{children}</>;
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.35, ease: "easeOut" }}
+    <div
+      style={{
+        animation: "fade-in 0.35s ease-out both",
+      }}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }

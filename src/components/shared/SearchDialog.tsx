@@ -119,12 +119,12 @@ export function SearchDialog() {
     <div className="fixed inset-0 z-[100]" role="dialog" aria-modal="true">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in"
         onClick={() => setOpen(false)}
       />
 
       {/* Dialog */}
-      <div className="relative max-w-[640px] mx-auto mt-[15vh] bg-surface-container-high/95 backdrop-blur-xl border border-white/5 shadow-[0_40px_80px_rgba(0,0,0,0.5)]">
+      <div className="relative max-w-[640px] mx-auto mt-[15vh] bg-surface-container-high/95 backdrop-blur-xl border border-white/5 shadow-[0_40px_80px_rgba(0,0,0,0.5)] animate-scale-in">
         {/* Input */}
         <div className="flex items-center gap-3 px-5 py-4 border-b border-white/5">
           <Search size={18} className="text-white/30 flex-shrink-0" />

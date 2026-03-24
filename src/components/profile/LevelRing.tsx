@@ -1,8 +1,7 @@
 "use client";
 
-import { motion, useReducedMotion, type Transition } from "framer-motion";
 import Image from "next/image";
-import type { CSSProperties } from "react";
+import { useState, type CSSProperties } from "react";
 
 interface LevelRingProps {
   ring: { border?: string; style?: CSSProperties };
@@ -10,95 +9,67 @@ interface LevelRingProps {
   displayName: string;
 }
 
-export function LevelRing({ ring, image, displayName }: LevelRingProps) {
-  const prefersReduced = useReducedMotion();
+function getGlowColor(border?: string): string {
+  if (border?.includes("primary")) return "rgba(161,255,194,VAL)";
+  if (border?.includes("tertiary")) return "rgba(129,233,255,VAL)";
+  return "rgba(216,115,255,VAL)";
+}
 
-  const pulse = prefersReduced
-    ? {}
-    : {
-        animate: {
-          boxShadow: ring.style
-            ? [
-                "0 0 20px rgba(161,255,194,0.3)",
-                "0 0 35px rgba(161,255,194,0.5)",
-                "0 0 20px rgba(161,255,194,0.3)",
-              ]
-            : undefined,
-        },
-        transition: { duration: 3, repeat: Infinity, ease: "easeInOut" } as Transition,
-      };
+export function LevelRing({ ring, image, displayName }: LevelRingProps) {
+  const [prefersReduced] = useState(() =>
+    typeof window !== "undefined"
+      ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      : false,
+  );
+
+  const avatarContent = image ? (
+    <Image
+      src={image}
+      alt={displayName}
+      width={112}
+      height={112}
+      className="w-full h-full rounded-full object-cover"
+    />
+  ) : (
+    <div className="w-full h-full rounded-full bg-surface-container-highest flex items-center justify-center font-headline font-black text-2xl text-primary">
+      {displayName.slice(0, 2).toUpperCase()}
+    </div>
+  );
 
   if (ring.style) {
+    const glowTemplate = "rgba(161,255,194,VAL)";
     return (
-      <motion.div
-        {...pulse}
+      <div
+        className={prefersReduced ? "" : "animate-glow-pulse"}
         style={{
           ...ring.style,
           padding: "4px",
           borderRadius: "50%",
           display: "inline-block",
+          boxShadow: prefersReduced ? undefined : `0 0 20px ${glowTemplate.replace("VAL", "0.3")}`,
         }}
       >
         <div className="w-28 h-28 rounded-full overflow-hidden bg-surface-container-highest">
-          {image ? (
-            <Image
-              src={image}
-              alt={displayName}
-              width={112}
-              height={112}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center font-headline font-black text-2xl text-primary">
-              {displayName.slice(0, 2).toUpperCase()}
-            </div>
-          )}
+          {avatarContent}
         </div>
-      </motion.div>
+      </div>
     );
   }
 
+  const glowBase = getGlowColor(ring.border);
+
   return (
-    <motion.div
-      className={`w-32 h-32 rounded-full border-4 ${ring.border} p-1.5`}
-      animate={
+    <div
+      className={`w-32 h-32 rounded-full border-4 ${ring.border} p-1.5 ${prefersReduced ? "" : "animate-glow-pulse"}`}
+      style={
         prefersReduced
-          ? {}
+          ? undefined
           : {
-              boxShadow: [
-                ring.border?.includes("primary")
-                  ? "0 0 15px rgba(161,255,194,0.2)"
-                  : ring.border?.includes("tertiary")
-                    ? "0 0 15px rgba(129,233,255,0.2)"
-                    : "0 0 15px rgba(216,115,255,0.2)",
-                ring.border?.includes("primary")
-                  ? "0 0 28px rgba(161,255,194,0.4)"
-                  : ring.border?.includes("tertiary")
-                    ? "0 0 28px rgba(129,233,255,0.4)"
-                    : "0 0 28px rgba(216,115,255,0.4)",
-                ring.border?.includes("primary")
-                  ? "0 0 15px rgba(161,255,194,0.2)"
-                  : ring.border?.includes("tertiary")
-                    ? "0 0 15px rgba(129,233,255,0.2)"
-                    : "0 0 15px rgba(216,115,255,0.2)",
-              ],
+              boxShadow: `0 0 15px ${glowBase.replace("VAL", "0.2")}`,
             }
       }
-      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
     >
-      {image ? (
-        <Image
-          src={image}
-          alt={displayName}
-          width={116}
-          height={116}
-          className="w-full h-full rounded-full object-cover"
-        />
-      ) : (
-        <div className="w-full h-full rounded-full bg-surface-container-highest flex items-center justify-center font-headline font-black text-2xl text-primary">
-          {displayName.slice(0, 2).toUpperCase()}
-        </div>
-      )}
-    </motion.div>
+      {avatarContent}
+    </div>
   );
 }

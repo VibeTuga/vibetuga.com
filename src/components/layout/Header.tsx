@@ -51,7 +51,7 @@ export function Header({ user }: { user?: SessionUser | null }) {
                 "transition-colors duration-200",
                 isActive(link.href)
                   ? "text-primary border-b-2 border-primary pb-1"
-                  : "text-white/60 hover:text-white",
+                  : "text-white/60 hover:text-white nav-link-hover",
               )}
             >
               {link.label}
@@ -76,7 +76,7 @@ export function Header({ user }: { user?: SessionUser | null }) {
           ) : (
             <Link
               href="/login"
-              className="hidden sm:inline-flex items-center gap-2 px-4 py-2 bg-primary text-on-primary font-bold text-sm hover:shadow-[0_0_15px_rgba(161,255,194,0.4)] transition-all"
+              className="hidden sm:inline-flex items-center gap-2 px-4 py-2 bg-primary text-on-primary font-bold text-sm hover:shadow-[0_0_15px_rgba(161,255,194,0.4)] active:scale-95 transition-all"
             >
               Entrar
             </Link>

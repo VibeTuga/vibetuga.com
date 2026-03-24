@@ -1,19 +1,28 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Bookmark } from "lucide-react";
-import { motion, useReducedMotion } from "framer-motion";
 
 export function BookmarkButton({ postId }: { postId: string }) {
   const [bookmarked, setBookmarked] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [popKey, setPopKey] = useState(0);
-  const prefersReduced = useReducedMotion();
+  const iconRef = useRef<HTMLSpanElement>(null);
+  const prefersReducedRef = useRef(false);
 
   useEffect(() => {
+    prefersReducedRef.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const key = `vt-bookmarked-${postId}`;
     setBookmarked(sessionStorage.getItem(key) === "1");
   }, [postId]);
+
+  function pop() {
+    const el = iconRef.current;
+    if (!el || prefersReducedRef.current) return;
+    el.animate(
+      [{ transform: "scale(1)" }, { transform: "scale(1.3)" }, { transform: "scale(1)" }],
+      { duration: 250, easing: "ease-out" },
+    );
+  }
 
   async function toggle() {
     if (loading) return;
@@ -21,7 +30,7 @@ export function BookmarkButton({ postId }: { postId: string }) {
 
     const was = bookmarked;
     setBookmarked(!was);
-    setPopKey((k) => k + 1);
+    pop();
 
     try {
       const res = await fetch(`/api/blog/posts/${postId}/bookmark`, { method: "POST" });
@@ -58,14 +67,9 @@ export function BookmarkButton({ postId }: { postId: string }) {
       }`}
       aria-label={bookmarked ? "Remover bookmark" : "Guardar"}
     >
-      <motion.span
-        key={prefersReduced ? undefined : popKey}
-        animate={prefersReduced ? {} : { scale: [1, 1.3, 1] }}
-        transition={{ duration: 0.25, ease: "easeOut" }}
-        style={{ display: "inline-flex" }}
-      >
+      <span ref={iconRef} style={{ display: "inline-flex" }}>
         <Bookmark size={16} className={`transition-colors ${bookmarked ? "fill-current" : ""}`} />
-      </motion.span>
+      </span>
       {bookmarked ? "Guardado" : "Guardar"}
     </button>
   );

@@ -1,7 +1,6 @@
 "use client";
 
-import { useReducedMotion, motion } from "framer-motion";
-import type { ReactNode } from "react";
+import { useRef, useEffect, useState, type ReactNode } from "react";
 
 interface AnimatedPodiumItemProps {
   children: ReactNode;
@@ -10,24 +9,52 @@ interface AnimatedPodiumItemProps {
 }
 
 export function AnimatedPodiumItem({ children, index, className }: AnimatedPodiumItemProps) {
-  const prefersReduced = useReducedMotion();
+  const ref = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const [prefersReduced] = useState(() =>
+    typeof window !== "undefined"
+      ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      : false,
+  );
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || prefersReduced) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [prefersReduced]);
 
   if (prefersReduced) {
     return <div className={className}>{children}</div>;
   }
 
   const isCenter = index === 1;
+  const distance = isCenter ? 40 : 24;
+  const delay = index * 0.12 + 0.1;
 
   return (
-    <motion.div
+    <div
+      ref={ref}
       className={className}
-      initial={{ opacity: 0, y: isCenter ? 40 : 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: index * 0.12 + 0.1, duration: 0.55, ease: "easeOut" }}
+      style={{
+        opacity: isVisible ? undefined : 0,
+        animation: isVisible ? `fade-up ${0.55}s ease-out ${delay}s both` : "none",
+        ["--animate-distance" as string]: `${distance}px`,
+      }}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }
 
@@ -38,21 +65,46 @@ interface AnimatedTableRowProps {
 }
 
 export function AnimatedTableRow({ children, index, className }: AnimatedTableRowProps) {
-  const prefersReduced = useReducedMotion();
+  const ref = useRef<HTMLTableRowElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const [prefersReduced] = useState(() =>
+    typeof window !== "undefined"
+      ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      : false,
+  );
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || prefersReduced) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [prefersReduced]);
 
   if (prefersReduced) {
     return <tr className={className}>{children}</tr>;
   }
 
   return (
-    <motion.tr
+    <tr
+      ref={ref}
       className={className}
-      initial={{ opacity: 0, x: -10 }}
-      whileInView={{ opacity: 1, x: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: index * 0.05, duration: 0.35, ease: "easeOut" }}
+      style={{
+        opacity: isVisible ? undefined : 0,
+        animation: isVisible ? `slide-row 0.35s ease-out ${index * 0.05}s both` : "none",
+      }}
     >
       {children}
-    </motion.tr>
+    </tr>
   );
 }
