@@ -16,6 +16,8 @@ import { TableOfContents } from "@/components/blog/TableOfContents";
 import { getArticleJsonLd } from "@/lib/jsonld";
 import { BarChart3 } from "lucide-react";
 import { auth } from "@/lib/auth";
+import { getSeriesForPost } from "@/lib/db/queries/series";
+import { SeriesNavigation } from "@/components/blog/SeriesNavigation";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -66,7 +68,10 @@ export default async function BlogPostPage({ params }: Props) {
 
   if (!post) notFound();
 
-  const { prev, next } = await getAdjacentPosts(post.publishedAt, post.id);
+  const [{ prev, next }, seriesInfo] = await Promise.all([
+    getAdjacentPosts(post.publishedAt, post.id),
+    getSeriesForPost(post.id),
+  ]);
   const accent = getCategoryAccent(post.categoryColor);
   const authorName = post.authorDisplayName || post.authorName || "Anónimo";
 
@@ -180,6 +185,9 @@ export default async function BlogPostPage({ params }: Props) {
               </div>
             </div>
           </header>
+
+          {/* Series Navigation */}
+          {seriesInfo && <SeriesNavigation series={seriesInfo} />}
 
           {/* Cover Image */}
           {post.coverImage && (
