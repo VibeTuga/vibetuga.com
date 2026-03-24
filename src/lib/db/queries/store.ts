@@ -96,6 +96,8 @@ export const getProductBySlug = cache(async (slug: string) => {
       status: storeProducts.status,
       coverImage: storeProducts.coverImage,
       tags: storeProducts.tags,
+      previewContent: storeProducts.previewContent,
+      demoUrl: storeProducts.demoUrl,
       createdAt: storeProducts.createdAt,
       updatedAt: storeProducts.updatedAt,
       sellerName: users.discordUsername,

@@ -22,6 +22,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
         coverImage: storeProducts.coverImage,
         tags: storeProducts.tags,
         downloadKey: storeProducts.downloadKey,
+        previewContent: storeProducts.previewContent,
+        demoUrl: storeProducts.demoUrl,
         stripePriceId: storeProducts.stripePriceId,
         createdAt: storeProducts.createdAt,
         updatedAt: storeProducts.updatedAt,
@@ -89,6 +91,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       coverImage,
       tags,
       downloadKey,
+      previewContent,
+      demoUrl,
       status,
     } = body;
 
@@ -103,6 +107,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     if (coverImage !== undefined) updates.coverImage = coverImage || null;
     if (tags !== undefined) updates.tags = tags;
     if (downloadKey !== undefined) updates.downloadKey = downloadKey || null;
+    if (previewContent !== undefined) updates.previewContent = previewContent || null;
+    if (demoUrl !== undefined) updates.demoUrl = demoUrl || null;
 
     // Only admins can change status
     if (status !== undefined) {

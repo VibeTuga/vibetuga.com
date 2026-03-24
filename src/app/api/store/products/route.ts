@@ -99,8 +99,18 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { title, slug, description, priceCents, productType, coverImage, tags, downloadKey } =
-      body;
+    const {
+      title,
+      slug,
+      description,
+      priceCents,
+      productType,
+      coverImage,
+      tags,
+      downloadKey,
+      previewContent,
+      demoUrl,
+    } = body;
 
     if (!title || !slug || priceCents == null) {
       return NextResponse.json({ error: "Title, slug, and price are required" }, { status: 400 });
@@ -131,6 +141,8 @@ export async function POST(request: Request) {
         coverImage: coverImage || null,
         tags: tags || [],
         downloadKey: downloadKey || null,
+        previewContent: previewContent || null,
+        demoUrl: demoUrl || null,
       })
       .returning();
 
