@@ -20,6 +20,7 @@ import {
   Library,
   Calendar,
   BarChart3,
+  ToggleRight,
 } from "lucide-react";
 import { Logo } from "@/components/shared/Logo";
 import { cn } from "@/lib/utils";
@@ -44,6 +45,7 @@ const adminLinks: readonly {
   { href: "/admin/refunds", label: "Reembolsos", icon: RotateCcw },
   { href: "/admin/role-requests", label: "Pedidos de Role", icon: Shield },
   { href: "/admin/reports", label: "Denúncias", icon: Flag },
+  { href: "/admin/feature-flags", label: "Feature Flags", icon: ToggleRight },
   { href: "/admin/audit-log", label: "Auditoria", icon: ActivitySquare },
   { href: "/admin/categories", label: "Categorias", icon: FolderOpen },
   { href: "/admin/users", label: "Utilizadores", icon: Users },
