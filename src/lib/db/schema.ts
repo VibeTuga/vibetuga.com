@@ -147,6 +147,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   challengeEntries: many(challengeEntries),
   challengeEntryVotes: many(challengeEntryVotes),
   blogSeries: many(blogSeries),
+  blogRevisions: many(blogRevisions),
 }));
 
 // ─── NextAuth Required Tables ───────────────────────────────
@@ -256,6 +257,7 @@ export const blogPostsRelations = relations(blogPosts, ({ one, many }) => ({
   likes: many(blogPostLikes),
   bookmarks: many(blogPostBookmarks),
   seriesEntries: many(blogSeriesPosts),
+  revisions: many(blogRevisions),
 }));
 
 // ─── Blog Comments ──────────────────────────────────────────
@@ -1160,6 +1162,40 @@ export const blogSeriesPostsRelations = relations(blogSeriesPosts, ({ one }) => 
   post: one(blogPosts, {
     fields: [blogSeriesPosts.postId],
     references: [blogPosts.id],
+  }),
+}));
+
+// ─── Blog Revisions ──────────────────────────────────────
+
+export const blogRevisions = pgTable(
+  "blog_revision",
+  {
+    id: serial("id").primaryKey(),
+    postId: uuid("post_id")
+      .notNull()
+      .references(() => blogPosts.id, { onDelete: "cascade" }),
+    title: varchar("title", { length: 500 }).notNull(),
+    content: text("content").notNull(),
+    editedBy: uuid("edited_by").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    revisionNumber: integer("revision_number").notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [
+    uniqueIndex("blog_revision_post_number_idx").on(t.postId, t.revisionNumber),
+    index("blog_revision_post_idx").on(t.postId),
+  ],
+);
+
+export const blogRevisionsRelations = relations(blogRevisions, ({ one }) => ({
+  post: one(blogPosts, {
+    fields: [blogRevisions.postId],
+    references: [blogPosts.id],
+  }),
+  editor: one(users, {
+    fields: [blogRevisions.editedBy],
+    references: [users.id],
   }),
 }));
 

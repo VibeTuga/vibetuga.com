@@ -4,6 +4,7 @@ import { blogPosts } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { logAdminAction, getClientIp } from "@/lib/audit";
+import { createRevision } from "@/lib/db/queries/revisions";
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
@@ -21,19 +22,29 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const { id } = await params;
 
     // Authors can only edit their own posts
-    if (session.user.role === "author") {
-      const [existing] = await db
-        .select({ authorId: blogPosts.authorId })
-        .from(blogPosts)
-        .where(eq(blogPosts.id, id))
-        .limit(1);
-      if (!existing || existing.authorId !== session.user.id) {
-        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-      }
+    const [existing] = await db
+      .select({ authorId: blogPosts.authorId, title: blogPosts.title, content: blogPosts.content })
+      .from(blogPosts)
+      .where(eq(blogPosts.id, id))
+      .limit(1);
+
+    if (!existing) {
+      return NextResponse.json({ error: "Post not found" }, { status: 404 });
+    }
+
+    if (session.user.role === "author" && existing.authorId !== session.user.id) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const body = await request.json();
     const { title, slug, excerpt, content, categoryId, tags, coverImage, status, postType } = body;
+
+    // Auto-create a revision when title or content changes
+    const titleChanged = title !== undefined && title !== existing.title;
+    const contentChanged = content !== undefined && content !== existing.content;
+    if (titleChanged || contentChanged) {
+      await createRevision(id, existing.title, existing.content, session.user.id);
+    }
 
     const updates: Record<string, unknown> = { updatedAt: new Date() };
     if (title !== undefined) updates.title = title;
