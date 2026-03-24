@@ -7,6 +7,7 @@ import { db } from "./db";
 import { users, accounts, sessions, verificationTokens, referrals } from "./db/schema";
 import { awardXP } from "./gamification";
 import { createNotification } from "./notifications";
+import { logger } from "./logger";
 
 function getDiscordAvatarUrl(profile: DiscordProfile) {
   if (!profile.avatar) {
@@ -97,6 +98,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           user.name = discordUsername;
           user.image = discordImage ?? user.image;
         }
+
+        logger.info(
+          { discordId, discordUsername, isNewUser },
+          isNewUser ? "New user sign-in via Discord" : "Returning user sign-in via Discord",
+        );
 
         // Process referral for new users
         if (isNewUser) {

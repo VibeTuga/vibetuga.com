@@ -11,6 +11,7 @@ import {
 import { constructWebhookEvent, stripe, getPlatformFeePercent } from "@/lib/stripe";
 import { awardXP } from "@/lib/gamification";
 import { sendPurchaseReceiptEmail } from "@/lib/email";
+import { logger } from "@/lib/logger";
 import { eq } from "drizzle-orm";
 import type Stripe from "stripe";
 
@@ -44,11 +45,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ received: true, deduplicated: true });
     }
   } catch (err) {
-    console.error("Failed to check webhook idempotency:", err);
+    logger.error({ err, eventId: event.id }, "Failed to check webhook idempotency");
     // Continue processing — better to risk a duplicate than to drop an event
   }
 
   // ─── Process event ─────────────────────────────────────────
+
+  logger.info({ eventType: event.type, eventId: event.id }, "Stripe webhook event received");
 
   try {
     switch (event.type) {
@@ -86,7 +89,10 @@ export async function POST(request: Request) {
         break;
     }
   } catch (err) {
-    console.error(`Failed to process webhook event ${event.type} (${event.id}):`, err);
+    logger.error(
+      { err, eventType: event.type, eventId: event.id },
+      "Failed to process webhook event",
+    );
     return NextResponse.json({ error: "Erro ao processar evento" }, { status: 500 });
   }
 
@@ -98,9 +104,11 @@ export async function POST(request: Request) {
       status: "processed",
     });
   } catch (err) {
-    console.error("Failed to record webhook event:", err);
+    logger.error({ err, eventId: event.id }, "Failed to record webhook event");
     // Non-fatal — event was already processed successfully
   }
+
+  logger.info({ eventType: event.type, eventId: event.id }, "Stripe webhook event processed");
 
   return NextResponse.json({ received: true });
 }
@@ -180,7 +188,7 @@ async function handleCheckoutSessionCompleted(event: Stripe.Event) {
       }
     }
   } catch (transferErr) {
-    console.error("Failed to create Connect transfer:", transferErr);
+    logger.error({ err: transferErr, productId, buyerId }, "Failed to create Connect transfer");
     // Transfer failure should not fail the webhook
   }
 
@@ -218,7 +226,7 @@ async function handleCheckoutSessionCompleted(event: Stripe.Event) {
       }
     }
   } catch (emailErr) {
-    console.error("Failed to send purchase receipt email:", emailErr);
+    logger.error({ err: emailErr, buyerId, productId }, "Failed to send purchase receipt email");
   }
 }
 
