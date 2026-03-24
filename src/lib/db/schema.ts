@@ -154,6 +154,8 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   storeCoupons: many(storeCoupons),
   storeRefundsBuyer: many(storeRefunds, { relationName: "refundBuyer" }),
   storeRefundsResolved: many(storeRefunds, { relationName: "refundResolver" }),
+  communityEvents: many(communityEvents),
+  apiKeys: many(apiKeys),
 }));
 
 // ─── NextAuth Required Tables ───────────────────────────────
@@ -1432,6 +1434,72 @@ export const storeCollectionProductsRelations = relations(storeCollectionProduct
   product: one(storeProducts, {
     fields: [storeCollectionProducts.productId],
     references: [storeProducts.id],
+  }),
+}));
+
+// ─── Community Events ──────────────────────────────────────
+
+export const eventTypeEnum = pgEnum("event_type", [
+  "stream",
+  "workshop",
+  "challenge",
+  "meetup",
+  "other",
+]);
+
+export const communityEvents = pgTable(
+  "community_event",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    title: varchar("title", { length: 200 }).notNull(),
+    description: text("description"),
+    eventType: eventTypeEnum("event_type").default("other").notNull(),
+    startAt: timestamp("start_at", { mode: "date" }).notNull(),
+    endAt: timestamp("end_at", { mode: "date" }),
+    link: varchar("link", { length: 512 }),
+    coverImage: varchar("cover_image", { length: 512 }),
+    createdBy: uuid("created_by").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [
+    index("community_event_start_idx").on(t.startAt),
+    index("community_event_type_idx").on(t.eventType),
+  ],
+);
+
+export const communityEventsRelations = relations(communityEvents, ({ one }) => ({
+  creator: one(users, {
+    fields: [communityEvents.createdBy],
+    references: [users.id],
+  }),
+}));
+
+// ─── API Keys ─────────────────────────────────────────────
+
+export const apiKeys = pgTable(
+  "api_key",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    keyHash: varchar("key_hash", { length: 255 }).notNull(),
+    name: varchar("name", { length: 100 }).notNull(),
+    scopes: text("scopes").array().default([]).notNull(),
+    lastUsedAt: timestamp("last_used_at", { mode: "date" }),
+    expiresAt: timestamp("expires_at", { mode: "date" }),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [index("api_key_user_idx").on(t.userId), index("api_key_hash_idx").on(t.keyHash)],
+);
+
+export const apiKeysRelations = relations(apiKeys, ({ one }) => ({
+  user: one(users, {
+    fields: [apiKeys.userId],
+    references: [users.id],
   }),
 }));
 
