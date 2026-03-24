@@ -20,6 +20,7 @@ export async function GET() {
         viewsCount: blogPosts.viewsCount,
         likesCount: blogPosts.likesCount,
         publishedAt: blogPosts.publishedAt,
+        scheduledPublishAt: blogPosts.scheduledPublishAt,
         createdAt: blogPosts.createdAt,
         authorName: users.discordUsername,
         categoryName: blogCategories.name,
@@ -48,7 +49,18 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { title, slug, excerpt, content, categoryId, tags, coverImage, status, postType } = body;
+    const {
+      title,
+      slug,
+      excerpt,
+      content,
+      categoryId,
+      tags,
+      coverImage,
+      status,
+      postType,
+      scheduledPublishAt,
+    } = body;
 
     if (!title || !slug || !content) {
       return NextResponse.json({ error: "Title, slug, and content are required" }, { status: 400 });
@@ -76,8 +88,16 @@ export async function POST(request: Request) {
     const readingTimeMinutes = Math.max(1, Math.ceil(content.split(/\s+/).length / 200));
 
     // Force community submissions to pending_review
-    const finalStatus = isPrivileged ? status || "draft" : "pending_review";
     const finalPostType = isPrivileged ? postType || "admin" : "community";
+
+    // Handle scheduled publishing: if scheduledPublishAt is in the future, keep as draft
+    const parsedSchedule = scheduledPublishAt ? new Date(scheduledPublishAt) : null;
+    const isScheduled = parsedSchedule && parsedSchedule > new Date();
+    const finalStatus = !isPrivileged
+      ? "pending_review"
+      : isScheduled
+        ? "draft"
+        : status || "draft";
 
     const [post] = await db
       .insert(blogPosts)
@@ -94,6 +114,7 @@ export async function POST(request: Request) {
         postType: finalPostType,
         readingTimeMinutes,
         publishedAt: finalStatus === "published" ? new Date() : null,
+        scheduledPublishAt: isScheduled ? parsedSchedule : null,
       })
       .returning();
 
