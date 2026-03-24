@@ -587,6 +587,8 @@ export const storePurchases = pgTable(
     pricePaidCents: integer("price_paid_cents").notNull(),
     stripePaymentId: varchar("stripe_payment_id", { length: 255 }),
     stripeTransferId: varchar("stripe_transfer_id", { length: 255 }),
+    couponCode: varchar("coupon_code", { length: 50 }),
+    discountCents: integer("discount_cents"),
     createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
   },
   (t) => [

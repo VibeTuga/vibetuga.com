@@ -1,7 +1,16 @@
 import { cache } from "react";
 import { db } from "@/lib/db";
-import { storeProducts, storePurchases, storeReviews, users } from "@/lib/db/schema";
-import { eq, desc, and, or, count, sql, ilike } from "drizzle-orm";
+import {
+  storeProducts,
+  storePurchases,
+  storeReviews,
+  storeWishlists,
+  productUpdates,
+  storeCollections,
+  storeCollectionProducts,
+  users,
+} from "@/lib/db/schema";
+import { eq, desc, and, or, count, sql, ilike, asc, gte } from "drizzle-orm";
 
 const PRODUCTS_PER_PAGE = 12;
 
@@ -197,9 +206,195 @@ export const getUserPurchases = cache(async (userId: string) => {
     .orderBy(desc(storePurchases.createdAt));
 });
 
+// ─── Seller Analytics ──────────────────────────────────────
+
+export const getSellerAnalytics = cache(async (sellerId: string) => {
+  const [totals] = await db
+    .select({
+      totalRevenue: sql<number>`coalesce(sum(${storePurchases.pricePaidCents}), 0)::int`,
+      totalSales: sql<number>`count(${storePurchases.id})::int`,
+    })
+    .from(storePurchases)
+    .innerJoin(storeProducts, eq(storePurchases.productId, storeProducts.id))
+    .where(eq(storeProducts.sellerId, sellerId));
+
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const dailySales = await db
+    .select({
+      date: sql<string>`to_char(${storePurchases.createdAt}::date, 'YYYY-MM-DD')`.as("date"),
+      sales: sql<number>`count(${storePurchases.id})::int`.as("sales"),
+      revenue: sql<number>`coalesce(sum(${storePurchases.pricePaidCents}), 0)::int`.as("revenue"),
+    })
+    .from(storePurchases)
+    .innerJoin(storeProducts, eq(storePurchases.productId, storeProducts.id))
+    .where(and(eq(storeProducts.sellerId, sellerId), gte(storePurchases.createdAt, thirtyDaysAgo)))
+    .groupBy(sql`${storePurchases.createdAt}::date`)
+    .orderBy(sql`${storePurchases.createdAt}::date`);
+
+  const topProducts = await db
+    .select({
+      id: storeProducts.id,
+      title: storeProducts.title,
+      slug: storeProducts.slug,
+      productType: storeProducts.productType,
+      priceCents: storeProducts.priceCents,
+      salesCount: sql<number>`count(${storePurchases.id})::int`.as("sales_count"),
+      revenue: sql<number>`coalesce(sum(${storePurchases.pricePaidCents}), 0)::int`.as("revenue"),
+    })
+    .from(storeProducts)
+    .leftJoin(storePurchases, eq(storeProducts.id, storePurchases.productId))
+    .where(eq(storeProducts.sellerId, sellerId))
+    .groupBy(storeProducts.id)
+    .orderBy(desc(sql`coalesce(sum(${storePurchases.pricePaidCents}), 0)`))
+    .limit(10);
+
+  return {
+    totalRevenue: totals?.totalRevenue ?? 0,
+    totalSales: totals?.totalSales ?? 0,
+    dailySales,
+    topProducts,
+  };
+});
+
+// ─── Wishlist ──────────────────────────────────────────────
+
+export const getUserWishlist = cache(async (userId: string) => {
+  return db
+    .select({
+      id: storeWishlists.id,
+      productId: storeWishlists.productId,
+      createdAt: storeWishlists.createdAt,
+      title: storeProducts.title,
+      slug: storeProducts.slug,
+      priceCents: storeProducts.priceCents,
+      productType: storeProducts.productType,
+      coverImage: storeProducts.coverImage,
+      sellerName: users.discordUsername,
+      sellerDisplayName: users.displayName,
+    })
+    .from(storeWishlists)
+    .innerJoin(storeProducts, eq(storeWishlists.productId, storeProducts.id))
+    .leftJoin(users, eq(storeProducts.sellerId, users.id))
+    .where(eq(storeWishlists.userId, userId))
+    .orderBy(desc(storeWishlists.createdAt));
+});
+
+export const getUserWishlistProductIds = cache(async (userId: string) => {
+  const rows = await db
+    .select({ productId: storeWishlists.productId })
+    .from(storeWishlists)
+    .where(eq(storeWishlists.userId, userId));
+  return rows.map((r) => r.productId);
+});
+
+// ─── Product Updates ───────────────────────────────────────
+
+export const getProductUpdates = cache(async (productId: string) => {
+  return db
+    .select()
+    .from(productUpdates)
+    .where(eq(productUpdates.productId, productId))
+    .orderBy(desc(productUpdates.createdAt));
+});
+
+// ─── Collections ───────────────────────────────────────────
+
+export const getCollections = cache(async () => {
+  return db
+    .select({
+      id: storeCollections.id,
+      name: storeCollections.name,
+      slug: storeCollections.slug,
+      description: storeCollections.description,
+      coverImage: storeCollections.coverImage,
+      isFeatured: storeCollections.isFeatured,
+      sortOrder: storeCollections.sortOrder,
+      createdAt: storeCollections.createdAt,
+      productCount: sql<number>`count(${storeCollectionProducts.productId})::int`.as(
+        "product_count",
+      ),
+    })
+    .from(storeCollections)
+    .leftJoin(
+      storeCollectionProducts,
+      eq(storeCollections.id, storeCollectionProducts.collectionId),
+    )
+    .groupBy(storeCollections.id)
+    .orderBy(asc(storeCollections.sortOrder), desc(storeCollections.createdAt));
+});
+
+export const getFeaturedCollections = cache(async (limit = 3) => {
+  return db
+    .select({
+      id: storeCollections.id,
+      name: storeCollections.name,
+      slug: storeCollections.slug,
+      description: storeCollections.description,
+      coverImage: storeCollections.coverImage,
+      productCount: sql<number>`count(${storeCollectionProducts.productId})::int`.as(
+        "product_count",
+      ),
+    })
+    .from(storeCollections)
+    .leftJoin(
+      storeCollectionProducts,
+      eq(storeCollections.id, storeCollectionProducts.collectionId),
+    )
+    .where(eq(storeCollections.isFeatured, true))
+    .groupBy(storeCollections.id)
+    .orderBy(asc(storeCollections.sortOrder))
+    .limit(limit);
+});
+
+export const getCollectionBySlug = cache(async (slug: string) => {
+  const [collection] = await db
+    .select()
+    .from(storeCollections)
+    .where(eq(storeCollections.slug, slug))
+    .limit(1);
+
+  if (!collection) return null;
+
+  const products = await db
+    .select({
+      id: storeProducts.id,
+      title: storeProducts.title,
+      slug: storeProducts.slug,
+      description: storeProducts.description,
+      priceCents: storeProducts.priceCents,
+      productType: storeProducts.productType,
+      coverImage: storeProducts.coverImage,
+      tags: storeProducts.tags,
+      sellerName: users.discordUsername,
+      sellerDisplayName: users.displayName,
+      sellerImage: users.image,
+      avgRating: sql<number>`coalesce(avg(${storeReviews.rating})::numeric(2,1), 0)`.as(
+        "avg_rating",
+      ),
+      reviewCount: sql<number>`count(${storeReviews.id})::int`.as("review_count"),
+    })
+    .from(storeCollectionProducts)
+    .innerJoin(storeProducts, eq(storeCollectionProducts.productId, storeProducts.id))
+    .leftJoin(users, eq(storeProducts.sellerId, users.id))
+    .leftJoin(storeReviews, eq(storeProducts.id, storeReviews.productId))
+    .where(eq(storeCollectionProducts.collectionId, collection.id))
+    .groupBy(storeProducts.id, storeCollectionProducts.sortOrder, users.id)
+    .orderBy(asc(storeCollectionProducts.sortOrder));
+
+  return { ...collection, products };
+});
+
+// ─── Types ─────────────────────────────────────────────────
+
 export type StoreProduct = Awaited<ReturnType<typeof getApprovedProducts>>["products"][number];
 export type StoreProductDetail = NonNullable<Awaited<ReturnType<typeof getProductBySlug>>>;
 export type SellerProduct = Awaited<ReturnType<typeof getSellerProducts>>[number];
 export type PendingProduct = Awaited<ReturnType<typeof getPendingProducts>>[number];
 export type AdminProduct = Awaited<ReturnType<typeof getProductsForAdmin>>[number];
 export type UserPurchase = Awaited<ReturnType<typeof getUserPurchases>>[number];
+export type SellerAnalytics = Awaited<ReturnType<typeof getSellerAnalytics>>;
+export type WishlistItem = Awaited<ReturnType<typeof getUserWishlist>>[number];
+export type CollectionWithCount = Awaited<ReturnType<typeof getCollections>>[number];
+export type CollectionDetail = NonNullable<Awaited<ReturnType<typeof getCollectionBySlug>>>;
