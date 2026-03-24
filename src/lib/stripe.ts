@@ -69,3 +69,49 @@ export function constructWebhookEvent(body: string | Buffer, signature: string) 
 
   return stripe.webhooks.constructEvent(body, signature, webhookSecret);
 }
+
+// ─── Stripe Connect Helpers ──────────────────────────────────
+
+export async function createConnectAccount(userId: string, email: string) {
+  const account = await stripe.accounts.create({
+    type: "express",
+    email,
+    metadata: { vibetuga_user_id: userId },
+  });
+  return account.id;
+}
+
+export async function createAccountLink(accountId: string, refreshUrl: string, returnUrl: string) {
+  const link = await stripe.accountLinks.create({
+    account: accountId,
+    refresh_url: refreshUrl,
+    return_url: returnUrl,
+    type: "account_onboarding",
+  });
+  return link.url;
+}
+
+export async function getAccountStatus(accountId: string) {
+  const account = await stripe.accounts.retrieve(accountId);
+  return {
+    chargesEnabled: account.charges_enabled ?? false,
+    payoutsEnabled: account.payouts_enabled ?? false,
+  };
+}
+
+export async function getAccountBalance(accountId: string) {
+  const balance = await stripe.balance.retrieve({
+    stripeAccount: accountId,
+  });
+  return balance;
+}
+
+export async function createLoginLink(accountId: string) {
+  const link = await stripe.accounts.createLoginLink(accountId);
+  return link.url;
+}
+
+export function getPlatformFeePercent() {
+  const fee = parseInt(process.env.STRIPE_CONNECT_PLATFORM_FEE_PERCENT ?? "15", 10);
+  return Number.isNaN(fee) ? 15 : fee;
+}

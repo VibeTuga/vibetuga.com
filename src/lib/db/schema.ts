@@ -111,6 +111,8 @@ export const users = pgTable("user", {
   streakDays: integer("streak_days").default(0).notNull(),
   isBanned: boolean("is_banned").default(false).notNull(),
   isVerified: boolean("is_verified").default(false).notNull(),
+  stripeConnectAccountId: varchar("stripe_connect_account_id", { length: 255 }),
+  stripeConnectOnboarded: boolean("stripe_connect_onboarded").default(false).notNull(),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
 });
@@ -577,6 +579,7 @@ export const storePurchases = pgTable(
       .references(() => storeProducts.id),
     pricePaidCents: integer("price_paid_cents").notNull(),
     stripePaymentId: varchar("stripe_payment_id", { length: 255 }),
+    stripeTransferId: varchar("stripe_transfer_id", { length: 255 }),
     createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
   },
   (t) => [
