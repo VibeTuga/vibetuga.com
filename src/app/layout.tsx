@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Space_Grotesk, Inter } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { cn } from "@/lib/utils";
+import { CookieConsent } from "@/components/shared/CookieConsent";
 import "./globals.css";
 
 const geist = Geist({
@@ -50,6 +51,7 @@ export default function RootLayout({
     >
       <body className="scanlines min-h-full flex flex-col bg-background text-on-background font-body selection:bg-primary selection:text-on-primary">
         {children}
+        <CookieConsent />
         <SpeedInsights />
       </body>
     </html>
