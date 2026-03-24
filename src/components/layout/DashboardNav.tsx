@@ -12,7 +12,6 @@ import {
   Heart,
   Home,
   Key,
-  LayoutDashboard,
   Layers,
   Menu,
   MessageCircle,
@@ -24,37 +23,79 @@ import {
   User,
   Wallet,
   X,
+  type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const dashboardLinks = [
-  { href: "/dashboard", label: "Início", icon: LayoutDashboard, exact: true },
-  { href: "/dashboard/profile", label: "Meu Perfil", icon: User },
-  { href: "/dashboard/submit-post", label: "Submeter Post", icon: FileText },
-  { href: "/dashboard/submit-project", label: "Submeter Projeto", icon: Layers },
-  { href: "/dashboard/my-series", label: "Séries", icon: BookOpen },
-  { href: "/dashboard/my-purchases", label: "Minhas Compras", icon: ShoppingBag },
-  { href: "/dashboard/wishlist", label: "Lista de Desejos", icon: Heart },
-  { href: "/dashboard/messages", label: "Mensagens", icon: MessageCircle },
-  { href: "/dashboard/notifications", label: "Notificações", icon: Bell },
-  { href: "/dashboard/widgets", label: "Widgets", icon: Code },
-  { href: "/dashboard/api-keys", label: "API Keys", icon: Key },
-  { href: "/dashboard/settings", label: "Definições", icon: Settings },
-];
+interface NavItem {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  exact?: boolean;
+}
 
-const sellerLinks = [
-  { href: "/dashboard/my-products", label: "Meus Produtos", icon: Package },
-  { href: "/dashboard/submit-product", label: "Submeter Produto", icon: Plus },
-  { href: "/dashboard/seller-analytics", label: "Análise de Vendas", icon: BarChart3 },
-  { href: "/dashboard/coupons", label: "Cupões", icon: Tag },
-  { href: "/dashboard/seller-payouts", label: "Pagamentos", icon: Wallet },
+interface NavGroup {
+  label: string;
+  items: NavItem[];
+  sellerOnly?: boolean;
+}
+
+const navGroups: NavGroup[] = [
+  {
+    label: "Principal",
+    items: [
+      { href: "/dashboard", label: "Início", icon: Home, exact: true },
+      { href: "/dashboard/profile", label: "Meu Perfil", icon: User },
+    ],
+  },
+  {
+    label: "Conteúdo",
+    items: [
+      { href: "/dashboard/submit-post", label: "Submeter Post", icon: FileText },
+      { href: "/dashboard/submit-project", label: "Submeter Projeto", icon: Layers },
+      { href: "/dashboard/my-series", label: "Séries", icon: BookOpen },
+    ],
+  },
+  {
+    label: "Compras",
+    items: [
+      { href: "/dashboard/my-purchases", label: "Minhas Compras", icon: ShoppingBag },
+      { href: "/dashboard/wishlist", label: "Lista de Desejos", icon: Heart },
+    ],
+  },
+  {
+    label: "Social",
+    items: [
+      { href: "/dashboard/messages", label: "Mensagens", icon: MessageCircle },
+      { href: "/dashboard/notifications", label: "Notificações", icon: Bell },
+    ],
+  },
+  {
+    label: "Ferramentas",
+    items: [
+      { href: "/dashboard/widgets", label: "Widgets", icon: Code },
+      { href: "/dashboard/api-keys", label: "API Keys", icon: Key },
+      { href: "/dashboard/settings", label: "Definições", icon: Settings },
+    ],
+  },
+  {
+    label: "Vendedor",
+    sellerOnly: true,
+    items: [
+      { href: "/dashboard/my-products", label: "Meus Produtos", icon: Package },
+      { href: "/dashboard/submit-product", label: "Submeter Produto", icon: Plus },
+      { href: "/dashboard/seller-analytics", label: "Análise de Vendas", icon: BarChart3 },
+      { href: "/dashboard/coupons", label: "Cupões", icon: Tag },
+      { href: "/dashboard/seller-payouts", label: "Pagamentos", icon: Wallet },
+    ],
+  },
 ];
 
 export function DashboardNav({ canSell }: { canSell: boolean }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const allLinks = canSell ? [...dashboardLinks, ...sellerLinks] : dashboardLinks;
+  const visibleGroups = navGroups.filter((g) => !g.sellerOnly || canSell);
 
   function isActive(href: string, exact?: boolean) {
     if (exact) return pathname === href;
@@ -62,48 +103,16 @@ export function DashboardNav({ canSell }: { canSell: boolean }) {
   }
 
   return (
-    <div className="border-b border-white/5 bg-surface-container-low">
-      <div className="max-w-[1200px] mx-auto px-6 py-3 flex items-center gap-6">
-        <span className="text-[10px] font-mono text-white/30 uppercase tracking-widest">
-          Dashboard
-        </span>
-
-        {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-4">
-          {allLinks.map((link) => {
-            const Icon = link.icon;
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  "flex items-center gap-2 text-xs font-mono uppercase tracking-widest transition-colors",
-                  isActive(
-                    link.href,
-                    "exact" in link ? (link as { exact?: boolean }).exact : undefined,
-                  )
-                    ? "text-primary"
-                    : "text-white/50 hover:text-primary",
-                )}
-              >
-                <Icon size={14} />
-                {link.label}
-              </Link>
-            );
-          })}
-        </nav>
-
-        <div className="ml-auto flex items-center gap-3">
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-xs font-mono text-white/30 uppercase tracking-widest hover:text-white transition-colors"
-          >
-            <Home size={14} />
-            <span className="hidden sm:inline">Voltar</span>
-          </Link>
+    <>
+      {/* Mobile top bar */}
+      <div className="lg:hidden border-b border-white/5 bg-surface-container-low">
+        <div className="flex items-center justify-between px-4 py-3">
+          <span className="text-[10px] font-mono text-white/30 uppercase tracking-widest">
+            Dashboard
+          </span>
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden text-white/60 hover:text-primary transition-colors"
+            className="text-white/60 hover:text-primary transition-colors p-1"
             aria-label={mobileOpen ? "Fechar menu" : "Abrir menu"}
           >
             {mobileOpen ? <X size={20} /> : <Menu size={20} />}
@@ -111,35 +120,81 @@ export function DashboardNav({ canSell }: { canSell: boolean }) {
         </div>
       </div>
 
-      {/* Mobile dropdown */}
+      {/* Mobile overlay */}
       {mobileOpen && (
-        <nav className="md:hidden border-t border-white/5">
-          <div className="flex flex-col px-6 py-2 gap-1">
-            {allLinks.map((link) => {
-              const Icon = link.icon;
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMobileOpen(false)}
-                  className={cn(
-                    "flex items-center gap-3 px-4 py-3 font-mono text-xs uppercase transition-colors",
-                    isActive(
-                      link.href,
-                      "exact" in link ? (link as { exact?: boolean }).exact : undefined,
-                    )
-                      ? "text-primary bg-primary/5"
-                      : "text-white/50 hover:text-primary",
-                  )}
-                >
-                  <Icon size={16} />
-                  <span>{link.label}</span>
-                </Link>
-              );
-            })}
-          </div>
-        </nav>
+        <div
+          className="lg:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+          onClick={() => setMobileOpen(false)}
+        />
       )}
-    </div>
+
+      {/* Sidebar */}
+      <aside
+        className={cn(
+          "fixed top-0 left-0 z-50 h-full w-64 bg-surface-container-low border-r border-white/5 overflow-y-auto transition-transform duration-200",
+          "lg:sticky lg:top-0 lg:translate-x-0 lg:z-auto lg:h-screen lg:shrink-0",
+          mobileOpen ? "translate-x-0" : "-translate-x-full",
+        )}
+      >
+        {/* Sidebar header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
+          <span className="text-[10px] font-mono text-white/30 uppercase tracking-widest">
+            Dashboard
+          </span>
+          <button
+            onClick={() => setMobileOpen(false)}
+            className="lg:hidden text-white/40 hover:text-white transition-colors"
+            aria-label="Fechar menu"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* Nav groups */}
+        <nav className="px-3 py-4 space-y-5">
+          {visibleGroups.map((group) => (
+            <div key={group.label}>
+              <p className="px-3 mb-1.5 text-[10px] font-mono text-white/25 uppercase tracking-widest">
+                {group.label}
+              </p>
+              <ul className="space-y-0.5">
+                {group.items.map((item) => {
+                  const Icon = item.icon;
+                  const active = isActive(item.href, item.exact);
+                  return (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        onClick={() => setMobileOpen(false)}
+                        className={cn(
+                          "flex items-center gap-3 px-3 py-2 rounded-md text-[13px] transition-colors",
+                          active
+                            ? "text-primary bg-primary/8"
+                            : "text-white/50 hover:text-white/80 hover:bg-white/[0.03]",
+                        )}
+                      >
+                        <Icon size={15} className={active ? "text-primary" : "text-white/30"} />
+                        {item.label}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
+        </nav>
+
+        {/* Back to site */}
+        <div className="px-3 pb-6 mt-auto">
+          <Link
+            href="/"
+            className="flex items-center gap-3 px-3 py-2 rounded-md text-[13px] text-white/30 hover:text-white/60 transition-colors"
+          >
+            <Home size={15} />
+            Voltar ao site
+          </Link>
+        </div>
+      </aside>
+    </>
   );
 }

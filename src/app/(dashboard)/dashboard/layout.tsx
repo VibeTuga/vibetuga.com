@@ -21,9 +21,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const canSell = ["admin", "moderator", "seller"].includes(session.user.role);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col lg:flex-row">
       <DashboardNav canSell={canSell} />
-      <main className="max-w-200 mx-auto px-6 py-8">
+      <main className="flex-1 min-w-0 max-w-[1200px] mx-auto px-6 py-8 w-full">
         <PageFadeIn>{children}</PageFadeIn>
       </main>
     </div>
