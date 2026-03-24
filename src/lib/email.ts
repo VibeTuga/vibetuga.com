@@ -212,6 +212,133 @@ export async function sendDigestEmail(email: string, html: string) {
   });
 }
 
+// ─── Purchase Receipt Email ───────────────────────────────────
+
+type PurchaseReceiptData = {
+  productTitle: string;
+  productType: string;
+  sellerName: string;
+  priceCents: number;
+  purchaseDate: Date;
+  downloadKey?: string | null;
+};
+
+const PRODUCT_TYPE_LABELS_PT: Record<string, string> = {
+  skill: "Skill",
+  auto_runner: "Auto Runner",
+  agent_kit: "Agent Kit",
+  prompt_pack: "Prompt Pack",
+  template: "Template",
+  course: "Curso",
+  guide: "Guia",
+  other: "Outro",
+};
+
+function formatEur(cents: number): string {
+  return `€${(cents / 100).toFixed(2).replace(".", ",")}`;
+}
+
+function formatDatePT(date: Date): string {
+  return new Intl.DateTimeFormat("pt-PT", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(date));
+}
+
+export async function sendPurchaseReceiptEmail(email: string, data: PurchaseReceiptData) {
+  const typeLabel = PRODUCT_TYPE_LABELS_PT[data.productType] ?? data.productType;
+  const downloadSection = data.downloadKey
+    ? `<tr>
+        <td style="padding:24px 0 0;">
+          <a href="https://vibetuga.com/api/upload/${escapeHtml(data.downloadKey)}" style="display:inline-block;background:#a1ffc2;color:#0a0a0a;font-weight:900;font-size:12px;text-transform:uppercase;letter-spacing:2px;padding:14px 32px;text-decoration:none;">
+            Descarregar Produto
+          </a>
+        </td>
+      </tr>`
+    : "";
+
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+<body style="margin:0;padding:0;background:#0a0a0a;font-family:Inter,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0a0a;padding:40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background:#111111;max-width:600px;width:100%;">
+          <tr>
+            <td style="padding:40px 48px 32px;border-bottom:2px solid #a1ffc2;">
+              <p style="margin:0;font-size:11px;font-family:monospace;color:#a1ffc2;text-transform:uppercase;letter-spacing:3px;">VibeTuga</p>
+              <h1 style="margin:16px 0 0;font-size:28px;font-weight:900;color:#ffffff;line-height:1.2;">
+                Recibo de Compra
+              </h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:32px 48px;">
+              <p style="margin:0 0 20px;font-size:15px;color:#ffffff99;line-height:1.6;">
+                A tua compra foi processada com sucesso. Aqui estão os detalhes:
+              </p>
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;">
+                <tr>
+                  <td style="padding:12px 0;border-bottom:1px solid #ffffff0d;">
+                    <span style="font-size:11px;font-family:monospace;color:#ffffff44;text-transform:uppercase;letter-spacing:1px;">Produto</span>
+                    <p style="margin:6px 0 0;font-size:16px;font-weight:700;color:#ffffff;">${escapeHtml(data.productTitle)}</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 0;border-bottom:1px solid #ffffff0d;">
+                    <span style="font-size:11px;font-family:monospace;color:#ffffff44;text-transform:uppercase;letter-spacing:1px;">Tipo</span>
+                    <p style="margin:6px 0 0;font-size:14px;color:#a1ffc2;">${escapeHtml(typeLabel)}</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 0;border-bottom:1px solid #ffffff0d;">
+                    <span style="font-size:11px;font-family:monospace;color:#ffffff44;text-transform:uppercase;letter-spacing:1px;">Vendedor</span>
+                    <p style="margin:6px 0 0;font-size:14px;color:#ffffff99;">${escapeHtml(data.sellerName)}</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 0;border-bottom:1px solid #ffffff0d;">
+                    <span style="font-size:11px;font-family:monospace;color:#ffffff44;text-transform:uppercase;letter-spacing:1px;">Preço</span>
+                    <p style="margin:6px 0 0;font-size:20px;font-weight:900;color:#a1ffc2;">${formatEur(data.priceCents)}</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 0;">
+                    <span style="font-size:11px;font-family:monospace;color:#ffffff44;text-transform:uppercase;letter-spacing:1px;">Data</span>
+                    <p style="margin:6px 0 0;font-size:14px;color:#ffffff99;">${escapeHtml(formatDatePT(data.purchaseDate))}</p>
+                  </td>
+                </tr>
+              </table>
+              ${downloadSection}
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:24px 48px;border-top:1px solid #ffffff10;">
+              <p style="margin:0;font-size:11px;color:#ffffff33;font-family:monospace;">
+                Este email serve como recibo da tua compra em vibetuga.com.
+                <br />Questões? Contacta-nos no <a href="https://discord.vibetuga.com" style="color:#a1ffc220;text-decoration:none;">Discord</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+  return sendEmail({
+    to: email,
+    subject: `VibeTuga — Recibo de Compra: ${data.productTitle}`,
+    html,
+  });
+}
+
 // ─── Campaign Send ────────────────────────────────────────────
 
 export async function sendCampaign(campaignId: string) {
