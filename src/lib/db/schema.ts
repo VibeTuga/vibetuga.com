@@ -1503,6 +1503,22 @@ export const apiKeysRelations = relations(apiKeys, ({ one }) => ({
   }),
 }));
 
+// ─── Feature Flags ────────────────────────────────────────
+
+export const featureFlags = pgTable(
+  "feature_flag",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    key: varchar("key", { length: 100 }).unique().notNull(),
+    isEnabled: boolean("is_enabled").default(false).notNull(),
+    rolloutPercentage: integer("rollout_percentage").default(100).notNull(),
+    description: text("description"),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [index("feature_flag_key_idx").on(t.key)],
+);
+
 // ─── Stripe Webhook Events (Idempotency) ─────────────────
 
 export const stripeWebhookEvents = pgTable(
