@@ -61,7 +61,7 @@ function renderProfileSvg(data: {
 
   <!-- Level badge -->
   <rect x="200" y="80" width="${safeLevelName.length * 10 + 60}" height="28" rx="14" fill="#00ff88" fill-opacity="0.12"/>
-  <text x="215" y="99" font-family="'Space Grotesk', 'Segoe UI', Arial, sans-serif" font-size="13" font-weight="600" fill="#00ff88">LVL ${level} &middot; ${safeLevelName}</text>
+  <text x="215" y="99" font-family="'Space Grotesk', 'Segoe UI', Arial, sans-serif" font-size="13" font-weight="600" fill="#00ff88">LVL ${level} &#xB7; ${safeLevelName}</text>
 
   <!-- Stats -->
   <g transform="translate(200, 125)">

@@ -43,6 +43,19 @@ export async function GET() {
 
     const status = await getAccountStatus(user.stripeConnectAccountId);
 
+    // Sync DB flag if Stripe says charges are enabled but DB hasn't been updated
+    // (handles cases where webhook was missed or not configured)
+    if (status.chargesEnabled && !user.stripeConnectOnboarded) {
+      await db
+        .update(users)
+        .set({
+          stripeConnectOnboarded: true,
+          updatedAt: new Date(),
+        })
+        .where(eq(users.id, session.user.id));
+      user.stripeConnectOnboarded = true;
+    }
+
     let balance = null;
     if (user.stripeConnectOnboarded && status.chargesEnabled) {
       try {

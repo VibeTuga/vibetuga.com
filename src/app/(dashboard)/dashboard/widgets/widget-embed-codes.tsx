@@ -84,7 +84,7 @@ function WidgetCard({
       {/* Preview */}
       <div className="px-6 py-6 border-b border-white/5 bg-black/20">
         <p className="text-[10px] font-mono text-white/30 uppercase tracking-widest mb-3">
-          Pr&eacute;-visualiza&ccedil;&atilde;o
+          Pré-visualização
         </p>
         <div className="flex justify-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -119,7 +119,7 @@ export function WidgetEmbedCodes({ userId, displayName, earnedBadges }: WidgetEm
     <div className="space-y-6">
       {/* Profile Widget */}
       <WidgetCard
-        title="Cart&atilde;o de Perfil"
+        title="Cartão de Perfil"
         description={`O teu cartão VibeTuga — ${displayName}`}
         icon={User}
         previewUrl={profileUrl}
@@ -188,7 +188,7 @@ export function WidgetEmbedCodes({ userId, displayName, earnedBadges }: WidgetEm
         <div className="border border-white/5 rounded-xl bg-white/[0.02] p-8 text-center">
           <ImageIcon size={32} className="mx-auto text-white/20 mb-3" />
           <p className="text-sm text-white/40">
-            Ainda n&atilde;o tens badges. Participa na comunidade para desbloquear conquistas!
+            Ainda não tens badges. Participa na comunidade para desbloquear conquistas!
           </p>
         </div>
       )}
