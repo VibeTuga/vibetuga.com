@@ -150,6 +150,10 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   challengeEntryVotes: many(challengeEntryVotes),
   blogSeries: many(blogSeries),
   blogRevisions: many(blogRevisions),
+  storeWishlists: many(storeWishlists),
+  storeCoupons: many(storeCoupons),
+  storeRefundsBuyer: many(storeRefunds, { relationName: "refundBuyer" }),
+  storeRefundsResolved: many(storeRefunds, { relationName: "refundResolver" }),
 }));
 
 // ─── NextAuth Required Tables ───────────────────────────────
@@ -563,6 +567,9 @@ export const storeProductsRelations = relations(storeProducts, ({ one, many }) =
   }),
   purchases: many(storePurchases),
   reviews: many(storeReviews),
+  wishlists: many(storeWishlists),
+  updates: many(productUpdates),
+  collectionEntries: many(storeCollectionProducts),
 }));
 
 // ─── Store Purchases ───────────────────────────────────────
@@ -588,7 +595,7 @@ export const storePurchases = pgTable(
   ],
 );
 
-export const storePurchasesRelations = relations(storePurchases, ({ one }) => ({
+export const storePurchasesRelations = relations(storePurchases, ({ one, many }) => ({
   buyer: one(users, {
     fields: [storePurchases.buyerId],
     references: [users.id],
@@ -597,6 +604,7 @@ export const storePurchasesRelations = relations(storePurchases, ({ one }) => ({
     fields: [storePurchases.productId],
     references: [storeProducts.id],
   }),
+  refunds: many(storeRefunds),
 }));
 
 // ─── Store Reviews ─────────────────────────────────────────
@@ -1227,5 +1235,217 @@ export const contentAnalytics = pgTable(
       t.referralSource,
     ),
     index("content_analytics_content_idx").on(t.contentType, t.contentId),
+  ],
+);
+
+// ─── Store Wishlists ──────────────────────────────────────
+
+export const storeWishlists = pgTable(
+  "store_wishlist",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    productId: uuid("product_id")
+      .notNull()
+      .references(() => storeProducts.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [
+    uniqueIndex("store_wishlist_user_product_idx").on(t.userId, t.productId),
+    index("store_wishlist_user_idx").on(t.userId),
+    index("store_wishlist_product_idx").on(t.productId),
+  ],
+);
+
+export const storeWishlistsRelations = relations(storeWishlists, ({ one }) => ({
+  user: one(users, {
+    fields: [storeWishlists.userId],
+    references: [users.id],
+  }),
+  product: one(storeProducts, {
+    fields: [storeWishlists.productId],
+    references: [storeProducts.id],
+  }),
+}));
+
+// ─── Store Coupons ────────────────────────────────────────
+
+export const storeCoupons = pgTable(
+  "store_coupon",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    code: varchar("code", { length: 50 }).unique().notNull(),
+    sellerId: uuid("seller_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    discountPercent: smallint("discount_percent"),
+    discountAmountCents: integer("discount_amount_cents"),
+    maxUses: integer("max_uses"),
+    currentUses: integer("current_uses").default(0).notNull(),
+    expiresAt: timestamp("expires_at", { mode: "date" }),
+    isActive: boolean("is_active").default(true).notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [
+    index("store_coupon_code_idx").on(t.code),
+    index("store_coupon_seller_idx").on(t.sellerId),
+  ],
+);
+
+export const storeCouponsRelations = relations(storeCoupons, ({ one }) => ({
+  seller: one(users, {
+    fields: [storeCoupons.sellerId],
+    references: [users.id],
+  }),
+}));
+
+// ─── Store Refunds ────────────────────────────────────────
+
+export const refundStatusEnum = pgEnum("refund_status", [
+  "pending",
+  "approved",
+  "rejected",
+  "refunded",
+]);
+
+export const storeRefunds = pgTable(
+  "store_refund",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    purchaseId: uuid("purchase_id")
+      .notNull()
+      .references(() => storePurchases.id, { onDelete: "cascade" }),
+    buyerId: uuid("buyer_id")
+      .notNull()
+      .references(() => users.id),
+    reason: text("reason").notNull(),
+    status: refundStatusEnum("status").default("pending").notNull(),
+    adminNotes: text("admin_notes"),
+    stripeRefundId: varchar("stripe_refund_id", { length: 255 }),
+    resolvedBy: uuid("resolved_by").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    resolvedAt: timestamp("resolved_at", { mode: "date" }),
+  },
+  (t) => [
+    index("store_refund_purchase_idx").on(t.purchaseId),
+    index("store_refund_buyer_idx").on(t.buyerId),
+    index("store_refund_status_idx").on(t.status),
+  ],
+);
+
+export const storeRefundsRelations = relations(storeRefunds, ({ one }) => ({
+  purchase: one(storePurchases, {
+    fields: [storeRefunds.purchaseId],
+    references: [storePurchases.id],
+  }),
+  buyer: one(users, {
+    fields: [storeRefunds.buyerId],
+    references: [users.id],
+    relationName: "refundBuyer",
+  }),
+  resolver: one(users, {
+    fields: [storeRefunds.resolvedBy],
+    references: [users.id],
+    relationName: "refundResolver",
+  }),
+}));
+
+// ─── Product Updates ──────────────────────────────────────
+
+export const productUpdates = pgTable(
+  "product_update",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    productId: uuid("product_id")
+      .notNull()
+      .references(() => storeProducts.id, { onDelete: "cascade" }),
+    version: varchar("version", { length: 50 }).notNull(),
+    changelog: text("changelog").notNull(),
+    downloadKey: varchar("download_key", { length: 512 }),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [index("product_update_product_idx").on(t.productId)],
+);
+
+export const productUpdatesRelations = relations(productUpdates, ({ one }) => ({
+  product: one(storeProducts, {
+    fields: [productUpdates.productId],
+    references: [storeProducts.id],
+  }),
+}));
+
+// ─── Store Collections ────────────────────────────────────
+
+export const storeCollections = pgTable(
+  "store_collection",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: varchar("name", { length: 200 }).notNull(),
+    slug: varchar("slug", { length: 200 }).unique().notNull(),
+    description: text("description"),
+    coverImage: text("cover_image"),
+    isFeatured: boolean("is_featured").default(false).notNull(),
+    sortOrder: integer("sort_order").default(0).notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [
+    index("store_collection_slug_idx").on(t.slug),
+    index("store_collection_featured_idx").on(t.isFeatured),
+  ],
+);
+
+export const storeCollectionsRelations = relations(storeCollections, ({ many }) => ({
+  products: many(storeCollectionProducts),
+}));
+
+// ─── Store Collection Products ────────────────────────────
+
+export const storeCollectionProducts = pgTable(
+  "store_collection_product",
+  {
+    collectionId: uuid("collection_id")
+      .notNull()
+      .references(() => storeCollections.id, { onDelete: "cascade" }),
+    productId: uuid("product_id")
+      .notNull()
+      .references(() => storeProducts.id, { onDelete: "cascade" }),
+    sortOrder: integer("sort_order").default(0).notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.collectionId, t.productId] }),
+    index("store_collection_product_collection_idx").on(t.collectionId),
+    index("store_collection_product_product_idx").on(t.productId),
+  ],
+);
+
+export const storeCollectionProductsRelations = relations(storeCollectionProducts, ({ one }) => ({
+  collection: one(storeCollections, {
+    fields: [storeCollectionProducts.collectionId],
+    references: [storeCollections.id],
+  }),
+  product: one(storeProducts, {
+    fields: [storeCollectionProducts.productId],
+    references: [storeProducts.id],
+  }),
+}));
+
+// ─── Stripe Webhook Events (Idempotency) ─────────────────
+
+export const stripeWebhookEvents = pgTable(
+  "stripe_webhook_event",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    stripeEventId: varchar("stripe_event_id", { length: 255 }).unique().notNull(),
+    eventType: varchar("event_type", { length: 100 }).notNull(),
+    processedAt: timestamp("processed_at", { mode: "date" }).defaultNow().notNull(),
+    status: varchar("status", { length: 50 }).default("processed").notNull(),
+  },
+  (t) => [
+    index("stripe_webhook_event_stripe_id_idx").on(t.stripeEventId),
+    index("stripe_webhook_event_type_idx").on(t.eventType),
   ],
 );
