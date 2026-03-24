@@ -12,6 +12,7 @@
     "prepare": "husky || true",
     "db:seed-blog": "npx tsx --env-file=.env.local src/lib/db/seed-blog.ts",
     "db:merge-seed-users": "npx tsx --env-file=.env.local src/lib/db/merge-seed-users.ts",
+    "db:seed-events": "npx tsx --env-file=.env.local src/lib/db/seed-events-challenges.ts",
     "analyze": "ANALYZE=true next build",
     "test": "vitest",
     "test:ci": "vitest run"
