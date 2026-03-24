@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useState, type CSSProperties } from "react";
+import type { CSSProperties } from "react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 interface LevelRingProps {
   ring: { border?: string; style?: CSSProperties };
@@ -16,11 +17,7 @@ function getGlowColor(border?: string): string {
 }
 
 export function LevelRing({ ring, image, displayName }: LevelRingProps) {
-  const [prefersReduced] = useState(() =>
-    typeof window !== "undefined"
-      ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
-      : false,
-  );
+  const prefersReduced = useReducedMotion();
 
   const avatarContent = image ? (
     <Image

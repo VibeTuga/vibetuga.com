@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState } from "react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 interface CountUpProps {
   end: number;
@@ -12,11 +13,7 @@ interface CountUpProps {
 export function CountUp({ end, duration = 1.5, className, locale = "pt-PT" }: CountUpProps) {
   const ref = useRef<HTMLSpanElement>(null);
   const [display, setDisplay] = useState(end.toLocaleString(locale));
-  const [prefersReduced] = useState(() =>
-    typeof window !== "undefined"
-      ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
-      : false,
-  );
+  const prefersReduced = useReducedMotion();
   const hasAnimated = useRef(false);
 
   useEffect(() => {

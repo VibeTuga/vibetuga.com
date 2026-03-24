@@ -127,10 +127,14 @@ export default function SubmitPostPage() {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Title */}
         <div>
-          <label className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2">
+          <label
+            htmlFor="post-title"
+            className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2"
+          >
             Título *
           </label>
           <input
+            id="post-title"
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -145,10 +149,14 @@ export default function SubmitPostPage() {
 
         {/* Category */}
         <div>
-          <label className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2">
+          <label
+            htmlFor="post-category"
+            className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2"
+          >
             Categoria
           </label>
           <select
+            id="post-category"
             value={categoryId}
             onChange={(e) => setCategoryId(e.target.value)}
             className="w-full bg-surface-container-lowest border border-white/5 focus:border-tertiary/50 text-white text-sm p-4 font-body transition-all outline-none"
@@ -164,10 +172,14 @@ export default function SubmitPostPage() {
 
         {/* Excerpt */}
         <div>
-          <label className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2">
+          <label
+            htmlFor="post-excerpt"
+            className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2"
+          >
             Resumo
           </label>
           <textarea
+            id="post-excerpt"
             value={excerpt}
             onChange={(e) => setExcerpt(e.target.value)}
             rows={2}
@@ -178,10 +190,14 @@ export default function SubmitPostPage() {
 
         {/* Content */}
         <div>
-          <label className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2">
+          <label
+            htmlFor="post-content"
+            className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2"
+          >
             Conteúdo *
           </label>
           <textarea
+            id="post-content"
             value={content}
             onChange={(e) => setContent(e.target.value)}
             required
@@ -193,10 +209,14 @@ export default function SubmitPostPage() {
 
         {/* Tags */}
         <div>
-          <label className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2">
+          <label
+            htmlFor="post-tags"
+            className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2"
+          >
             Tags
           </label>
           <input
+            id="post-tags"
             type="text"
             value={tags}
             onChange={(e) => setTags(e.target.value)}

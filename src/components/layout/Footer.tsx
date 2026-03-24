@@ -60,10 +60,12 @@ function FooterNewsletterForm() {
             $
           </span>
           <input
+            id="footer-newsletter-email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="teu@email.pt"
+            aria-label="Email para newsletter"
             required
             disabled={status === "loading"}
             className="w-full bg-surface-container-lowest border border-white/10 focus:border-primary/30 text-xs py-2 pl-6 pr-3 text-white placeholder:text-white/20 font-mono outline-none transition-all disabled:opacity-50"
@@ -117,7 +119,19 @@ export function Footer() {
           <div className="text-primary font-mono text-[10px] tracking-widest uppercase">
             &copy; {new Date().getFullYear()} VIBETUGA_SYSTEM
           </div>
-          <div className="flex gap-6 font-mono text-[10px] tracking-widest uppercase">
+          <div className="flex flex-wrap gap-6 font-mono text-[10px] tracking-widest uppercase">
+            <Link
+              href="/vibe-coding"
+              className="text-white/30 hover:text-tertiary transition-colors duration-300"
+            >
+              Vibe Coding
+            </Link>
+            <Link
+              href="/ai-tools"
+              className="text-white/30 hover:text-tertiary transition-colors duration-300"
+            >
+              Ferramentas IA
+            </Link>
             <Link
               href="/privacy"
               className="text-white/30 hover:text-tertiary transition-colors duration-300"

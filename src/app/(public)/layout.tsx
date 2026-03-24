@@ -10,7 +10,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
   return (
     <>
       <HeaderServer />
-      <main className="flex-1 pt-20">
+      <main id="main-content" className="flex-1 pt-20">
         <PageFadeIn>{children}</PageFadeIn>
       </main>
       <Footer />
