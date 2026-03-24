@@ -1,7 +1,9 @@
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import { getApprovedProducts } from "@/lib/db/queries/store";
+import Link from "next/link";
+import Image from "next/image";
+import { getApprovedProducts, getFeaturedCollections } from "@/lib/db/queries/store";
 import { ProductCard } from "@/components/store/ProductCard";
 import { Pagination } from "@/components/blog/Pagination";
 import { StoreTypeFilter, StoreSearchInput } from "@/components/store/StoreFilters";
@@ -36,11 +38,14 @@ export default async function StorePage({ searchParams }: { searchParams: Search
   const params = await searchParams;
   const page = Math.max(1, parseInt(params.page ?? "1", 10) || 1);
 
-  const { products, totalPages, currentPage } = await getApprovedProducts({
-    productType: params.type,
-    q: params.q,
-    page,
-  });
+  const [{ products, totalPages, currentPage }, featuredCollections] = await Promise.all([
+    getApprovedProducts({
+      productType: params.type,
+      q: params.q,
+      page,
+    }),
+    getFeaturedCollections(),
+  ]);
 
   const paginationParams: Record<string, string> = {};
   if (params.type) paginationParams.type = params.type;
@@ -50,11 +55,62 @@ export default async function StorePage({ searchParams }: { searchParams: Search
     <div className="max-w-7xl mx-auto px-6 py-8">
       {/* Header */}
       <section className="mb-12">
-        <h1 className="text-4xl md:text-5xl font-black font-headline tracking-tighter text-white mb-2">
-          Loja
-        </h1>
+        <div className="flex items-end justify-between gap-4 mb-2">
+          <h1 className="text-4xl md:text-5xl font-black font-headline tracking-tighter text-white">
+            Loja
+          </h1>
+          <Link
+            href="/store/collections"
+            className="text-xs font-mono text-white/40 uppercase tracking-widest hover:text-primary transition-colors"
+          >
+            Ver Coleções &rarr;
+          </Link>
+        </div>
         <p className="text-white/50 text-lg">Ferramentas, templates e kits para vibe coders.</p>
       </section>
+
+      {/* Featured Collections */}
+      {featuredCollections.length > 0 && (
+        <section className="mb-12">
+          <h2 className="text-[10px] font-mono text-white/40 uppercase tracking-widest mb-4">
+            Coleções em Destaque
+          </h2>
+          <div className="flex gap-4 overflow-x-auto pb-2 -mx-2 px-2 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10">
+            {featuredCollections.map((c) => (
+              <Link
+                key={c.id}
+                href={`/store/collections/${c.slug}`}
+                className="group shrink-0 w-72 bg-surface-container border border-white/5 rounded-xl overflow-hidden hover:border-primary/20 transition-all duration-300"
+              >
+                <div className="relative h-28 bg-black">
+                  {c.coverImage ? (
+                    <Image
+                      src={c.coverImage}
+                      alt={c.name}
+                      fill
+                      className="object-cover opacity-50 group-hover:opacity-70 transition-opacity duration-500"
+                      sizes="288px"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-gradient-to-br from-secondary/20 to-primary/10" />
+                  )}
+                </div>
+                <div className="p-4">
+                  <h3 className="text-sm font-bold text-white font-headline group-hover:text-primary transition-colors mb-1">
+                    {c.name}
+                  </h3>
+                  {c.description && (
+                    <p className="text-xs text-white/40 line-clamp-1 mb-2">{c.description}</p>
+                  )}
+                  <span className="text-[10px] font-mono text-white/30">
+                    {c.productCount} {c.productCount === 1 ? "produto" : "produtos"}
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Filters */}
       <section className="mb-8 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">

@@ -368,6 +368,7 @@ export const getCollectionBySlug = cache(async (slug: string) => {
       productType: storeProducts.productType,
       coverImage: storeProducts.coverImage,
       tags: storeProducts.tags,
+      createdAt: storeProducts.createdAt,
       sellerName: users.discordUsername,
       sellerDisplayName: users.displayName,
       sellerImage: users.image,
