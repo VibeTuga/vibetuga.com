@@ -155,6 +155,13 @@
       "when": 1774320405861,
       "tag": "0021_short_mindworm",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1774326038598,
+      "tag": "0022_ordinary_fixer",
+      "breakpoints": true
     }
   ]
 }

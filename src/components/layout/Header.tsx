@@ -23,6 +23,7 @@ const navLinks = [
   { href: "/blog", label: "Blog" },
   { href: "/showcase", label: "Showcase" },
   { href: "/challenges", label: "Desafios" },
+  { href: "/events", label: "Eventos" },
   { href: "/leaderboard", label: "Leaderboard" },
   { href: "/store", label: "Store" },
 ] as const;

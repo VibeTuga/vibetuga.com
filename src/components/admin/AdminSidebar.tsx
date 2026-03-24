@@ -18,6 +18,8 @@ import {
   Tag,
   RotateCcw,
   Library,
+  Calendar,
+  BarChart3,
 } from "lucide-react";
 import { Logo } from "@/components/shared/Logo";
 import { cn } from "@/lib/utils";
@@ -34,6 +36,8 @@ const adminLinks: readonly {
   { href: "/admin/showcase", label: "Showcase", icon: Rocket },
   { href: "/admin/newsletter", label: "Newsletter", icon: Mail },
   { href: "/admin/challenges", label: "Desafios", icon: Trophy },
+  { href: "/admin/events", label: "Eventos", icon: Calendar },
+  { href: "/admin/analytics", label: "Analíticas", icon: BarChart3 },
   { href: "/admin/store", label: "Loja", icon: ShoppingBag },
   { href: "/admin/collections", label: "Coleções", icon: Library },
   { href: "/admin/coupons", label: "Cupões", icon: Tag },
