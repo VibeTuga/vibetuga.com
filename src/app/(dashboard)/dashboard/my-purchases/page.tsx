@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
-import { getUserPurchases } from "@/lib/db/queries/store";
+import { getUserPurchases, getPurchaseRefunds } from "@/lib/db/queries/store";
 import Link from "next/link";
 import { ShoppingBag, Download, FileText } from "lucide-react";
+import { RefundButton } from "./RefundButton";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -39,7 +40,13 @@ export default async function MyPurchasesPage() {
     redirect("/login");
   }
 
-  const purchases = await getUserPurchases(session.user.id);
+  const [purchases, refunds] = await Promise.all([
+    getUserPurchases(session.user.id),
+    getPurchaseRefunds(session.user.id),
+  ]);
+
+  // Build refund lookup by purchaseId
+  const refundByPurchase = new Map(refunds.map((r) => [r.purchaseId, r]));
 
   return (
     <div>
@@ -72,56 +79,83 @@ export default async function MyPurchasesPage() {
         <div className="space-y-3">
           {purchases.map((purchase) => {
             const typeLabel = PRODUCT_TYPE_LABELS[purchase.productType] ?? purchase.productType;
+            const refund = refundByPurchase.get(purchase.id);
+            const refundData = refund
+              ? {
+                  id: refund.id,
+                  purchaseId: refund.purchaseId,
+                  status: refund.status,
+                  reason: refund.reason,
+                  adminNotes: refund.adminNotes,
+                  createdAt: refund.createdAt.toISOString(),
+                  resolvedAt: refund.resolvedAt?.toISOString() ?? null,
+                }
+              : undefined;
 
             return (
               <div
                 key={purchase.id}
-                className="flex items-center gap-4 p-4 bg-surface-container-lowest border border-white/5 hover:border-white/10 transition-colors"
+                className="p-4 bg-surface-container-lowest border border-white/5 hover:border-white/10 transition-colors"
               >
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Link
-                      href={`/store/${purchase.productSlug}`}
-                      className="text-sm font-bold text-white truncate hover:text-primary transition-colors"
-                    >
-                      {purchase.productTitle}
-                    </Link>
-                    <span className="shrink-0 text-[10px] font-mono px-2 py-0.5 bg-white/5 text-white/40">
-                      {typeLabel}
-                    </span>
+                <div className="flex items-center gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Link
+                        href={`/store/${purchase.productSlug}`}
+                        className="text-sm font-bold text-white truncate hover:text-primary transition-colors"
+                      >
+                        {purchase.productTitle}
+                      </Link>
+                      <span className="shrink-0 text-[10px] font-mono px-2 py-0.5 bg-white/5 text-white/40">
+                        {typeLabel}
+                      </span>
+                      {refund && (
+                        <RefundButton
+                          purchaseId={purchase.id}
+                          purchaseDate={purchase.createdAt.toISOString()}
+                          refund={refundData}
+                        />
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3 text-[10px] font-mono text-white/30">
+                      <span>{formatPrice(purchase.pricePaidCents)}</span>
+                      <span>·</span>
+                      <span>{formatDate(purchase.createdAt)}</span>
+                      {purchase.sellerDisplayName || purchase.sellerName ? (
+                        <>
+                          <span>·</span>
+                          <span>por {purchase.sellerDisplayName ?? purchase.sellerName}</span>
+                        </>
+                      ) : null}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3 text-[10px] font-mono text-white/30">
-                    <span>{formatPrice(purchase.pricePaidCents)}</span>
-                    <span>·</span>
-                    <span>{formatDate(purchase.createdAt)}</span>
-                    {purchase.sellerDisplayName || purchase.sellerName ? (
-                      <>
-                        <span>·</span>
-                        <span>por {purchase.sellerDisplayName ?? purchase.sellerName}</span>
-                      </>
-                    ) : null}
-                  </div>
-                </div>
 
-                <div className="shrink-0 flex items-center gap-2">
-                  <a
-                    href={`/api/store/purchases/${purchase.id}/invoice`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 text-white/50 text-[10px] font-mono uppercase tracking-wider hover:bg-white/10 hover:text-white/70 transition-colors"
-                  >
-                    <FileText size={12} />
-                    Fatura
-                  </a>
-                  {purchase.downloadKey && (
-                    <Link
-                      href={`/api/upload/${purchase.downloadKey}`}
-                      className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary text-[10px] font-mono uppercase tracking-wider hover:bg-primary/20 transition-colors"
+                  <div className="shrink-0 flex items-center gap-2">
+                    {!refund && (
+                      <RefundButton
+                        purchaseId={purchase.id}
+                        purchaseDate={purchase.createdAt.toISOString()}
+                      />
+                    )}
+                    <a
+                      href={`/api/store/purchases/${purchase.id}/invoice`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 text-white/50 text-[10px] font-mono uppercase tracking-wider hover:bg-white/10 hover:text-white/70 transition-colors"
                     >
-                      <Download size={12} />
-                      Download
-                    </Link>
-                  )}
+                      <FileText size={12} />
+                      Fatura
+                    </a>
+                    {purchase.downloadKey && (
+                      <Link
+                        href={`/api/upload/${purchase.downloadKey}`}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary text-[10px] font-mono uppercase tracking-wider hover:bg-primary/20 transition-colors"
+                      >
+                        <Download size={12} />
+                        Download
+                      </Link>
+                    )}
+                  </div>
                 </div>
               </div>
             );

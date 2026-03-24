@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { storeCoupons } from "@/lib/db/schema";
+import { storeCoupons, users } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { rateLimit } from "@/lib/rate-limit";
 
@@ -21,10 +21,33 @@ export async function GET() {
   try {
     const isAdmin = session.user.role === "admin" || session.user.role === "moderator";
 
+    if (isAdmin) {
+      const coupons = await db
+        .select({
+          id: storeCoupons.id,
+          code: storeCoupons.code,
+          sellerId: storeCoupons.sellerId,
+          discountPercent: storeCoupons.discountPercent,
+          discountAmountCents: storeCoupons.discountAmountCents,
+          maxUses: storeCoupons.maxUses,
+          currentUses: storeCoupons.currentUses,
+          expiresAt: storeCoupons.expiresAt,
+          isActive: storeCoupons.isActive,
+          createdAt: storeCoupons.createdAt,
+          sellerName: users.discordUsername,
+          sellerDisplayName: users.displayName,
+        })
+        .from(storeCoupons)
+        .leftJoin(users, eq(storeCoupons.sellerId, users.id))
+        .orderBy(desc(storeCoupons.createdAt));
+
+      return NextResponse.json({ coupons });
+    }
+
     const coupons = await db
       .select()
       .from(storeCoupons)
-      .where(isAdmin ? undefined : eq(storeCoupons.sellerId, session.user.id))
+      .where(eq(storeCoupons.sellerId, session.user.id))
       .orderBy(desc(storeCoupons.createdAt));
 
     return NextResponse.json({ coupons });
