@@ -3,13 +3,13 @@ import { db } from "@/lib/db";
 import { newsletterCampaigns, newsletterSubscribers } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 
-const apiKey = process.env.RESEND_API_KEY;
-
-if (!apiKey && process.env.NODE_ENV === "production") {
-  throw new Error("RESEND_API_KEY is required in production");
+function getResendClient() {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey && process.env.NODE_ENV === "production") {
+    throw new Error("RESEND_API_KEY is required in production");
+  }
+  return new Resend(apiKey ?? "re_placeholder");
 }
-
-const resend = new Resend(apiKey ?? "re_placeholder");
 
 const FROM_ADDRESS = process.env.EMAIL_FROM || "VibeTuga <noreply@vibetuga.com>";
 
@@ -22,7 +22,7 @@ export async function sendEmail({
   subject: string;
   html: string;
 }) {
-  return resend.emails.send({
+  return getResendClient().emails.send({
     from: FROM_ADDRESS,
     to,
     subject,
@@ -393,7 +393,7 @@ export async function sendCampaign(campaignId: string) {
     }));
 
     try {
-      await resend.batch.send(emails);
+      await getResendClient().batch.send(emails);
       sentCount += chunk.length;
     } catch (err) {
       console.error(`Error sending batch ${i / CHUNK_SIZE + 1}:`, err);
