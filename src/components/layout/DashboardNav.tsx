@@ -7,6 +7,7 @@ import {
   BarChart3,
   Bell,
   BookOpen,
+  Code,
   FileText,
   Heart,
   Home,
@@ -36,6 +37,7 @@ const dashboardLinks = [
   { href: "/dashboard/wishlist", label: "Lista de Desejos", icon: Heart },
   { href: "/dashboard/messages", label: "Mensagens", icon: MessageCircle },
   { href: "/dashboard/notifications", label: "Notificações", icon: Bell },
+  { href: "/dashboard/widgets", label: "Widgets", icon: Code },
   { href: "/dashboard/api-keys", label: "API Keys", icon: Key },
   { href: "/dashboard/settings", label: "Definições", icon: Settings },
 ];
