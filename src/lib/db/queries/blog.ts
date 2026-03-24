@@ -16,91 +16,95 @@ type BlogFilters = {
 export const getPublishedPosts = cache(async (filters: BlogFilters) => {
   const { category, tag, q, sort = "latest", page = 1 } = filters;
 
-  const conditions: ReturnType<typeof eq>[] = [eq(blogPosts.status, "published")];
+  try {
+    const conditions: ReturnType<typeof eq>[] = [eq(blogPosts.status, "published")];
 
-  if (category) {
-    const [cat] = await db
-      .select({ id: blogCategories.id })
-      .from(blogCategories)
-      .where(eq(blogCategories.slug, category))
-      .limit(1);
-    if (cat) {
-      conditions.push(eq(blogPosts.categoryId, cat.id));
+    if (category) {
+      const [cat] = await db
+        .select({ id: blogCategories.id })
+        .from(blogCategories)
+        .where(eq(blogCategories.slug, category))
+        .limit(1);
+      if (cat) {
+        conditions.push(eq(blogPosts.categoryId, cat.id));
+      }
     }
+
+    if (q) {
+      const searchCondition = or(
+        ilike(blogPosts.title, `%${q}%`),
+        ilike(blogPosts.excerpt, `%${q}%`),
+      );
+      if (searchCondition) conditions.push(searchCondition);
+    }
+
+    if (tag) {
+      conditions.push(sql`${blogPosts.tags} @> ARRAY[${tag}]::text[]`);
+    }
+
+    const whereClause = and(...conditions);
+
+    let orderBy;
+    switch (sort) {
+      case "popular":
+        orderBy = desc(blogPosts.viewsCount);
+        break;
+      case "oldest":
+        orderBy = asc(blogPosts.publishedAt);
+        break;
+      default:
+        orderBy = desc(blogPosts.publishedAt);
+    }
+
+    const offset = (page - 1) * POSTS_PER_PAGE;
+
+    const [postsResult, totalResult] = await Promise.all([
+      db
+        .select({
+          id: blogPosts.id,
+          title: blogPosts.title,
+          slug: blogPosts.slug,
+          excerpt: blogPosts.excerpt,
+          coverImage: blogPosts.coverImage,
+          postType: blogPosts.postType,
+          tags: blogPosts.tags,
+          readingTimeMinutes: blogPosts.readingTimeMinutes,
+          viewsCount: blogPosts.viewsCount,
+          likesCount: blogPosts.likesCount,
+          publishedAt: blogPosts.publishedAt,
+          authorName: users.discordUsername,
+          authorDisplayName: users.displayName,
+          authorImage: users.image,
+          authorRole: users.role,
+          categoryName: blogCategories.name,
+          categorySlug: blogCategories.slug,
+          categoryColor: blogCategories.color,
+          commentsCount:
+            sql<number>`(SELECT count(*)::int FROM blog_comment WHERE blog_comment.post_id = blog_post.id AND blog_comment.is_approved = true)`.as(
+              "comments_count",
+            ),
+        })
+        .from(blogPosts)
+        .leftJoin(users, eq(blogPosts.authorId, users.id))
+        .leftJoin(blogCategories, eq(blogPosts.categoryId, blogCategories.id))
+        .where(whereClause)
+        .orderBy(orderBy)
+        .limit(POSTS_PER_PAGE)
+        .offset(offset),
+      db.select({ count: count() }).from(blogPosts).where(whereClause),
+    ]);
+
+    const total = totalResult[0]?.count ?? 0;
+
+    return {
+      posts: postsResult,
+      total,
+      totalPages: Math.ceil(total / POSTS_PER_PAGE),
+      currentPage: page,
+    };
+  } catch {
+    return { posts: [], total: 0, totalPages: 0, currentPage: page };
   }
-
-  if (q) {
-    const searchCondition = or(
-      ilike(blogPosts.title, `%${q}%`),
-      ilike(blogPosts.excerpt, `%${q}%`),
-    );
-    if (searchCondition) conditions.push(searchCondition);
-  }
-
-  if (tag) {
-    conditions.push(sql`${blogPosts.tags} @> ARRAY[${tag}]::text[]`);
-  }
-
-  const whereClause = and(...conditions);
-
-  let orderBy;
-  switch (sort) {
-    case "popular":
-      orderBy = desc(blogPosts.viewsCount);
-      break;
-    case "oldest":
-      orderBy = asc(blogPosts.publishedAt);
-      break;
-    default:
-      orderBy = desc(blogPosts.publishedAt);
-  }
-
-  const offset = (page - 1) * POSTS_PER_PAGE;
-
-  const [postsResult, totalResult] = await Promise.all([
-    db
-      .select({
-        id: blogPosts.id,
-        title: blogPosts.title,
-        slug: blogPosts.slug,
-        excerpt: blogPosts.excerpt,
-        coverImage: blogPosts.coverImage,
-        postType: blogPosts.postType,
-        tags: blogPosts.tags,
-        readingTimeMinutes: blogPosts.readingTimeMinutes,
-        viewsCount: blogPosts.viewsCount,
-        likesCount: blogPosts.likesCount,
-        publishedAt: blogPosts.publishedAt,
-        authorName: users.discordUsername,
-        authorDisplayName: users.displayName,
-        authorImage: users.image,
-        authorRole: users.role,
-        categoryName: blogCategories.name,
-        categorySlug: blogCategories.slug,
-        categoryColor: blogCategories.color,
-        commentsCount:
-          sql<number>`(SELECT count(*)::int FROM blog_comment WHERE blog_comment.post_id = blog_post.id AND blog_comment.is_approved = true)`.as(
-            "comments_count",
-          ),
-      })
-      .from(blogPosts)
-      .leftJoin(users, eq(blogPosts.authorId, users.id))
-      .leftJoin(blogCategories, eq(blogPosts.categoryId, blogCategories.id))
-      .where(whereClause)
-      .orderBy(orderBy)
-      .limit(POSTS_PER_PAGE)
-      .offset(offset),
-    db.select({ count: count() }).from(blogPosts).where(whereClause),
-  ]);
-
-  const total = totalResult[0]?.count ?? 0;
-
-  return {
-    posts: postsResult,
-    total,
-    totalPages: Math.ceil(total / POSTS_PER_PAGE),
-    currentPage: page,
-  };
 });
 
 export const getPostBySlug = cache(async (slug: string) => {
@@ -167,15 +171,19 @@ export const getAdjacentPosts = cache(async (publishedAt: Date | null, _currentI
 });
 
 export const getCategories = cache(async () => {
-  return db
-    .select({
-      id: blogCategories.id,
-      name: blogCategories.name,
-      slug: blogCategories.slug,
-      color: blogCategories.color,
-    })
-    .from(blogCategories)
-    .orderBy(asc(blogCategories.sortOrder));
+  try {
+    return await db
+      .select({
+        id: blogCategories.id,
+        name: blogCategories.name,
+        slug: blogCategories.slug,
+        color: blogCategories.color,
+      })
+      .from(blogCategories)
+      .orderBy(asc(blogCategories.sortOrder));
+  } catch {
+    return [];
+  }
 });
 
 export const getCategoryBySlug = cache(async (slug: string) => {

@@ -8,7 +8,6 @@ import {
   pgEnum,
   primaryKey,
   uuid,
-  serial,
   smallint,
   index,
   uniqueIndex,
@@ -926,7 +925,7 @@ export const referralsRelations = relations(referrals, ({ one }) => ({
 export const collections = pgTable(
   "collection",
   {
-    id: serial("id").primaryKey(),
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
@@ -952,7 +951,7 @@ export const collectionsRelations = relations(collections, ({ one, many }) => ({
 export const collectionItems = pgTable(
   "collection_item",
   {
-    id: serial("id").primaryKey(),
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
     collectionId: integer("collection_id")
       .notNull()
       .references(() => collections.id, { onDelete: "cascade" }),
@@ -993,7 +992,7 @@ export const challengeEntryStatusEnum = pgEnum("challenge_entry_status", [
 export const challenges = pgTable(
   "challenge",
   {
-    id: serial("id").primaryKey(),
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
     title: varchar("title", { length: 200 }).notNull(),
     description: text("description").notNull(),
     startAt: timestamp("start_at", { mode: "date" }).notNull(),
@@ -1026,7 +1025,7 @@ export const challengesRelations = relations(challenges, ({ one, many }) => ({
 export const challengeEntries = pgTable(
   "challenge_entry",
   {
-    id: serial("id").primaryKey(),
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
     challengeId: integer("challenge_id")
       .notNull()
       .references(() => challenges.id, { onDelete: "cascade" }),
@@ -1092,7 +1091,7 @@ export const challengeEntryVotesRelations = relations(challengeEntryVotes, ({ on
 export const directMessages = pgTable(
   "direct_message",
   {
-    id: serial("id").primaryKey(),
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
     senderId: uuid("sender_id").references(() => users.id, {
       onDelete: "set null",
     }),
@@ -1127,7 +1126,7 @@ export const directMessagesRelations = relations(directMessages, ({ one }) => ({
 export const blogSeries = pgTable(
   "blog_series",
   {
-    id: serial("id").primaryKey(),
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
     title: varchar("title", { length: 200 }).notNull(),
     slug: varchar("slug", { length: 200 }).unique().notNull(),
     description: text("description"),
@@ -1155,7 +1154,7 @@ export const blogSeriesRelations = relations(blogSeries, ({ one, many }) => ({
 export const blogSeriesPosts = pgTable(
   "blog_series_post",
   {
-    id: serial("id").primaryKey(),
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
     seriesId: integer("series_id")
       .notNull()
       .references(() => blogSeries.id, { onDelete: "cascade" }),
@@ -1188,7 +1187,7 @@ export const blogSeriesPostsRelations = relations(blogSeriesPosts, ({ one }) => 
 export const blogRevisions = pgTable(
   "blog_revision",
   {
-    id: serial("id").primaryKey(),
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
     postId: uuid("post_id")
       .notNull()
       .references(() => blogPosts.id, { onDelete: "cascade" }),

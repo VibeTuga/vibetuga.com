@@ -106,25 +106,36 @@ const categoryPills = [
 ] as const;
 
 export default async function LeaderboardPage() {
-  const [session, topUsers] = await Promise.all([
-    auth(),
-    db
-      .select({
-        id: users.id,
-        discordUsername: users.discordUsername,
-        displayName: users.displayName,
-        image: users.image,
-        xpPoints: users.xpPoints,
-        level: users.level,
-        isVerified: users.isVerified,
-        projectCount: sql<number>`cast(count(distinct ${showcaseProjects.id}) as int)`,
-      })
-      .from(users)
-      .leftJoin(showcaseProjects, eq(showcaseProjects.authorId, users.id))
-      .groupBy(users.id)
-      .orderBy(desc(users.xpPoints))
-      .limit(50),
-  ]);
+  const session = await auth().catch(() => null);
+  const topUsers = await db
+    .select({
+      id: users.id,
+      discordUsername: users.discordUsername,
+      displayName: users.displayName,
+      image: users.image,
+      xpPoints: users.xpPoints,
+      level: users.level,
+      isVerified: users.isVerified,
+      projectCount: sql<number>`cast(count(distinct ${showcaseProjects.id}) as int)`,
+    })
+    .from(users)
+    .leftJoin(showcaseProjects, eq(showcaseProjects.authorId, users.id))
+    .groupBy(users.id)
+    .orderBy(desc(users.xpPoints))
+    .limit(50)
+    .catch(
+      () =>
+        [] as {
+          id: string;
+          discordUsername: string;
+          displayName: string | null;
+          image: string | null;
+          xpPoints: number;
+          level: number;
+          isVerified: boolean;
+          projectCount: number;
+        }[],
+    );
 
   const podium = topUsers.slice(0, 3);
   const tableRows = topUsers.slice(3);
