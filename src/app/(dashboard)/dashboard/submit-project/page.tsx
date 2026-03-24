@@ -119,10 +119,14 @@ export default function SubmitProjectPage() {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Title */}
         <div>
-          <label className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2">
+          <label
+            htmlFor="project-title"
+            className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2"
+          >
             Título *
           </label>
           <input
+            id="project-title"
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -139,10 +143,14 @@ export default function SubmitProjectPage() {
 
         {/* Description */}
         <div>
-          <label className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2">
+          <label
+            htmlFor="project-description"
+            className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2"
+          >
             Descrição
           </label>
           <textarea
+            id="project-description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={4}
@@ -161,10 +169,14 @@ export default function SubmitProjectPage() {
 
         {/* Live URL */}
         <div>
-          <label className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2">
+          <label
+            htmlFor="project-live-url"
+            className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2"
+          >
             URL Live
           </label>
           <input
+            id="project-live-url"
             type="url"
             value={liveUrl}
             onChange={(e) => setLiveUrl(e.target.value)}
@@ -175,10 +187,14 @@ export default function SubmitProjectPage() {
 
         {/* Repo URL */}
         <div>
-          <label className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2">
+          <label
+            htmlFor="project-repo-url"
+            className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2"
+          >
             Repositório
           </label>
           <input
+            id="project-repo-url"
             type="url"
             value={repoUrl}
             onChange={(e) => setRepoUrl(e.target.value)}
@@ -189,10 +205,14 @@ export default function SubmitProjectPage() {
 
         {/* Video URL */}
         <div>
-          <label className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2">
+          <label
+            htmlFor="project-video-url"
+            className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2"
+          >
             URL do Vídeo Demo
           </label>
           <input
+            id="project-video-url"
             type="url"
             value={videoUrl}
             onChange={(e) => setVideoUrl(e.target.value)}
@@ -203,10 +223,14 @@ export default function SubmitProjectPage() {
 
         {/* Tech Stack */}
         <div>
-          <label className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2">
+          <label
+            htmlFor="project-tech-stack"
+            className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2"
+          >
             Stack Técnica
           </label>
           <input
+            id="project-tech-stack"
             type="text"
             value={techStack}
             onChange={(e) => setTechStack(e.target.value)}
@@ -217,10 +241,14 @@ export default function SubmitProjectPage() {
 
         {/* AI Tools */}
         <div>
-          <label className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2">
+          <label
+            htmlFor="project-ai-tools"
+            className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2"
+          >
             Ferramentas de IA Utilizadas
           </label>
           <input
+            id="project-ai-tools"
             type="text"
             value={aiToolsUsed}
             onChange={(e) => setAiToolsUsed(e.target.value)}

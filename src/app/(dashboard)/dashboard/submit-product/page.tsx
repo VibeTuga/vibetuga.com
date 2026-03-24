@@ -156,10 +156,14 @@ export default function SubmitProductPage() {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Title */}
         <div>
-          <label className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2">
+          <label
+            htmlFor="product-title"
+            className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2"
+          >
             Título *
           </label>
           <input
+            id="product-title"
             type="text"
             value={title}
             onChange={(e) => handleTitleChange(e.target.value)}
@@ -171,10 +175,14 @@ export default function SubmitProductPage() {
 
         {/* Slug */}
         <div>
-          <label className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2">
+          <label
+            htmlFor="product-slug"
+            className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2"
+          >
             Slug *
           </label>
           <input
+            id="product-slug"
             type="text"
             value={slug}
             onChange={(e) => handleSlugChange(e.target.value)}
@@ -187,10 +195,14 @@ export default function SubmitProductPage() {
 
         {/* Description */}
         <div>
-          <label className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2">
+          <label
+            htmlFor="product-description"
+            className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2"
+          >
             Descrição
           </label>
           <textarea
+            id="product-description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={6}
@@ -201,10 +213,14 @@ export default function SubmitProductPage() {
 
         {/* Price */}
         <div>
-          <label className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2">
+          <label
+            htmlFor="product-price"
+            className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2"
+          >
             Preço (€) *
           </label>
           <input
+            id="product-price"
             type="text"
             inputMode="decimal"
             value={priceEuros}
@@ -218,10 +234,14 @@ export default function SubmitProductPage() {
 
         {/* Product Type */}
         <div>
-          <label className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2">
+          <label
+            htmlFor="product-type"
+            className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2"
+          >
             Tipo de Produto
           </label>
           <select
+            id="product-type"
             value={productType}
             onChange={(e) => setProductType(e.target.value)}
             className="w-full bg-surface-container-lowest border border-white/5 focus:border-tertiary/50 text-white text-sm p-4 font-body transition-all outline-none"
@@ -244,10 +264,14 @@ export default function SubmitProductPage() {
 
         {/* Tags */}
         <div>
-          <label className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2">
+          <label
+            htmlFor="product-tags"
+            className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2"
+          >
             Tags
           </label>
           <input
+            id="product-tags"
             type="text"
             value={tags}
             onChange={(e) => setTags(e.target.value)}
@@ -258,10 +282,14 @@ export default function SubmitProductPage() {
 
         {/* Download Key */}
         <div>
-          <label className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2">
+          <label
+            htmlFor="product-download-key"
+            className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2"
+          >
             Chave de Download (R2)
           </label>
           <input
+            id="product-download-key"
             type="text"
             value={downloadKey}
             onChange={(e) => setDownloadKey(e.target.value)}
@@ -275,10 +303,14 @@ export default function SubmitProductPage() {
 
         {/* Preview Content */}
         <div>
-          <label className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2">
+          <label
+            htmlFor="product-preview"
+            className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2"
+          >
             Conteúdo de Pré-visualização
           </label>
           <textarea
+            id="product-preview"
             value={previewContent}
             onChange={(e) => setPreviewContent(e.target.value)}
             rows={4}
@@ -292,10 +324,14 @@ export default function SubmitProductPage() {
 
         {/* Demo URL */}
         <div>
-          <label className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2">
+          <label
+            htmlFor="product-demo-url"
+            className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2"
+          >
             URL de Demo
           </label>
           <input
+            id="product-demo-url"
             type="url"
             value={demoUrl}
             onChange={(e) => setDemoUrl(e.target.value)}

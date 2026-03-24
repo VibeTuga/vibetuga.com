@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState, type ReactNode } from "react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 interface AnimatedPodiumItemProps {
   children: ReactNode;
@@ -11,11 +12,7 @@ interface AnimatedPodiumItemProps {
 export function AnimatedPodiumItem({ children, index, className }: AnimatedPodiumItemProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
-  const [prefersReduced] = useState(() =>
-    typeof window !== "undefined"
-      ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
-      : false,
-  );
+  const prefersReduced = useReducedMotion();
 
   useEffect(() => {
     const el = ref.current;
@@ -67,11 +64,7 @@ interface AnimatedTableRowProps {
 export function AnimatedTableRow({ children, index, className }: AnimatedTableRowProps) {
   const ref = useRef<HTMLTableRowElement>(null);
   const [isVisible, setIsVisible] = useState(false);
-  const [prefersReduced] = useState(() =>
-    typeof window !== "undefined"
-      ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
-      : false,
-  );
+  const prefersReduced = useReducedMotion();
 
   useEffect(() => {
     const el = ref.current;

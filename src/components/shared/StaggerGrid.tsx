@@ -1,15 +1,12 @@
 "use client";
 
 import { useRef, useEffect, useState, Children, type ReactNode } from "react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 export function StaggerGrid({ children, className }: { children: ReactNode; className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
-  const [prefersReduced] = useState(() =>
-    typeof window !== "undefined"
-      ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
-      : false,
-  );
+  const prefersReduced = useReducedMotion();
 
   useEffect(() => {
     const el = ref.current;

@@ -1,13 +1,10 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 export function PageFadeIn({ children }: { children: ReactNode }) {
-  const [prefersReduced] = useState(() =>
-    typeof window !== "undefined"
-      ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
-      : false,
-  );
+  const prefersReduced = useReducedMotion();
 
   if (prefersReduced) {
     return <>{children}</>;

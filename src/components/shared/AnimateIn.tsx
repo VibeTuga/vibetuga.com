@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState, type ReactNode } from "react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 type Direction = "up" | "down" | "left" | "right" | "none";
 
@@ -31,18 +32,7 @@ export function AnimateIn({
 }: AnimateInProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
-  const [prefersReduced, setPrefersReduced] = useState(() =>
-    typeof window !== "undefined"
-      ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
-      : false,
-  );
-
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const handler = (e: MediaQueryListEvent) => setPrefersReduced(e.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
+  const prefersReduced = useReducedMotion();
 
   useEffect(() => {
     const el = ref.current;
