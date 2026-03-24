@@ -10,6 +10,7 @@ import {
   FileText,
   Heart,
   Home,
+  Key,
   LayoutDashboard,
   Layers,
   Menu,
@@ -35,6 +36,7 @@ const dashboardLinks = [
   { href: "/dashboard/wishlist", label: "Lista de Desejos", icon: Heart },
   { href: "/dashboard/messages", label: "Mensagens", icon: MessageCircle },
   { href: "/dashboard/notifications", label: "Notificações", icon: Bell },
+  { href: "/dashboard/api-keys", label: "API Keys", icon: Key },
   { href: "/dashboard/settings", label: "Definições", icon: Settings },
 ];
 
