@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import {
   Calendar,
   Clock,
@@ -103,9 +104,10 @@ export default async function EventsPage() {
                 const config = EVENT_TYPE_CONFIG[event.eventType] ?? EVENT_TYPE_CONFIG.other;
                 const TypeIcon = config.icon;
                 return (
-                  <div
+                  <Link
                     key={event.id}
-                    className="relative bg-surface-container-low border border-primary/10 rounded-lg p-6 hover:border-primary/30 transition-all duration-300 group"
+                    href={`/events/${event.id}`}
+                    className="relative block bg-surface-container-low border border-primary/10 rounded-lg p-6 hover:border-primary/30 transition-all duration-300 group"
                   >
                     <div className="flex flex-col md:flex-row md:items-start gap-4">
                       {/* Date column */}
@@ -152,20 +154,15 @@ export default async function EventsPage() {
                         </div>
                       </div>
 
-                      {/* Link */}
+                      {/* External link */}
                       {event.link && (
-                        <a
-                          href={event.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="shrink-0 inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary text-xs font-mono uppercase hover:bg-primary/20 transition-colors rounded"
-                        >
+                        <span className="shrink-0 inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary text-xs font-mono uppercase hover:bg-primary/20 transition-colors rounded">
                           <ExternalLink size={14} />
                           Participar
-                        </a>
+                        </span>
                       )}
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
             </div>
@@ -201,9 +198,10 @@ export default async function EventsPage() {
                 const config = EVENT_TYPE_CONFIG[event.eventType] ?? EVENT_TYPE_CONFIG.other;
                 const TypeIcon = config.icon;
                 return (
-                  <div
+                  <Link
                     key={event.id}
-                    className="bg-surface-container-lowest border border-white/5 rounded-lg p-5 hover:border-white/10 transition-all"
+                    href={`/events/${event.id}`}
+                    className="block bg-surface-container-lowest border border-white/5 rounded-lg p-5 hover:border-white/10 transition-all"
                   >
                     <div className="flex items-center gap-2 mb-2">
                       <span
@@ -223,7 +221,7 @@ export default async function EventsPage() {
                       <Clock size={12} />
                       {formatEventDate(event.startAt)}
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
             </div>
