@@ -1,0 +1,1 @@
+ALTER TABLE "blog_post" ADD COLUMN "scheduled_publish_at" timestamp;

@@ -120,6 +120,13 @@
       "when": 1774310598309,
       "tag": "0016_spooky_impossible_man",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1774311117636,
+      "tag": "0017_odd_tattoo",
+      "breakpoints": true
     }
   ]
 }

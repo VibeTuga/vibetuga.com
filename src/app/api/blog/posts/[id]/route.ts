@@ -37,7 +37,18 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
 
     const body = await request.json();
-    const { title, slug, excerpt, content, categoryId, tags, coverImage, status, postType } = body;
+    const {
+      title,
+      slug,
+      excerpt,
+      content,
+      categoryId,
+      tags,
+      coverImage,
+      status,
+      postType,
+      scheduledPublishAt,
+    } = body;
 
     // Auto-create a revision when title or content changes
     const titleChanged = title !== undefined && title !== existing.title;
@@ -64,6 +75,11 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       }
     }
     if (postType !== undefined) updates.postType = postType;
+    if (scheduledPublishAt !== undefined) {
+      const parsedSchedule = scheduledPublishAt ? new Date(scheduledPublishAt) : null;
+      updates.scheduledPublishAt =
+        parsedSchedule && parsedSchedule > new Date() ? parsedSchedule : null;
+    }
 
     const [post] = await db.update(blogPosts).set(updates).where(eq(blogPosts.id, id)).returning();
 
