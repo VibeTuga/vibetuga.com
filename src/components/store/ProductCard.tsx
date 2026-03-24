@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { StoreProduct } from "@/lib/db/queries/store";
+import { WishlistButton } from "./WishlistButton";
 
 const TYPE_BADGE_COLORS: Record<string, string> = {
   skill: "bg-primary text-on-primary",
@@ -47,7 +48,15 @@ function StarIcon({ filled }: { filled: boolean }) {
   );
 }
 
-export function ProductCard({ product }: { product: StoreProduct }) {
+export function ProductCard({
+  product,
+  wishlisted,
+  showWishlist = false,
+}: {
+  product: StoreProduct;
+  wishlisted?: boolean;
+  showWishlist?: boolean;
+}) {
   const badgeColor = TYPE_BADGE_COLORS[product.productType] ?? TYPE_BADGE_COLORS.other;
   const typeLabel = TYPE_LABELS[product.productType] ?? TYPE_LABELS.other;
   const gradientColor = TYPE_GRADIENT_COLORS[product.productType] ?? TYPE_GRADIENT_COLORS.other;
@@ -86,6 +95,11 @@ export function ProductCard({ product }: { product: StoreProduct }) {
             {typeLabel}
           </span>
         </div>
+        {showWishlist && (
+          <div className="absolute top-3 right-3 z-10">
+            <WishlistButton productId={product.id} initialWishlisted={wishlisted} size="sm" />
+          </div>
+        )}
       </div>
 
       {/* Content */}

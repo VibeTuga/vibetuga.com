@@ -1,14 +1,16 @@
-import { getPendingProducts, getProductsForAdmin } from "@/lib/db/queries/store";
+import { getPendingProducts, getProductsForAdmin, getAllCollections } from "@/lib/db/queries/store";
 import { PendingProductsSection, AllProductsTable } from "./StoreProductsManager";
+import { CollectionsManager } from "./CollectionsManager";
 
 export const metadata = {
   title: "Loja | Admin | VibeTuga",
 };
 
 export default async function AdminStorePage() {
-  const [pendingProducts, allProducts] = await Promise.all([
+  const [pendingProducts, allProducts, collections] = await Promise.all([
     getPendingProducts(),
     getProductsForAdmin(),
+    getAllCollections(),
   ]);
 
   return (
@@ -36,6 +38,18 @@ export default async function AdminStorePage() {
       <div className="bg-surface-container-low">
         <AllProductsTable products={allProducts} />
       </div>
+
+      {/* Collections section */}
+      <div className="mt-12 mb-8">
+        <h2 className="font-headline font-black text-xl uppercase tracking-tight text-white">
+          Coleções
+        </h2>
+        <p className="text-[10px] font-mono text-white/40 uppercase mt-1">
+          Coleções curadas de produtos
+        </p>
+      </div>
+
+      <CollectionsManager collections={collections} />
     </div>
   );
 }

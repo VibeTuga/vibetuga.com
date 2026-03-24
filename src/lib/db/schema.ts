@@ -127,6 +127,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   storeProducts: many(storeProducts),
   storePurchases: many(storePurchases),
   storeReviews: many(storeReviews),
+  storeWishlists: many(storeWishlists),
   subscriptions: many(subscriptions),
   settings: one(userSettings, {
     fields: [users.id],
@@ -541,6 +542,7 @@ export const storeProducts = pgTable(
     downloadKey: varchar("download_key", { length: 512 }),
     coverImage: text("cover_image"),
     tags: text("tags").array(),
+    isBundle: boolean("is_bundle").default(false).notNull(),
     createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
   },
@@ -559,6 +561,10 @@ export const storeProductsRelations = relations(storeProducts, ({ one, many }) =
   }),
   purchases: many(storePurchases),
   reviews: many(storeReviews),
+  wishlists: many(storeWishlists),
+  bundleItems: many(storeBundleItems, { relationName: "bundleProducts" }),
+  includedInBundles: many(storeBundleItems, { relationName: "bundledProduct" }),
+  collectionProducts: many(storeCollectionProducts),
 }));
 
 // ─── Store Purchases ───────────────────────────────────────
@@ -1224,3 +1230,126 @@ export const contentAnalytics = pgTable(
     index("content_analytics_content_idx").on(t.contentType, t.contentId),
   ],
 );
+
+// ─── Store Wishlists ────────────────────────────────────────
+
+export const storeWishlists = pgTable(
+  "store_wishlist",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    productId: uuid("product_id")
+      .notNull()
+      .references(() => storeProducts.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [
+    uniqueIndex("store_wishlist_user_product_idx").on(t.userId, t.productId),
+    index("store_wishlist_user_idx").on(t.userId),
+    index("store_wishlist_product_idx").on(t.productId),
+  ],
+);
+
+export const storeWishlistsRelations = relations(storeWishlists, ({ one }) => ({
+  user: one(users, {
+    fields: [storeWishlists.userId],
+    references: [users.id],
+  }),
+  product: one(storeProducts, {
+    fields: [storeWishlists.productId],
+    references: [storeProducts.id],
+  }),
+}));
+
+// ─── Store Collections ──────────────────────────────────────
+
+export const storeCollections = pgTable(
+  "store_collection",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: varchar("name", { length: 200 }).notNull(),
+    slug: varchar("slug", { length: 200 }).unique().notNull(),
+    description: text("description"),
+    coverImage: text("cover_image"),
+    isFeatured: boolean("is_featured").default(false).notNull(),
+    sortOrder: integer("sort_order").default(0).notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [
+    index("store_collection_slug_idx").on(t.slug),
+    index("store_collection_featured_idx").on(t.isFeatured),
+  ],
+);
+
+export const storeCollectionsRelations = relations(storeCollections, ({ many }) => ({
+  products: many(storeCollectionProducts),
+}));
+
+// ─── Store Collection Products ──────────────────────────────
+
+export const storeCollectionProducts = pgTable(
+  "store_collection_product",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    collectionId: uuid("collection_id")
+      .notNull()
+      .references(() => storeCollections.id, { onDelete: "cascade" }),
+    productId: uuid("product_id")
+      .notNull()
+      .references(() => storeProducts.id, { onDelete: "cascade" }),
+    sortOrder: integer("sort_order").default(0).notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [
+    uniqueIndex("store_collection_product_unique_idx").on(t.collectionId, t.productId),
+    index("store_collection_product_collection_idx").on(t.collectionId),
+  ],
+);
+
+export const storeCollectionProductsRelations = relations(storeCollectionProducts, ({ one }) => ({
+  collection: one(storeCollections, {
+    fields: [storeCollectionProducts.collectionId],
+    references: [storeCollections.id],
+  }),
+  product: one(storeProducts, {
+    fields: [storeCollectionProducts.productId],
+    references: [storeProducts.id],
+  }),
+}));
+
+// ─── Store Bundle Items ─────────────────────────────────────
+
+export const storeBundleItems = pgTable(
+  "store_bundle_item",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    bundleId: uuid("bundle_id")
+      .notNull()
+      .references(() => storeProducts.id, { onDelete: "cascade" }),
+    productId: uuid("product_id")
+      .notNull()
+      .references(() => storeProducts.id, { onDelete: "cascade" }),
+    sortOrder: integer("sort_order").default(0).notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [
+    uniqueIndex("store_bundle_item_unique_idx").on(t.bundleId, t.productId),
+    index("store_bundle_item_bundle_idx").on(t.bundleId),
+  ],
+);
+
+export const storeBundleItemsRelations = relations(storeBundleItems, ({ one }) => ({
+  bundle: one(storeProducts, {
+    fields: [storeBundleItems.bundleId],
+    references: [storeProducts.id],
+    relationName: "bundleProducts",
+  }),
+  product: one(storeProducts, {
+    fields: [storeBundleItems.productId],
+    references: [storeProducts.id],
+    relationName: "bundledProduct",
+  }),
+}));

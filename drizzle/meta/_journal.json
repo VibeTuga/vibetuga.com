@@ -127,6 +127,13 @@
       "when": 1774311117636,
       "tag": "0017_odd_tattoo",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1774317149302,
+      "tag": "0018_same_psynapse",
+      "breakpoints": true
     }
   ]
 }

@@ -2,11 +2,13 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { getProductBySlug } from "@/lib/db/queries/store";
+import { getProductBySlug, isProductInWishlist, getBundleItems } from "@/lib/db/queries/store";
 import { MarkdownContent } from "@/components/blog/MarkdownContent";
 import { BuyButton } from "@/components/store/BuyButton";
 import { ProductReviews } from "@/components/store/ProductReviews";
 import { ReportButton } from "@/components/shared/ReportButton";
+import { WishlistButton } from "@/components/store/WishlistButton";
+import { BundleContents } from "@/components/store/BundleContents";
 import { getProductJsonLd } from "@/lib/jsonld";
 import { auth } from "@/lib/auth";
 
@@ -97,6 +99,12 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
   if (!product) {
     notFound();
   }
+
+  const userId = session?.user?.id;
+  const [wishlisted, bundleItems] = await Promise.all([
+    userId ? isProductInWishlist(userId, product.id) : false,
+    product.isBundle ? getBundleItems(product.id) : [],
+  ]);
 
   const badgeColor = TYPE_BADGE_COLORS[product.productType] ?? TYPE_BADGE_COLORS.other;
   const typeLabel = TYPE_LABELS[product.productType] ?? TYPE_LABELS.other;
@@ -221,8 +229,15 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
                 </span>
               </div>
 
-              {/* Buy button */}
-              <BuyButton productId={product.id} />
+              {/* Buy button + wishlist */}
+              <div className="flex items-center gap-3">
+                <div className="flex-1">
+                  <BuyButton productId={product.id} />
+                </div>
+                {userId && (
+                  <WishlistButton productId={product.id} initialWishlisted={wishlisted} size="md" />
+                )}
+              </div>
               {session?.user && (
                 <div className="mt-4 pt-4 border-t border-white/5 flex justify-end">
                   <ReportButton contentType="product" contentId={product.id} size="sm" />
@@ -259,6 +274,9 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
           </div>
         </div>
       </div>
+
+      {/* Bundle contents */}
+      {product.isBundle && bundleItems.length > 0 && <BundleContents items={bundleItems} />}
 
       {/* Reviews section */}
       <ProductReviews productId={product.id} isAuthenticated={!!session?.user} />
