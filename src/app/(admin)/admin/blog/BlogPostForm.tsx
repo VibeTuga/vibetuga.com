@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Save, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { ImageUpload } from "@/components/shared/ImageUpload";
+import { RevisionHistory } from "@/components/blog/RevisionHistory";
 
 interface Category {
   id: string;
@@ -271,6 +272,15 @@ export function BlogPostForm({
               onChange={(url) => setForm((prev) => ({ ...prev, coverImage: url }))}
             />
           </div>
+
+          {/* Revision History (edit mode only) */}
+          {isEditing && initialData?.id && (
+            <RevisionHistory
+              postId={initialData.id}
+              currentTitle={form.title}
+              currentContent={form.content}
+            />
+          )}
 
           {/* Actions */}
           <div className="flex gap-3">
