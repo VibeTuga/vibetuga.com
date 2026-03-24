@@ -2,14 +2,19 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { getProductBySlug } from "@/lib/db/queries/store";
+import {
+  getProductBySlug,
+  getUserWishlistProductIds,
+  getProductUpdates,
+} from "@/lib/db/queries/store";
 import { MarkdownContent } from "@/components/blog/MarkdownContent";
 import { BuyButton } from "@/components/store/BuyButton";
+import { WishlistButton } from "@/components/store/WishlistButton";
 import { ProductReviews } from "@/components/store/ProductReviews";
 import { ReportButton } from "@/components/shared/ReportButton";
 import { getProductJsonLd } from "@/lib/jsonld";
 import { auth } from "@/lib/auth";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Package } from "lucide-react";
 
 export const revalidate = 60;
 
@@ -98,6 +103,13 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
   if (!product) {
     notFound();
   }
+
+  const [wishlistIds, updates] = await Promise.all([
+    session?.user ? getUserWishlistProductIds(session.user.id) : Promise.resolve([]),
+    getProductUpdates(product.id),
+  ]);
+
+  const isWishlisted = wishlistIds.includes(product.id);
 
   const badgeColor = TYPE_BADGE_COLORS[product.productType] ?? TYPE_BADGE_COLORS.other;
   const typeLabel = TYPE_LABELS[product.productType] ?? TYPE_LABELS.other;
@@ -254,6 +266,13 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
 
               {/* Buy button */}
               <BuyButton productId={product.id} />
+              <div className="mt-3">
+                <WishlistButton
+                  productId={product.id}
+                  initialWishlisted={isWishlisted}
+                  isAuthenticated={!!session?.user}
+                />
+              </div>
               {session?.user && (
                 <div className="mt-4 pt-4 border-t border-white/5 flex justify-end">
                   <ReportButton contentType="product" contentId={product.id} size="sm" />
@@ -290,6 +309,41 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
           </div>
         </div>
       </div>
+
+      {/* Product Updates section */}
+      {updates.length > 0 && (
+        <section className="mt-12 mb-8">
+          <div className="flex items-center gap-3 mb-6">
+            <Package size={20} className="text-tertiary" />
+            <h2 className="text-lg font-headline font-bold tracking-tight uppercase">
+              Atualizações
+            </h2>
+            <span className="text-[10px] font-mono text-white/40 bg-white/5 px-2 py-0.5 rounded">
+              {updates.length}
+            </span>
+          </div>
+          <div className="space-y-4">
+            {updates.map((update) => (
+              <div
+                key={update.id}
+                className="p-5 bg-surface-container border border-white/5 rounded-xl"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-xs font-mono font-bold text-tertiary bg-tertiary/10 px-2 py-0.5 rounded">
+                    v{update.version}
+                  </span>
+                  <span className="text-[10px] font-mono text-white/40">
+                    {new Date(update.createdAt).toLocaleDateString("pt-PT")}
+                  </span>
+                </div>
+                <p className="text-sm text-white/70 leading-relaxed whitespace-pre-wrap">
+                  {update.changelog}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Reviews section */}
       <ProductReviews productId={product.id} isAuthenticated={!!session?.user} />

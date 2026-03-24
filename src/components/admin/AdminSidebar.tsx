@@ -17,6 +17,7 @@ import {
   Trophy,
   Tag,
   RotateCcw,
+  Library,
 } from "lucide-react";
 import { Logo } from "@/components/shared/Logo";
 import { cn } from "@/lib/utils";
@@ -34,6 +35,7 @@ const adminLinks: readonly {
   { href: "/admin/newsletter", label: "Newsletter", icon: Mail },
   { href: "/admin/challenges", label: "Desafios", icon: Trophy },
   { href: "/admin/store", label: "Loja", icon: ShoppingBag },
+  { href: "/admin/collections", label: "Coleções", icon: Library },
   { href: "/admin/coupons", label: "Cupões", icon: Tag },
   { href: "/admin/refunds", label: "Reembolsos", icon: RotateCcw },
   { href: "/admin/role-requests", label: "Pedidos de Role", icon: Shield },

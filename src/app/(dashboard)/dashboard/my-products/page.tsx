@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { getSellerProducts } from "@/lib/db/queries/store";
 import Link from "next/link";
-import { Package, Plus, Pencil } from "lucide-react";
+import { Package, Plus, Pencil, History } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -114,6 +114,14 @@ export default async function MyProductsPage() {
                 >
                   {status.label}
                 </span>
+
+                <Link
+                  href={`/dashboard/products/${product.id}/updates`}
+                  className="shrink-0 p-2 text-white/30 hover:text-tertiary transition-colors"
+                  title="Atualizações"
+                >
+                  <History size={14} />
+                </Link>
 
                 <Link
                   href={`/dashboard/edit-product/${product.id}`}
