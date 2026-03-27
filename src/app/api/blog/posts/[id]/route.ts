@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { logAdminAction, getClientIp } from "@/lib/audit";
 import { createRevision } from "@/lib/db/queries/revisions";
+import { notifyNewPost } from "@/lib/discord-webhook";
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
@@ -85,6 +86,11 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
     if (!post) {
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
+    }
+
+    // Fire-and-forget Discord notification when post is published
+    if (status === "published" && post) {
+      notifyNewPost(post.title, post.slug, session.user.name ?? session.user.email ?? "Autor");
     }
 
     // Audit log status changes by admin/moderator

@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { blogPosts, users, blogCategories } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { auth } from "@/lib/auth";
+import { notifyNewPost } from "@/lib/discord-webhook";
 
 export async function GET() {
   try {
@@ -117,6 +118,11 @@ export async function POST(request: Request) {
         scheduledPublishAt: isScheduled ? parsedSchedule : null,
       })
       .returning();
+
+    // Fire-and-forget Discord notification for published posts
+    if (finalStatus === "published") {
+      notifyNewPost(post.title, post.slug, session.user.name ?? session.user.email ?? "Autor");
+    }
 
     return NextResponse.json(post, { status: 201 });
   } catch (error) {

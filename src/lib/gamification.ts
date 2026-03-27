@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { users, xpEvents, badges, userBadges, levels } from "@/lib/db/schema";
 import { eq, sql, and } from "drizzle-orm";
+import { notifyLevelUp } from "@/lib/discord-webhook";
 
 // ─── XP Action Constants ────────────────────────────────────
 
@@ -25,19 +26,23 @@ export type XpAction = keyof typeof XP_VALUES;
 
 // ─── Level Calculation ──────────────────────────────────────
 
-async function calculateLevel(xpPoints: number): Promise<number> {
+async function calculateLevel(xpPoints: number): Promise<{ level: number; name: string }> {
   const allLevels = await db
-    .select({ level: levels.level, xpRequired: levels.xpRequired })
+    .select({
+      level: levels.level,
+      name: levels.name,
+      xpRequired: levels.xpRequired,
+    })
     .from(levels)
     .orderBy(sql`${levels.xpRequired} DESC`);
 
   for (const lvl of allLevels) {
     if (xpPoints >= lvl.xpRequired) {
-      return lvl.level;
+      return { level: lvl.level, name: lvl.name };
     }
   }
 
-  return 1;
+  return { level: 1, name: "Noob" };
 }
 
 // ─── Award XP ───────────────────────────────────────────────
@@ -60,13 +65,24 @@ export async function awardXP(
     .update(users)
     .set({ xpPoints: sql`${users.xpPoints} + ${xpAmount}` })
     .where(eq(users.id, userId))
-    .returning({ xpPoints: users.xpPoints });
+    .returning({
+      xpPoints: users.xpPoints,
+      level: users.level,
+      discordUsername: users.discordUsername,
+      displayName: users.displayName,
+    });
 
   if (!updated) return;
 
-  const newLevel = await calculateLevel(updated.xpPoints);
+  const { level: newLevel, name: levelName } = await calculateLevel(updated.xpPoints);
 
-  await db.update(users).set({ level: newLevel }).where(eq(users.id, userId));
+  if (newLevel !== updated.level) {
+    await db.update(users).set({ level: newLevel }).where(eq(users.id, userId));
+
+    // Fire-and-forget Discord notification on level up
+    const username = updated.displayName || updated.discordUsername;
+    notifyLevelUp(username, newLevel, levelName);
+  }
 
   await checkAndAwardBadges(userId);
 }
