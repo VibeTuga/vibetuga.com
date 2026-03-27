@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Space_Grotesk, Inter } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { cn } from "@/lib/utils";
 import { CookieConsent } from "@/components/shared/CookieConsent";
 import "./globals.css";
@@ -34,14 +36,18 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+  const t = await getTranslations("nav");
+
   return (
     <html
-      lang="pt"
+      lang={locale}
       className={cn(
         "dark h-full antialiased",
         geist.variable,
@@ -54,9 +60,11 @@ export default function RootLayout({
           href="#main-content"
           className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-primary focus:text-on-primary focus:font-bold focus:text-sm focus:rounded-sm focus:outline-none"
         >
-          Saltar para o conteúdo
+          {t("skipToContent")}
         </a>
-        {children}
+        <NextIntlClientProvider messages={messages} locale={locale}>
+          {children}
+        </NextIntlClientProvider>
         <CookieConsent />
         <SpeedInsights />
       </body>

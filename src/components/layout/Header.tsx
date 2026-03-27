@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Menu, X } from "lucide-react";
 import { Logo } from "@/components/shared/Logo";
 import { SearchTrigger } from "@/components/shared/SearchDialog";
@@ -11,6 +12,7 @@ import { UserMenu, MobileUserMenu } from "@/components/layout/UserMenu";
 import type { SessionUser } from "@/components/layout/UserMenu";
 import { NotificationBell } from "@/components/shared/NotificationBell";
 import { MessageBadge } from "@/components/shared/MessageBadge";
+import { LanguageToggle } from "@/components/shared/LanguageToggle";
 import { cn } from "@/lib/utils";
 import type { EnabledFeatures } from "@/lib/feature-gate";
 
@@ -20,14 +22,14 @@ const SearchDialog = dynamic(
 );
 
 const allNavLinks = [
-  { href: "/", label: "Home" },
-  { href: "/blog", label: "Blog" },
-  { href: "/showcase", label: "Showcase" },
-  { href: "/challenges", label: "Desafios" },
-  { href: "/events", label: "Eventos" },
-  { href: "/leaderboard", label: "Leaderboard" },
-  { href: "/store", label: "Store" },
-  { href: "/pricing", label: "Premium" },
+  { href: "/", labelKey: "home" },
+  { href: "/blog", labelKey: "blog" },
+  { href: "/showcase", labelKey: "showcase" },
+  { href: "/challenges", labelKey: "challenges" },
+  { href: "/events", labelKey: "events" },
+  { href: "/leaderboard", labelKey: "leaderboard" },
+  { href: "/store", labelKey: "store" },
+  { href: "/pricing", labelKey: "premium" },
 ] as const;
 
 interface HeaderProps {
@@ -38,6 +40,7 @@ interface HeaderProps {
 export function Header({ user, features }: HeaderProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const t = useTranslations("nav");
 
   const navLinks = allNavLinks.filter((link) => {
     if (link.href === "/store" && features?.storeEnabled === false) return false;
@@ -68,13 +71,14 @@ export function Header({ user, features }: HeaderProps) {
                   : "text-white/60 hover:text-white nav-link-hover",
               )}
             >
-              {link.label}
+              {t(link.labelKey)}
             </Link>
           ))}
         </nav>
 
-        {/* Right side: search + auth area + mobile toggle */}
+        {/* Right side: lang + search + auth area + mobile toggle */}
         <div className="flex items-center gap-4">
+          <LanguageToggle className="hidden sm:flex" />
           <SearchTrigger />
           <SearchDialog />
 
@@ -92,7 +96,7 @@ export function Header({ user, features }: HeaderProps) {
               href="/login"
               className="hidden sm:inline-flex items-center gap-2 px-4 py-2 bg-primary text-on-primary font-bold text-sm hover:shadow-[0_0_15px_rgba(161,255,194,0.4)] active:scale-95 transition-all"
             >
-              Entrar
+              {t("login")}
             </Link>
           )}
 
@@ -100,7 +104,7 @@ export function Header({ user, features }: HeaderProps) {
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="md:hidden text-white/60 hover:text-primary transition-colors"
-            aria-label={mobileOpen ? "Fechar menu" : "Abrir menu"}
+            aria-label={mobileOpen ? t("closeMenu") : t("openMenu")}
           >
             {mobileOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -121,9 +125,14 @@ export function Header({ user, features }: HeaderProps) {
                   isActive(link.href) ? "text-primary" : "text-white/60 hover:text-white",
                 )}
               >
-                {link.label}
+                {t(link.labelKey)}
               </Link>
             ))}
+
+            {/* Mobile language toggle */}
+            <div className="py-3 sm:hidden">
+              <LanguageToggle />
+            </div>
 
             {/* Mobile auth section */}
             {user ? (
@@ -134,7 +143,7 @@ export function Header({ user, features }: HeaderProps) {
                 onClick={() => setMobileOpen(false)}
                 className="mt-2 py-3 text-center bg-primary text-on-primary font-bold text-sm"
               >
-                Entrar com Discord
+                {t("loginWithDiscord")}
               </Link>
             )}
           </div>
