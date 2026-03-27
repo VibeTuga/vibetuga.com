@@ -27,6 +27,7 @@ const allNavLinks = [
   { href: "/events", label: "Eventos" },
   { href: "/leaderboard", label: "Leaderboard" },
   { href: "/store", label: "Store" },
+  { href: "/pricing", label: "Premium" },
 ] as const;
 
 interface HeaderProps {
