@@ -12,9 +12,14 @@ export type LiveStreamInfo = {
 
 export async function HeaderServer() {
   const [session, features, liveStream] = await Promise.all([
-    auth(),
-    getEnabledFeatures(),
-    getLiveStream(),
+    auth().catch(() => null),
+    getEnabledFeatures().catch(() => ({
+      storeEnabled: false,
+      challengesEnabled: false,
+      premiumEnabled: false,
+      eventsEnabled: false,
+    })),
+    getLiveStream().catch(() => null),
   ]);
 
   const user: SessionUser | null = session?.user

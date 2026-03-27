@@ -4,6 +4,7 @@ import { blogPosts, users, blogCategories } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { notifyNewPost } from "@/lib/discord-webhook";
+import { awardXP } from "@/lib/gamification";
 
 export async function GET() {
   try {
@@ -119,9 +120,10 @@ export async function POST(request: Request) {
       })
       .returning();
 
-    // Fire-and-forget Discord notification for published posts
+    // Fire-and-forget Discord notification + XP award for published posts
     if (finalStatus === "published") {
       notifyNewPost(post.title, post.slug, session.user.name ?? session.user.email ?? "Autor");
+      awardXP(session.user.id, "blog_post_published", post.id);
     }
 
     return NextResponse.json(post, { status: 201 });

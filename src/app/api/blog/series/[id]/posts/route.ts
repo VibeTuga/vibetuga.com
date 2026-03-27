@@ -13,11 +13,7 @@ export async function POST(request: Request, context: RouteContext) {
   }
 
   try {
-    const { id } = await context.params;
-    const seriesId = parseInt(id, 10);
-    if (isNaN(seriesId)) {
-      return NextResponse.json({ error: "ID inválido" }, { status: 400 });
-    }
+    const { id: seriesId } = await context.params;
 
     const [series] = await db
       .select({ id: blogSeries.id, authorId: blogSeries.authorId })
@@ -97,11 +93,7 @@ export async function DELETE(request: Request, context: RouteContext) {
   }
 
   try {
-    const { id } = await context.params;
-    const seriesId = parseInt(id, 10);
-    if (isNaN(seriesId)) {
-      return NextResponse.json({ error: "ID inválido" }, { status: 400 });
-    }
+    const { id: seriesId } = await context.params;
 
     const [series] = await db
       .select({ id: blogSeries.id, authorId: blogSeries.authorId })

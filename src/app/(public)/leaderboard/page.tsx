@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { users, showcaseProjects } from "@/lib/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 import dynamic from "next/dynamic";
 import { AnimatedPodiumItem, AnimatedTableRow } from "@/components/leaderboard/AnimatedLeaderboard";
 import { VerifiedBadge } from "@/components/shared/VerifiedBadge";
@@ -49,20 +50,6 @@ function formatXP(xp: number): string {
 
 const podiumColors = [
   {
-    rank: "#2",
-    color: "tertiary",
-    borderColor: "border-tertiary",
-    bgColor: "bg-tertiary",
-    textColor: "text-tertiary",
-    onColor: "text-on-tertiary",
-    shadow: "shadow-[0_0_20px_rgba(129,233,255,0.3)]",
-    size: "w-24 h-24",
-    padding: "p-8",
-    order: "order-2 md:order-1",
-    xpSize: "text-2xl",
-    isFirst: false,
-  },
-  {
     rank: "#1",
     color: "primary",
     borderColor: "border-primary",
@@ -75,6 +62,20 @@ const podiumColors = [
     order: "order-1 md:order-2",
     xpSize: "text-4xl",
     isFirst: true,
+  },
+  {
+    rank: "#2",
+    color: "tertiary",
+    borderColor: "border-tertiary",
+    bgColor: "bg-tertiary",
+    textColor: "text-tertiary",
+    onColor: "text-on-tertiary",
+    shadow: "shadow-[0_0_20px_rgba(129,233,255,0.3)]",
+    size: "w-24 h-24",
+    padding: "p-8",
+    order: "order-2 md:order-1",
+    xpSize: "text-2xl",
+    isFirst: false,
   },
   {
     rank: "#3",
@@ -98,15 +99,20 @@ const timeTabs = [
   { label: "All-Time", active: true },
 ] as const;
 
-const categoryPills = [
-  { label: "Geral", active: true },
-  { label: "Criadores de Projetos", active: false },
-  { label: "Top Sellers", active: false },
-  { label: "Mais Helpful", active: false },
-] as const;
+const allCategoryPills = [
+  { label: "Geral", active: true, storeOnly: false },
+  { label: "Criadores de Projetos", active: false, storeOnly: false },
+  { label: "Top Sellers", active: false, storeOnly: true },
+  { label: "Mais Helpful", active: false, storeOnly: false },
+];
 
 export default async function LeaderboardPage() {
-  const session = await auth().catch(() => null);
+  const [session, storeEnabled] = await Promise.all([
+    auth().catch(() => null),
+    isFeatureEnabled("store_enabled"),
+  ]);
+
+  const categoryPills = allCategoryPills.filter((p) => !p.storeOnly || storeEnabled);
   const topUsers = await db
     .select({
       id: users.id,

@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth";
 import { logAdminAction, getClientIp } from "@/lib/audit";
 import { createRevision } from "@/lib/db/queries/revisions";
 import { notifyNewPost } from "@/lib/discord-webhook";
+import { awardXP } from "@/lib/gamification";
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
@@ -88,9 +89,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
 
-    // Fire-and-forget Discord notification when post is published
+    // Fire-and-forget Discord notification + XP award when post is published
     if (status === "published" && post) {
       notifyNewPost(post.title, post.slug, session.user.name ?? session.user.email ?? "Autor");
+      awardXP(existing.authorId, "blog_post_published", post.id);
     }
 
     // Audit log status changes by admin/moderator

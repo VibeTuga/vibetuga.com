@@ -2,58 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  FileText,
-  FolderOpen,
-  Users,
-  Clock,
-  Rocket,
-  Mail,
-  ShoppingBag,
-  Shield,
-  Flag,
-  ActivitySquare,
-  Trophy,
-  Heart,
-  Tag,
-  RotateCcw,
-  Library,
-  Calendar,
-  BarChart3,
-  ToggleRight,
-  Video,
-} from "lucide-react";
 import { Logo } from "@/components/shared/Logo";
 import { cn } from "@/lib/utils";
-
-const adminLinks: readonly {
-  href: string;
-  label: string;
-  icon: typeof LayoutDashboard;
-  exact?: boolean;
-}[] = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { href: "/admin/blog", label: "Blog Posts", icon: FileText, exact: true },
-  { href: "/admin/blog/pending", label: "Pendentes", icon: Clock },
-  { href: "/admin/showcase", label: "Showcase", icon: Rocket },
-  { href: "/admin/newsletter", label: "Newsletter", icon: Mail },
-  { href: "/admin/challenges", label: "Desafios", icon: Trophy },
-  { href: "/admin/contributors", label: "Contribuidores", icon: Heart },
-  { href: "/admin/events", label: "Eventos", icon: Calendar },
-  { href: "/admin/streams", label: "Streams", icon: Video },
-  { href: "/admin/analytics", label: "Analíticas", icon: BarChart3 },
-  { href: "/admin/store", label: "Loja", icon: ShoppingBag },
-  { href: "/admin/collections", label: "Coleções", icon: Library },
-  { href: "/admin/coupons", label: "Cupões", icon: Tag },
-  { href: "/admin/refunds", label: "Reembolsos", icon: RotateCcw },
-  { href: "/admin/role-requests", label: "Pedidos de Role", icon: Shield },
-  { href: "/admin/reports", label: "Denúncias", icon: Flag },
-  { href: "/admin/feature-flags", label: "Feature Flags", icon: ToggleRight },
-  { href: "/admin/audit-log", label: "Auditoria", icon: ActivitySquare },
-  { href: "/admin/categories", label: "Categorias", icon: FolderOpen },
-  { href: "/admin/users", label: "Utilizadores", icon: Users },
-];
+import { adminLinks } from "./admin-links";
 
 export function AdminSidebar() {
   const pathname = usePathname();
@@ -72,7 +23,7 @@ export function AdminSidebar() {
         </p>
       </div>
 
-      <nav className="flex-1 px-4 py-6 space-y-1">
+      <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
         {adminLinks.map((link) => {
           const active = isActive(link.href, link.exact);
           const Icon = link.icon;

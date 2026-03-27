@@ -25,11 +25,12 @@ export const getContributors = cache(async () => {
     badgeUserIds = badgeUsers.map((b) => b.userId);
   }
 
-  // Build WHERE: isVerified = true OR userId in badgeUserIds
-  const conditions =
-    badgeUserIds.length > 0
-      ? or(eq(users.isVerified, true), inArray(users.id, badgeUserIds))
-      : eq(users.isVerified, true);
+  // Build WHERE: isVerified = true OR admin/moderator OR has contributor badge
+  const baseConditions = [eq(users.isVerified, true), inArray(users.role, ["admin", "moderator"])];
+  if (badgeUserIds.length > 0) {
+    baseConditions.push(inArray(users.id, badgeUserIds));
+  }
+  const conditions = or(...baseConditions);
 
   const contributorBadgeCount = sql<number>`cast(count(distinct ${userBadges.badgeId}) as int)`;
 

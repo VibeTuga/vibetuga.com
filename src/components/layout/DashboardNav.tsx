@@ -41,6 +41,8 @@ interface NavGroup {
   groupKey: string;
   items: NavItem[];
   sellerOnly?: boolean;
+  storeOnly?: boolean;
+  premiumOnly?: boolean;
 }
 
 const navGroups: NavGroup[] = [
@@ -61,12 +63,17 @@ const navGroups: NavGroup[] = [
   },
   {
     groupKey: "purchases",
+    storeOnly: true,
     items: [
       { href: "/dashboard/my-purchases", labelKey: "myPurchases", icon: ShoppingBag },
-      { href: "/dashboard/subscription", labelKey: "subscription", icon: CreditCard },
       { href: "/dashboard/wishlist", labelKey: "wishlist", icon: Heart },
       { href: "/dashboard/collections", labelKey: "collections", icon: Bookmark },
     ],
+  },
+  {
+    groupKey: "premium",
+    premiumOnly: true,
+    items: [{ href: "/dashboard/subscription", labelKey: "subscription", icon: CreditCard }],
   },
   {
     groupKey: "social",
@@ -99,9 +106,14 @@ const navGroups: NavGroup[] = [
 interface DashboardNavProps {
   canSell: boolean;
   storeEnabled?: boolean;
+  premiumEnabled?: boolean;
 }
 
-export function DashboardNav({ canSell, storeEnabled = true }: DashboardNavProps) {
+export function DashboardNav({
+  canSell,
+  storeEnabled = false,
+  premiumEnabled = false,
+}: DashboardNavProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const tGroups = useTranslations("dashboard.groups");
@@ -110,6 +122,8 @@ export function DashboardNav({ canSell, storeEnabled = true }: DashboardNavProps
 
   const visibleGroups = navGroups.filter((g) => {
     if (g.sellerOnly && (!canSell || !storeEnabled)) return false;
+    if (g.storeOnly && !storeEnabled) return false;
+    if (g.premiumOnly && !premiumEnabled) return false;
     return true;
   });
 
