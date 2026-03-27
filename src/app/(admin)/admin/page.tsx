@@ -1,7 +1,16 @@
 import { db } from "@/lib/db";
 import { users, blogPosts } from "@/lib/db/schema";
 import { eq, count } from "drizzle-orm";
-import { Users, FileText, AlertCircle, BookOpen, TrendingUp } from "lucide-react";
+import {
+  Users,
+  FileText,
+  AlertCircle,
+  BookOpen,
+  TrendingUp,
+  Bot,
+  CheckCircle2,
+  XCircle,
+} from "lucide-react";
 import Link from "next/link";
 
 async function getStats() {
@@ -70,6 +79,9 @@ const quickLinks = [
 export default async function AdminDashboardPage() {
   const stats = await getStats();
 
+  const discordWebhookConfigured = !!process.env.DISCORD_WEBHOOK_URL;
+  const discordBotSecretConfigured = !!process.env.DISCORD_BOT_SECRET;
+
   return (
     <div>
       {/* Stats Overview */}
@@ -129,6 +141,69 @@ export default async function AdminDashboardPage() {
           })}
         </div>
       </section>
+
+      {/* Discord Integration Status */}
+      <section className="mt-8">
+        <h3 className="font-headline font-bold text-sm uppercase tracking-widest mb-6 px-2">
+          Integração Discord
+        </h3>
+        <div className="bg-surface-container p-6 border-b-2 border-transparent hover:border-secondary transition-all">
+          <div className="flex items-center gap-3 mb-4">
+            <Bot size={20} className="text-secondary" />
+            <span className="text-white font-headline font-bold text-sm uppercase tracking-widest">
+              Estado da Integração
+            </span>
+          </div>
+          <div className="space-y-3">
+            <DiscordConfigRow
+              label="Webhook URL"
+              envVar="DISCORD_WEBHOOK_URL"
+              configured={discordWebhookConfigured}
+              description="Notificações automáticas (posts, level-ups)"
+            />
+            <DiscordConfigRow
+              label="Bot Secret"
+              envVar="DISCORD_BOT_SECRET"
+              configured={discordBotSecretConfigured}
+              description="Autenticação da API de sincronização"
+            />
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function DiscordConfigRow({
+  label,
+  envVar,
+  configured,
+  description,
+}: {
+  label: string;
+  envVar: string;
+  configured: boolean;
+  description: string;
+}) {
+  return (
+    <div className="flex items-center justify-between py-2">
+      <div className="flex items-center gap-3">
+        {configured ? (
+          <CheckCircle2 size={16} className="text-primary shrink-0" />
+        ) : (
+          <XCircle size={16} className="text-error shrink-0" />
+        )}
+        <div>
+          <span className="text-white text-sm font-medium">{label}</span>
+          <span className="text-white/30 text-xs font-mono ml-2">{envVar}</span>
+          <p className="text-white/40 text-xs">{description}</p>
+        </div>
+      </div>
+      <span
+        className={`text-[10px] font-mono uppercase tracking-widest ${configured ? "text-primary" : "text-error"}`}
+      >
+        {configured ? "Configurado" : "Não configurado"}
+      </span>
     </div>
   );
 }
