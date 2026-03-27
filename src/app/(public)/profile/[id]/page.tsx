@@ -11,9 +11,11 @@ import {
   type ProfileProject,
   type ProfileBadge,
 } from "@/lib/db/queries/profile";
+import { getUserStreakData } from "@/lib/db/queries/streak";
 import { auth } from "@/lib/auth";
 import { XpProgressBar } from "@/components/profile/XpProgressBar";
 import { LevelRing } from "@/components/profile/LevelRing";
+import { StreakCalendar } from "@/components/profile/StreakCalendar";
 import { FollowButton } from "@/components/shared/FollowButton";
 import { VerifiedBadge } from "@/components/shared/VerifiedBadge";
 import { SendMessageButton } from "@/components/shared/SendMessageButton";
@@ -252,7 +254,10 @@ export default async function ProfilePage({ params, searchParams }: Props) {
   const session = await auth();
   const sessionUserId = session?.user?.id ?? null;
 
-  const profile = await getUserProfile(id, sessionUserId);
+  const [profile, streakData] = await Promise.all([
+    getUserProfile(id, sessionUserId),
+    getUserStreakData(id),
+  ]);
   if (!profile) notFound();
 
   const {
@@ -283,6 +288,7 @@ export default async function ProfilePage({ params, searchParams }: Props) {
 
   const tabs = [
     { key: "badges", label: "Badges", count: earnedCount },
+    { key: "streak", label: "Streak", count: streakData.currentStreak },
     { key: "posts", label: "Posts", count: posts.length },
     { key: "projects", label: "Projetos", count: projects.length },
     { key: "activity", label: "Atividade", count: recentXpEvents.length },
@@ -483,6 +489,17 @@ export default async function ProfilePage({ params, searchParams }: Props) {
                 allBadges.map((badge) => <BadgeCard key={badge.id} badge={badge} />)
               )}
             </div>
+          )}
+
+          {/* Streak tab */}
+          {tab === "streak" && (
+            <StreakCalendar
+              activities={streakData.activities}
+              currentStreak={streakData.currentStreak}
+              longestStreak={streakData.longestStreak}
+              showFreezeButton={isOwnProfile}
+              streakFreezeUsedAt={streakData.streakFreezeUsedAt}
+            />
           )}
 
           {/* Posts tab */}
