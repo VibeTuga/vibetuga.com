@@ -9,7 +9,9 @@ import {
   type DashboardXpEvent,
   type DashboardComment,
 } from "@/lib/db/queries/dashboard";
+import { getUserStreakData } from "@/lib/db/queries/streak";
 import { XpProgressBar } from "@/components/profile/XpProgressBar";
+import { StreakCalendar } from "@/components/profile/StreakCalendar";
 import {
   Zap,
   MessageSquare,
@@ -133,7 +135,10 @@ export default async function DashboardPage() {
   const session = await auth();
   if (!session?.user) redirect("/login");
 
-  const data = await getUserDashboardActivity(session.user.id);
+  const [data, streakData] = await Promise.all([
+    getUserDashboardActivity(session.user.id),
+    getUserStreakData(session.user.id),
+  ]);
   if (!data) redirect("/login");
 
   const { user, levelName, currentLevelXp, nextLevelXp, recentXpEvents, recentCommentsOnPosts } =
@@ -217,6 +222,21 @@ export default async function DashboardPage() {
           </div>
           <XpProgressBar progressPct={progressPct} />
         </div>
+      </div>
+
+      {/* Streak Calendar */}
+      <div>
+        <h2 className="text-sm font-mono text-white/50 uppercase tracking-widest mb-4 flex items-center gap-2">
+          <Flame size={14} className="text-orange-400" />
+          Calendário de Atividade
+        </h2>
+        <StreakCalendar
+          activities={streakData.activities}
+          currentStreak={streakData.currentStreak}
+          longestStreak={streakData.longestStreak}
+          showFreezeButton={true}
+          streakFreezeUsedAt={streakData.streakFreezeUsedAt}
+        />
       </div>
 
       {/* Activity feed */}

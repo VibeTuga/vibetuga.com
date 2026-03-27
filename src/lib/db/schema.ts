@@ -108,6 +108,8 @@ export const users = pgTable("user", {
   xpPoints: integer("xp_points").default(0).notNull(),
   level: integer("level").default(1).notNull(),
   streakDays: integer("streak_days").default(0).notNull(),
+  longestStreak: integer("longest_streak").default(0).notNull(),
+  streakFreezeUsedAt: timestamp("streak_freeze_used_at", { mode: "date" }),
   isBanned: boolean("is_banned").default(false).notNull(),
   isVerified: boolean("is_verified").default(false).notNull(),
   stripeConnectAccountId: varchar("stripe_connect_account_id", { length: 255 }),
