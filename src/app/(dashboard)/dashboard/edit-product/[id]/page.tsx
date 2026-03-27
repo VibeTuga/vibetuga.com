@@ -4,6 +4,7 @@ import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { Save, Loader2, Trash2 } from "lucide-react";
 import { ImageUpload } from "@/components/shared/ImageUpload";
+import { FileUpload } from "@/components/shared/FileUpload";
 
 function slugify(text: string): string {
   return text
@@ -387,18 +388,11 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         {/* Download Key */}
         <div>
           <label className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2">
-            Chave de Download (R2)
+            Ficheiro do Produto
           </label>
-          <input
-            type="text"
-            value={downloadKey}
-            onChange={(e) => setDownloadKey(e.target.value)}
-            disabled={!isDraft}
-            className="w-full bg-surface-container-lowest border border-white/5 focus:border-tertiary/50 focus:shadow-[0_0_8px_rgba(129,233,255,0.15)] text-white text-sm p-4 font-mono placeholder:text-white/20 transition-all outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-            placeholder="products/meu-produto.zip"
-          />
+          <FileUpload value={downloadKey} onChange={setDownloadKey} />
           <p className="mt-1 text-[10px] font-mono text-white/20">
-            Caminho do ficheiro no bucket R2 (para entrega após compra)
+            Ficheiro entregue ao comprador após a compra
           </p>
         </div>
 

@@ -148,7 +148,7 @@ export default async function MyPurchasesPage() {
                     </a>
                     {purchase.downloadKey && (
                       <Link
-                        href={`/api/upload/${purchase.downloadKey}`}
+                        href={`/api/store/products/${purchase.productId}/download`}
                         className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary text-[10px] font-mono uppercase tracking-wider hover:bg-primary/20 transition-colors"
                       >
                         <Download size={12} />

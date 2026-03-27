@@ -105,6 +105,21 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 STRIPE_CONNECT_PLATFORM_FEE_PERCENT=15
 ```
 
+## Private R2 Bucket (Product Downloads)
+
+Product files are stored in a separate private R2 bucket with no public access. Downloads are served via purchase-verified presigned URLs that expire after 1 hour.
+
+When a seller uploads a product file, it goes to the private bucket. When a buyer clicks "Download", the API verifies their purchase and generates a short-lived presigned URL to serve the file.
+
+### Required Environment Variables
+
+```env
+R2_PRIVATE_ACCOUNT_ID=        # Cloudflare account ID for the private bucket
+R2_PRIVATE_ACCESS_KEY_ID=     # R2 API token key ID (private bucket)
+R2_PRIVATE_SECRET_ACCESS_KEY= # R2 API token secret (private bucket)
+R2_PRIVATE_BUCKET_NAME=       # Private bucket name (e.g. vibetuga-products)
+```
+
 ## Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
