@@ -20,13 +20,18 @@ async function loadFlags(): Promise<CachedFlags["data"]> {
     return flagsCache.data;
   }
 
-  const rows = await db.select().from(featureFlags);
-  const data = new Map(
-    rows.map((r) => [r.key, { isEnabled: r.isEnabled, rolloutPercentage: r.rolloutPercentage }]),
-  );
+  try {
+    const rows = await db.select().from(featureFlags);
+    const data = new Map(
+      rows.map((r) => [r.key, { isEnabled: r.isEnabled, rolloutPercentage: r.rolloutPercentage }]),
+    );
 
-  flagsCache = { data, timestamp: now };
-  return data;
+    flagsCache = { data, timestamp: now };
+    return data;
+  } catch {
+    // Return empty map on DB error — all flags will default to disabled
+    return new Map();
+  }
 }
 
 /** Invalidate the in-memory cache (call after mutations). */
