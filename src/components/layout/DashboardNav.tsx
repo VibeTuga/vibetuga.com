@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   BarChart3,
   Bell,
+  Bookmark,
   BookOpen,
   Code,
   FileText,
@@ -61,6 +62,7 @@ const navGroups: NavGroup[] = [
     items: [
       { href: "/dashboard/my-purchases", label: "Minhas Compras", icon: ShoppingBag },
       { href: "/dashboard/wishlist", label: "Lista de Desejos", icon: Heart },
+      { href: "/dashboard/collections", label: "Coleções", icon: Bookmark },
     ],
   },
   {
