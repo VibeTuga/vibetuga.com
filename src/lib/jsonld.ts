@@ -103,6 +103,23 @@ export function getProjectJsonLd(project: {
   };
 }
 
+// ─── Contributors Page ────────────────────────────────────────────────────────
+
+export function getContributorsPageJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Contribuidores — VibeTuga",
+    description: "Membros reconhecidos do programa de contribuidores da comunidade VibeTuga.",
+    url: `${SITE_URL}/contributors`,
+    isPartOf: {
+      "@type": "WebSite",
+      name: "VibeTuga",
+      url: SITE_URL,
+    },
+  };
+}
+
 // ─── Product ───────────────────────────────────────────────────────────────────
 
 export function getProductJsonLd(product: {

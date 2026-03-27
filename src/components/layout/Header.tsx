@@ -28,6 +28,7 @@ const allNavLinks = [
   { href: "/challenges", labelKey: "challenges" },
   { href: "/events", labelKey: "events" },
   { href: "/leaderboard", labelKey: "leaderboard" },
+  { href: "/contributors", labelKey: "contributors" },
   { href: "/store", labelKey: "store" },
   { href: "/pricing", labelKey: "premium" },
 ] as const;
