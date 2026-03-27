@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Trophy, Star, Clock, Users, ExternalLink, Crown } from "lucide-react";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 import { db } from "@/lib/db";
 import { challenges, challengeEntries, challengeEntryVotes, users, badges } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
@@ -60,6 +61,8 @@ const STATUS_BADGE: Record<string, { label: string; className: string }> = {
 };
 
 export default async function ChallengeDetailPage({ params }: { params: Promise<PageParams> }) {
+  if (!(await isFeatureEnabled("challenges_enabled"))) notFound();
+
   const { id } = await params;
   const challengeId = parseInt(id, 10);
   if (isNaN(challengeId)) notFound();

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 import {
   getProductBySlug,
   getUserWishlistProductIds,
@@ -97,6 +98,8 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 }
 
 export default async function ProductDetailPage({ params }: { params: Params }) {
+  if (!(await isFeatureEnabled("store_enabled"))) notFound();
+
   const { slug } = await params;
   const [product, session] = await Promise.all([getProductBySlug(slug), auth()]);
 

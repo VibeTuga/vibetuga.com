@@ -5,6 +5,7 @@ import { storeProducts, storeCoupons } from "@/lib/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { stripe } from "@/lib/stripe";
 import { rateLimit } from "@/lib/rate-limit";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 
 const limiter = rateLimit({ interval: 60_000, limit: 10 });
 
@@ -41,6 +42,10 @@ function calculateDiscount(
 }
 
 export async function POST(request: Request) {
+  if (!(await isFeatureEnabled("store_enabled"))) {
+    return NextResponse.json({ error: "Feature disabled" }, { status: 404 });
+  }
+
   const session = await auth();
 
   if (!session?.user) {

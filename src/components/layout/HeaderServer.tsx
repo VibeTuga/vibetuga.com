@@ -1,9 +1,10 @@
 import { auth } from "@/lib/auth";
+import { getEnabledFeatures } from "@/lib/feature-gate";
 import { Header } from "./Header";
 import type { SessionUser } from "./UserMenu";
 
 export async function HeaderServer() {
-  const session = await auth();
+  const [session, features] = await Promise.all([auth(), getEnabledFeatures()]);
 
   const user: SessionUser | null = session?.user
     ? {
@@ -15,5 +16,5 @@ export async function HeaderServer() {
       }
     : null;
 
-  return <Header user={user} />;
+  return <Header user={user} features={features} />;
 }

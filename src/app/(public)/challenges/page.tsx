@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { Trophy, Clock, Users, Star, ChevronRight } from "lucide-react";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 import { db } from "@/lib/db";
 import { challenges, challengeEntries } from "@/lib/db/schema";
 import { eq, desc, sql, or } from "drizzle-orm";
@@ -37,6 +39,8 @@ const STATUS_BADGE: Record<string, { label: string; className: string }> = {
 };
 
 export default async function ChallengesPage() {
+  if (!(await isFeatureEnabled("challenges_enabled"))) notFound();
+
   const rows = await db
     .select({
       id: challenges.id,
