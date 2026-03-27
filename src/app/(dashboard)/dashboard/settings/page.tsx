@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { useTranslations, useLocale } from "next-intl";
 import {
   Settings,
   Bell,
@@ -22,15 +24,7 @@ interface UserSettingsData {
   locale: "pt" | "en";
 }
 
-const PRIVACY_OPTIONS = [
-  {
-    value: "public" as const,
-    label: "Público",
-    description: "Qualquer pessoa pode ver o teu perfil",
-  },
-  { value: "members" as const, label: "Membros", description: "Apenas membros registados" },
-  { value: "private" as const, label: "Privado", description: "Apenas tu podes ver o teu perfil" },
-];
+const PRIVACY_KEYS = ["public", "members", "private"] as const;
 
 const LOCALE_OPTIONS = [
   { value: "pt" as const, label: "Português" },
@@ -52,6 +46,11 @@ interface UserProfile {
 }
 
 export default function SettingsPage() {
+  const t = useTranslations("settings");
+  const tc = useTranslations("common");
+  const tRole = useTranslations("roles");
+  const locale = useLocale();
+  const router = useRouter();
   const [settings, setSettings] = useState<UserSettingsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -76,11 +75,11 @@ export default function SettingsPage() {
   useEffect(() => {
     fetch("/api/users/me/settings")
       .then((res) => {
-        if (!res.ok) throw new Error("Erro ao carregar definições");
+        if (!res.ok) throw new Error(t("loadError"));
         return res.json();
       })
       .then((data: UserSettingsData) => setSettings(data))
-      .catch(() => setError("Não foi possível carregar as definições."))
+      .catch(() => setError(t("loadError")))
       .finally(() => setLoading(false));
 
     fetch("/api/users/me")
@@ -96,33 +95,41 @@ export default function SettingsPage() {
       .catch(() => {});
   }, []);
 
-  const save = useCallback(async (updates: Partial<UserSettingsData>) => {
-    setSaving(true);
-    setSaved(false);
-    setError(null);
+  const save = useCallback(
+    async (updates: Partial<UserSettingsData>) => {
+      setSaving(true);
+      setSaved(false);
+      setError(null);
 
-    try {
-      const res = await fetch("/api/users/me/settings", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updates),
-      });
+      try {
+        const res = await fetch("/api/users/me/settings", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updates),
+        });
 
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error ?? "Erro ao guardar");
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.error ?? t("saveError"));
+        }
+
+        const updated: UserSettingsData = await res.json();
+        setSettings(updated);
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2000);
+
+        if (updates.locale) {
+          document.cookie = `locale=${updates.locale};path=/;max-age=${60 * 60 * 24 * 365};samesite=lax`;
+          router.refresh();
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : t("saveError"));
+      } finally {
+        setSaving(false);
       }
-
-      const updated: UserSettingsData = await res.json();
-      setSettings(updated);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao guardar definições");
-    } finally {
-      setSaving(false);
-    }
-  }, []);
+    },
+    [t, router],
+  );
 
   if (loading) {
     return (
@@ -148,9 +155,9 @@ export default function SettingsPage() {
       <div>
         <h1 className="text-xl font-semibold text-white flex items-center gap-2">
           <Settings size={20} className="text-primary" />
-          Definições
+          {t("title")}
         </h1>
-        <p className="text-sm text-white/40 mt-1">Gere as tuas preferências e privacidade.</p>
+        <p className="text-sm text-white/40 mt-1">{t("description")}</p>
       </div>
 
       {/* Status bar */}
@@ -166,7 +173,7 @@ export default function SettingsPage() {
         >
           {saving && <Loader2 size={12} className="animate-spin" />}
           {saved && <Check size={12} />}
-          {saving ? "A guardar..." : saved ? "Guardado" : error}
+          {saving ? tc("saving") : saved ? tc("saved") : error}
         </div>
       )}
 
@@ -174,12 +181,12 @@ export default function SettingsPage() {
       <section className="bg-surface-container-low rounded-lg p-6 space-y-5">
         <h2 className="text-sm font-mono text-white/50 uppercase tracking-widest flex items-center gap-2">
           <Bell size={14} className="text-primary" />
-          Notificações
+          {t("notifications")}
         </h2>
 
         <ToggleRow
-          label="Notificações por email"
-          description="Receber emails sobre atividade na plataforma"
+          label={t("emailNotifications")}
+          description={t("emailNotificationsDesc")}
           checked={settings.emailNotifications}
           disabled={saving}
           icon={settings.emailNotifications ? <Bell size={16} /> : <BellOff size={16} />}
@@ -190,8 +197,8 @@ export default function SettingsPage() {
         />
 
         <ToggleRow
-          label="Notificações in-app"
-          description="Receber notificações dentro da plataforma"
+          label={t("inAppNotifications")}
+          description={t("inAppNotificationsDesc")}
           checked={settings.inAppNotifications}
           disabled={saving}
           icon={settings.inAppNotifications ? <Bell size={16} /> : <BellOff size={16} />}
@@ -206,30 +213,30 @@ export default function SettingsPage() {
       <section className="bg-surface-container-low rounded-lg p-6 space-y-5">
         <h2 className="text-sm font-mono text-white/50 uppercase tracking-widest flex items-center gap-2">
           <Globe size={14} className="text-tertiary" />
-          Privacidade
+          {t("privacy")}
         </h2>
 
         <div>
-          <label className="block text-sm text-white/80 mb-2">Visibilidade do perfil</label>
+          <label className="block text-sm text-white/80 mb-2">{t("profileVisibility")}</label>
           <div className="space-y-2">
-            {PRIVACY_OPTIONS.map((opt) => (
+            {PRIVACY_KEYS.map((key) => (
               <button
-                key={opt.value}
+                key={key}
                 type="button"
                 disabled={saving}
                 onClick={() => {
-                  if (opt.value === settings.privacyLevel) return;
-                  setSettings({ ...settings, privacyLevel: opt.value });
-                  save({ privacyLevel: opt.value });
+                  if (key === settings.privacyLevel) return;
+                  setSettings({ ...settings, privacyLevel: key });
+                  save({ privacyLevel: key });
                 }}
                 className={`w-full text-left p-3 rounded-lg border transition-colors ${
-                  settings.privacyLevel === opt.value
+                  settings.privacyLevel === key
                     ? "bg-primary/10 border-primary/30 text-white"
                     : "bg-surface-container border-white/5 text-white/60 hover:border-white/10"
                 } disabled:opacity-50`}
               >
-                <span className="text-sm font-medium">{opt.label}</span>
-                <p className="text-[11px] text-white/40 mt-0.5">{opt.description}</p>
+                <span className="text-sm font-medium">{t(key)}</span>
+                <p className="text-[11px] text-white/40 mt-0.5">{t(`${key}Desc`)}</p>
               </button>
             ))}
           </div>
@@ -240,11 +247,11 @@ export default function SettingsPage() {
       <section className="bg-surface-container-low rounded-lg p-6 space-y-5">
         <h2 className="text-sm font-mono text-white/50 uppercase tracking-widest flex items-center gap-2">
           <Languages size={14} className="text-secondary" />
-          Idioma
+          {t("language")}
         </h2>
 
         <div>
-          <label className="block text-sm text-white/80 mb-2">Idioma da interface</label>
+          <label className="block text-sm text-white/80 mb-2">{t("interfaceLanguage")}</label>
           <div className="flex gap-2">
             {LOCALE_OPTIONS.map((opt) => (
               <button
@@ -274,29 +281,27 @@ export default function SettingsPage() {
         <section className="bg-surface-container-low rounded-lg p-6 space-y-5">
           <h2 className="text-sm font-mono text-white/50 uppercase tracking-widest flex items-center gap-2">
             <Shield size={14} className="text-tertiary" />
-            Pedir Upgrade de Role
+            {t("roleUpgrade")}
           </h2>
 
           {roleRequests.some((r) => r.status === "pending") ? (
             <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4">
-              <p className="text-sm text-yellow-400">
-                Tens um pedido pendente. Aguarda a revisão por um administrador.
-              </p>
+              <p className="text-sm text-yellow-400">{t("pendingRequest")}</p>
               {roleRequests
                 .filter((r) => r.status === "pending")
                 .map((r) => (
                   <div key={r.id} className="mt-3 text-xs text-white/40 font-mono">
-                    <span className="text-white/60">Role pedido:</span>{" "}
+                    <span className="text-white/60">{t("requestedRole")}</span>{" "}
                     <span className="text-primary">{r.requestedRole}</span>
-                    <span className="ml-4 text-white/60">Submetido:</span>{" "}
-                    {new Date(r.createdAt).toLocaleDateString("pt-PT")}
+                    <span className="ml-4 text-white/60">{t("submitted")}</span>{" "}
+                    {new Date(r.createdAt).toLocaleDateString(locale === "pt" ? "pt-PT" : "en-GB")}
                   </div>
                 ))}
             </div>
           ) : (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm text-white/80 mb-2">Role pretendido</label>
+                <label className="block text-sm text-white/80 mb-2">{t("desiredRole")}</label>
                 <div className="flex gap-2">
                   {(["seller", "author"] as const).map((role) => (
                     <button
@@ -311,7 +316,7 @@ export default function SettingsPage() {
                           : "bg-surface-container border-white/5 text-white/50 hover:border-white/10"
                       }`}
                     >
-                      {role === "seller" ? "Seller" : "Author"}
+                      {tRole(role)}
                     </button>
                   ))}
                 </div>
@@ -319,7 +324,8 @@ export default function SettingsPage() {
 
               <div>
                 <label className="block text-sm text-white/80 mb-2">
-                  Razão do pedido <span className="text-white/30">(mín. 10 caracteres)</span>
+                  {t("requestReason")}{" "}
+                  <span className="text-white/30">{t("requestReasonHint")}</span>
                 </label>
                 <textarea
                   value={roleRequestForm.reason}
@@ -328,13 +334,13 @@ export default function SettingsPage() {
                   }
                   rows={3}
                   maxLength={1000}
-                  placeholder="Explica porque queres este role..."
+                  placeholder={t("requestReasonPlaceholder")}
                   className="w-full bg-surface-container border border-white/5 rounded-lg p-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-primary/30"
                 />
               </div>
 
               {roleError && <p className="text-xs text-red-400">{roleError}</p>}
-              {roleSuccess && <p className="text-xs text-primary">Pedido submetido com sucesso!</p>}
+              {roleSuccess && <p className="text-xs text-primary">{t("requestSuccess")}</p>}
 
               <button
                 type="button"
@@ -351,14 +357,14 @@ export default function SettingsPage() {
                     });
                     if (!res.ok) {
                       const data = await res.json();
-                      throw new Error(data.error ?? "Erro ao submeter");
+                      throw new Error(data.error ?? t("submitError"));
                     }
                     const newReq: RoleRequestData = await res.json();
                     setRoleRequests([newReq, ...roleRequests]);
                     setRoleSuccess(true);
                     setRoleRequestForm({ requestedRole: "seller", reason: "" });
                   } catch (err) {
-                    setRoleError(err instanceof Error ? err.message : "Erro ao submeter pedido");
+                    setRoleError(err instanceof Error ? err.message : t("submitError"));
                   } finally {
                     setSubmittingRole(false);
                   }
@@ -370,7 +376,7 @@ export default function SettingsPage() {
                 ) : (
                   <Shield size={14} />
                 )}
-                Submeter Pedido
+                {t("submitRequest")}
               </button>
             </div>
           )}
@@ -379,7 +385,7 @@ export default function SettingsPage() {
           {roleRequests.filter((r) => r.status !== "pending").length > 0 && (
             <div className="pt-4 border-t border-white/5 space-y-2">
               <p className="text-[11px] font-mono text-white/30 uppercase tracking-widest">
-                Histórico
+                {t("history")}
               </p>
               {roleRequests
                 .filter((r) => r.status !== "pending")
@@ -395,10 +401,14 @@ export default function SettingsPage() {
                           : "bg-red-500/10 text-red-400"
                       }`}
                     >
-                      {r.status === "approved" ? "Aprovado" : "Rejeitado"}
+                      {r.status === "approved" ? t("approved") : t("rejected")}
                     </span>
                     <span className="text-white/60">{r.requestedRole}</span>
-                    <span>{new Date(r.createdAt).toLocaleDateString("pt-PT")}</span>
+                    <span>
+                      {new Date(r.createdAt).toLocaleDateString(
+                        locale === "pt" ? "pt-PT" : "en-GB",
+                      )}
+                    </span>
                     {r.reviewNote && <span className="text-white/30">— {r.reviewNote}</span>}
                   </div>
                 ))}
@@ -411,7 +421,7 @@ export default function SettingsPage() {
       <section className="bg-surface-container-low rounded-lg p-6 space-y-5">
         <h2 className="text-sm font-mono text-white/50 uppercase tracking-widest flex items-center gap-2">
           <Download size={14} className="text-primary" />
-          Conta
+          {t("account")}
         </h2>
 
         {accountError && (
@@ -423,10 +433,8 @@ export default function SettingsPage() {
         {/* Data Export */}
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-sm text-white/80">Exportar Dados</p>
-            <p className="text-[11px] text-white/40">
-              Faz download de todos os teus dados em formato JSON (GDPR).
-            </p>
+            <p className="text-sm text-white/80">{t("exportData")}</p>
+            <p className="text-[11px] text-white/40">{t("exportDataDesc")}</p>
           </div>
           <button
             type="button"
@@ -438,7 +446,7 @@ export default function SettingsPage() {
                 const res = await fetch("/api/users/me/export");
                 if (!res.ok) {
                   const data = await res.json();
-                  throw new Error(data.error ?? "Erro ao exportar");
+                  throw new Error(data.error ?? t("exportError"));
                 }
                 const blob = await res.blob();
                 const disposition = res.headers.get("content-disposition");
@@ -453,7 +461,7 @@ export default function SettingsPage() {
                 a.remove();
                 URL.revokeObjectURL(url);
               } catch (err) {
-                setAccountError(err instanceof Error ? err.message : "Erro ao exportar dados");
+                setAccountError(err instanceof Error ? err.message : t("exportError"));
               } finally {
                 setExporting(false);
               }
@@ -461,7 +469,7 @@ export default function SettingsPage() {
             className="flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/20 text-primary text-sm font-mono rounded-lg hover:bg-primary/20 transition-colors disabled:opacity-50 flex-shrink-0"
           >
             {exporting ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
-            Exportar
+            {t("export")}
           </button>
         </div>
 
@@ -470,11 +478,8 @@ export default function SettingsPage() {
           <div className="flex items-start gap-3">
             <AlertTriangle size={16} className="text-red-400 mt-0.5 flex-shrink-0" />
             <div className="flex-1">
-              <p className="text-sm text-red-400 font-medium">Zona de Perigo</p>
-              <p className="text-[11px] text-white/40 mt-1">
-                Eliminar a tua conta é permanente e irreversível. Todos os teus dados, posts,
-                comentários, projetos e compras serão apagados.
-              </p>
+              <p className="text-sm text-red-400 font-medium">{t("dangerZone")}</p>
+              <p className="text-[11px] text-white/40 mt-1">{t("dangerZoneDesc")}</p>
 
               {!showDeleteConfirm ? (
                 <button
@@ -483,22 +488,18 @@ export default function SettingsPage() {
                   className="mt-3 flex items-center gap-2 px-4 py-2 bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-mono rounded-lg hover:bg-red-500/20 transition-colors"
                 >
                   <Trash2 size={14} />
-                  Eliminar Conta
+                  {t("deleteAccount")}
                 </button>
               ) : (
                 <div className="mt-3 space-y-3 bg-red-500/5 border border-red-500/10 rounded-lg p-4">
                   <p className="text-xs text-red-400">
-                    Escreve{" "}
-                    <span className="font-mono font-bold">
-                      {userProfile?.discordUsername ?? "o teu username"}
-                    </span>{" "}
-                    para confirmar:
+                    {t("typeUsername", { username: userProfile?.discordUsername ?? "..." })}
                   </p>
                   <input
                     type="text"
                     value={deleteConfirmText}
                     onChange={(e) => setDeleteConfirmText(e.target.value)}
-                    placeholder="Escreve o teu username..."
+                    placeholder={t("typeUsernamePlaceholder")}
                     className="w-full bg-surface-container border border-red-500/20 rounded-lg p-2 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-red-500/40"
                   />
                   <div className="flex gap-2">
@@ -514,13 +515,11 @@ export default function SettingsPage() {
                           const res = await fetch("/api/users/me", { method: "DELETE" });
                           if (!res.ok) {
                             const data = await res.json();
-                            throw new Error(data.error ?? "Erro ao eliminar");
+                            throw new Error(data.error ?? t("deleteError"));
                           }
                           window.location.href = "/login";
                         } catch (err) {
-                          setAccountError(
-                            err instanceof Error ? err.message : "Erro ao eliminar conta",
-                          );
+                          setAccountError(err instanceof Error ? err.message : t("deleteError"));
                           setDeleting(false);
                         }
                       }}
@@ -531,7 +530,7 @@ export default function SettingsPage() {
                       ) : (
                         <Trash2 size={14} />
                       )}
-                      Confirmar Eliminação
+                      {t("confirmDeletion")}
                     </button>
                     <button
                       type="button"
@@ -541,7 +540,7 @@ export default function SettingsPage() {
                       }}
                       className="px-4 py-2 bg-surface-container border border-white/5 text-white/50 text-sm font-mono rounded-lg hover:border-white/10 transition-colors"
                     >
-                      Cancelar
+                      {tc("cancel")}
                     </button>
                   </div>
                 </div>
