@@ -194,6 +194,7 @@ export const getUserPurchases = cache(async (userId: string) => {
   return db
     .select({
       id: storePurchases.id,
+      productId: storePurchases.productId,
       pricePaidCents: storePurchases.pricePaidCents,
       createdAt: storePurchases.createdAt,
       productTitle: storeProducts.title,

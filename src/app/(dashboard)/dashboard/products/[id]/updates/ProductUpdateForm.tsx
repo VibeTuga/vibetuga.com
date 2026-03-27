@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Upload } from "lucide-react";
+import { FileUpload } from "@/components/shared/FileUpload";
 
 export function ProductUpdateForm({ productId }: { productId: string }) {
   const router = useRouter();
@@ -67,15 +68,9 @@ export function ProductUpdateForm({ productId }: { productId: string }) {
         </div>
         <div>
           <label className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2">
-            Nova chave de download (opcional)
+            Novo ficheiro (opcional)
           </label>
-          <input
-            type="text"
-            value={downloadKey}
-            onChange={(e) => setDownloadKey(e.target.value)}
-            placeholder="products/meu-produto/v1.2.0.zip"
-            className="w-full px-4 py-3 bg-surface-container-lowest text-white text-sm font-mono border border-white/5 rounded focus:border-tertiary focus:outline-none transition-colors placeholder:text-white/20"
-          />
+          <FileUpload value={downloadKey} onChange={setDownloadKey} />
         </div>
       </div>
 
