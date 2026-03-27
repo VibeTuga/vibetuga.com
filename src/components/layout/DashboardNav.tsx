@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
   BarChart3,
   Bell,
@@ -31,66 +32,66 @@ import { cn } from "@/lib/utils";
 
 interface NavItem {
   href: string;
-  label: string;
+  labelKey: string;
   icon: LucideIcon;
   exact?: boolean;
 }
 
 interface NavGroup {
-  label: string;
+  groupKey: string;
   items: NavItem[];
   sellerOnly?: boolean;
 }
 
 const navGroups: NavGroup[] = [
   {
-    label: "Principal",
+    groupKey: "main",
     items: [
-      { href: "/dashboard", label: "Início", icon: Home, exact: true },
-      { href: "/dashboard/profile", label: "Meu Perfil", icon: User },
+      { href: "/dashboard", labelKey: "home", icon: Home, exact: true },
+      { href: "/dashboard/profile", labelKey: "myProfile", icon: User },
     ],
   },
   {
-    label: "Conteúdo",
+    groupKey: "content",
     items: [
-      { href: "/dashboard/submit-post", label: "Submeter Post", icon: FileText },
-      { href: "/dashboard/submit-project", label: "Submeter Projeto", icon: Layers },
-      { href: "/dashboard/my-series", label: "Séries", icon: BookOpen },
+      { href: "/dashboard/submit-post", labelKey: "submitPost", icon: FileText },
+      { href: "/dashboard/submit-project", labelKey: "submitProject", icon: Layers },
+      { href: "/dashboard/my-series", labelKey: "series", icon: BookOpen },
     ],
   },
   {
-    label: "Compras",
+    groupKey: "purchases",
     items: [
-      { href: "/dashboard/my-purchases", label: "Minhas Compras", icon: ShoppingBag },
-      { href: "/dashboard/subscription", label: "Subscrição", icon: CreditCard },
-      { href: "/dashboard/wishlist", label: "Lista de Desejos", icon: Heart },
-      { href: "/dashboard/collections", label: "Coleções", icon: Bookmark },
+      { href: "/dashboard/my-purchases", labelKey: "myPurchases", icon: ShoppingBag },
+      { href: "/dashboard/subscription", labelKey: "subscription", icon: CreditCard },
+      { href: "/dashboard/wishlist", labelKey: "wishlist", icon: Heart },
+      { href: "/dashboard/collections", labelKey: "collections", icon: Bookmark },
     ],
   },
   {
-    label: "Social",
+    groupKey: "social",
     items: [
-      { href: "/dashboard/messages", label: "Mensagens", icon: MessageCircle },
-      { href: "/dashboard/notifications", label: "Notificações", icon: Bell },
+      { href: "/dashboard/messages", labelKey: "messages", icon: MessageCircle },
+      { href: "/dashboard/notifications", labelKey: "notifications", icon: Bell },
     ],
   },
   {
-    label: "Ferramentas",
+    groupKey: "tools",
     items: [
-      { href: "/dashboard/widgets", label: "Widgets", icon: Code },
-      { href: "/dashboard/api-keys", label: "API Keys", icon: Key },
-      { href: "/dashboard/settings", label: "Definições", icon: Settings },
+      { href: "/dashboard/widgets", labelKey: "widgets", icon: Code },
+      { href: "/dashboard/api-keys", labelKey: "apiKeys", icon: Key },
+      { href: "/dashboard/settings", labelKey: "settings", icon: Settings },
     ],
   },
   {
-    label: "Vendedor",
+    groupKey: "seller",
     sellerOnly: true,
     items: [
-      { href: "/dashboard/my-products", label: "Meus Produtos", icon: Package },
-      { href: "/dashboard/submit-product", label: "Submeter Produto", icon: Plus },
-      { href: "/dashboard/seller-analytics", label: "Análise de Vendas", icon: BarChart3 },
-      { href: "/dashboard/coupons", label: "Cupões", icon: Tag },
-      { href: "/dashboard/seller-payouts", label: "Pagamentos", icon: Wallet },
+      { href: "/dashboard/my-products", labelKey: "myProducts", icon: Package },
+      { href: "/dashboard/submit-product", labelKey: "submitProduct", icon: Plus },
+      { href: "/dashboard/seller-analytics", labelKey: "sellerAnalytics", icon: BarChart3 },
+      { href: "/dashboard/coupons", labelKey: "coupons", icon: Tag },
+      { href: "/dashboard/seller-payouts", labelKey: "payouts", icon: Wallet },
     ],
   },
 ];
@@ -103,6 +104,9 @@ interface DashboardNavProps {
 export function DashboardNav({ canSell, storeEnabled = true }: DashboardNavProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const tGroups = useTranslations("dashboard.groups");
+  const tItems = useTranslations("dashboard.items");
+  const tDash = useTranslations("dashboard");
 
   const visibleGroups = navGroups.filter((g) => {
     if (g.sellerOnly && (!canSell || !storeEnabled)) return false;
@@ -120,12 +124,12 @@ export function DashboardNav({ canSell, storeEnabled = true }: DashboardNavProps
       <div className="lg:hidden border-b border-white/5 bg-surface-container-low">
         <div className="flex items-center justify-between px-4 py-3">
           <span className="text-[10px] font-mono text-white/30 uppercase tracking-widest">
-            Dashboard
+            {tDash("title")}
           </span>
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="text-white/60 hover:text-primary transition-colors p-1"
-            aria-label={mobileOpen ? "Fechar menu" : "Abrir menu"}
+            aria-label={mobileOpen ? tDash("backToSite") : tDash("title")}
           >
             {mobileOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -151,12 +155,12 @@ export function DashboardNav({ canSell, storeEnabled = true }: DashboardNavProps
         {/* Sidebar header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
           <span className="text-[10px] font-mono text-white/30 uppercase tracking-widest">
-            Dashboard
+            {tDash("title")}
           </span>
           <button
             onClick={() => setMobileOpen(false)}
             className="lg:hidden text-white/40 hover:text-white transition-colors"
-            aria-label="Fechar menu"
+            aria-label={tDash("backToSite")}
           >
             <X size={16} />
           </button>
@@ -165,9 +169,9 @@ export function DashboardNav({ canSell, storeEnabled = true }: DashboardNavProps
         {/* Nav groups */}
         <nav className="px-3 py-4 space-y-5">
           {visibleGroups.map((group) => (
-            <div key={group.label}>
+            <div key={group.groupKey}>
               <p className="px-3 mb-1.5 text-[10px] font-mono text-white/25 uppercase tracking-widest">
-                {group.label}
+                {tGroups(group.groupKey)}
               </p>
               <ul className="space-y-0.5">
                 {group.items.map((item) => {
@@ -186,7 +190,7 @@ export function DashboardNav({ canSell, storeEnabled = true }: DashboardNavProps
                         )}
                       >
                         <Icon size={15} className={active ? "text-primary" : "text-white/30"} />
-                        {item.label}
+                        {tItems(item.labelKey)}
                       </Link>
                     </li>
                   );
@@ -203,7 +207,7 @@ export function DashboardNav({ canSell, storeEnabled = true }: DashboardNavProps
             className="flex items-center gap-3 px-3 py-2 rounded-md text-[13px] text-white/30 hover:text-white/60 transition-colors"
           >
             <Home size={15} />
-            Voltar ao site
+            {tDash("backToSite")}
           </Link>
         </div>
       </aside>
