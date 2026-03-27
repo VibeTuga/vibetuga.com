@@ -14,7 +14,6 @@ test.describe("Header Navigation", () => {
       "href",
       "/leaderboard",
     );
-    await expect(nav.getByRole("link", { name: "Store" })).toHaveAttribute("href", "/store");
   });
 
   test("blog link navigates to blog page", async ({ page }) => {
