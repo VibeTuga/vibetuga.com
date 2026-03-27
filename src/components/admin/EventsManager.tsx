@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2, Pencil, Calendar, X } from "lucide-react";
 import { MarkdownEditor } from "@/components/shared/MarkdownEditor";
+import { ImageUpload } from "@/components/shared/ImageUpload";
 
 interface EventRow {
   id: string;
@@ -243,31 +244,27 @@ export function EventsManager({ initialEvents }: { initialEvents: EventRow[] }) 
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-[10px] font-mono uppercase text-white/40 mb-1">
-                  Link
-                </label>
-                <input
-                  type="url"
-                  value={formData.link}
-                  onChange={(e) => setFormData({ ...formData, link: e.target.value })}
-                  className="w-full px-3 py-2 bg-surface-container-high border border-white/10 rounded text-sm text-white placeholder:text-white/20 focus:border-primary/50 focus:outline-none"
-                  placeholder="https://..."
-                />
-              </div>
-              <div>
-                <label className="block text-[10px] font-mono uppercase text-white/40 mb-1">
-                  Imagem de Capa
-                </label>
-                <input
-                  type="url"
-                  value={formData.coverImage}
-                  onChange={(e) => setFormData({ ...formData, coverImage: e.target.value })}
-                  className="w-full px-3 py-2 bg-surface-container-high border border-white/10 rounded text-sm text-white placeholder:text-white/20 focus:border-primary/50 focus:outline-none"
-                  placeholder="https://..."
-                />
-              </div>
+            <div>
+              <label className="block text-[10px] font-mono uppercase text-white/40 mb-1">
+                Link
+              </label>
+              <input
+                type="url"
+                value={formData.link}
+                onChange={(e) => setFormData({ ...formData, link: e.target.value })}
+                className="w-full px-3 py-2 bg-surface-container-high border border-white/10 rounded text-sm text-white placeholder:text-white/20 focus:border-primary/50 focus:outline-none"
+                placeholder="https://..."
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-mono uppercase text-white/40 mb-1">
+                Imagem de Capa
+              </label>
+              <ImageUpload
+                value={formData.coverImage}
+                onChange={(url) => setFormData({ ...formData, coverImage: url })}
+              />
             </div>
 
             <div className="flex justify-end gap-3 pt-2">

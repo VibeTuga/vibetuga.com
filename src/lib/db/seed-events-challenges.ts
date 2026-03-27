@@ -131,6 +131,73 @@ const CHALLENGES = [
     xpReward: 150,
     status: "draft" as const,
   },
+  // Active
+  {
+    title: "CLI Tool Sprint: A Melhor Ferramenta em 24h",
+    description:
+      "Tens 24 horas para construir a melhor ferramenta de linha de comandos usando IA. Pode ser um CLI para produtividade, DevOps, análise de dados — o que quiseres. Originalidade e utilidade prática são os critérios de avaliação!",
+    startAt: daysAgo(2),
+    endAt: daysFromNow(5),
+    xpReward: 150,
+    status: "active" as const,
+  },
+  {
+    title: "Bot Builder Battle: Cria o Teu Bot",
+    description:
+      "Constrói um bot para Discord ou Telegram usando vibe coding. O bot deve ser útil para a comunidade — moderação, jogos, notificações, ou algo totalmente inovador. Bots funcionais ganham XP extra!",
+    startAt: daysAgo(3),
+    endAt: daysFromNow(11),
+    xpReward: 175,
+    status: "active" as const,
+  },
+  // Voting
+  {
+    title: "Documentation Dash: Docs com Superpoderes",
+    description:
+      "O desafio de documentação terminou! Os participantes usaram ferramentas de IA para contribuir documentação de qualidade para projetos open source. Agora é a tua vez de votar na melhor contribuição.",
+    startAt: daysAgo(15),
+    endAt: daysAgo(3),
+    xpReward: 100,
+    status: "voting" as const,
+  },
+  // Completed
+  {
+    title: "API Speedrun: REST API em 4 Horas",
+    description:
+      "Desafio relâmpago concluído! Os participantes tiveram apenas 4 horas para construir uma REST API completa com autenticação, CRUD e documentação. Velocidade e qualidade de código foram os critérios decisivos. Parabéns aos finalistas!",
+    startAt: daysAgo(35),
+    endAt: daysAgo(30),
+    xpReward: 100,
+    status: "completed" as const,
+  },
+  {
+    title: "AI Art Meets Code: Arte Generativa",
+    description:
+      "Criatividade sem limites! Os participantes combinaram código e IA para criar arte generativa — shaders, SVGs dinâmicos, visualizações de dados artísticas. Um desafio que provou que programar também é uma forma de arte.",
+    startAt: daysAgo(75),
+    endAt: daysAgo(70),
+    xpReward: 125,
+    status: "completed" as const,
+  },
+  // Draft (future)
+  {
+    title: "Design System Challenge: Componentes de Raiz",
+    description:
+      "Em breve! Cria uma biblioteca de componentes reutilizáveis do zero usando vibe coding. Acessibilidade, consistência visual e documentação serão avaliadas. Prepara o teu Figma e o teu editor!",
+    startAt: daysFromNow(45),
+    endAt: daysFromNow(52),
+    xpReward: 200,
+    status: "draft" as const,
+  },
+  {
+    title: "Mobile First Challenge: PWA em 72 Horas",
+    description:
+      "Brevemente! Constrói uma Progressive Web App responsiva e funcional em apenas 72 horas. A app deve funcionar offline, ter boa performance mobile e resolver um problema real. Ferramentas de IA são obrigatórias!",
+    startAt: daysFromNow(60),
+    endAt: daysFromNow(63),
+    xpReward: 200,
+    status: "draft" as const,
+  },
 ];
 
 async function seedEventsChallenges() {
