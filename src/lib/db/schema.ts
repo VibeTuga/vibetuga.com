@@ -1128,11 +1128,11 @@ export const directMessagesRelations = relations(directMessages, ({ one }) => ({
 export const blogSeries = pgTable(
   "blog_series",
   {
-    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+    id: uuid("id").primaryKey().defaultRandom(),
     title: varchar("title", { length: 200 }).notNull(),
     slug: varchar("slug", { length: 200 }).unique().notNull(),
     description: text("description"),
-    coverImage: varchar("cover_image", { length: 500 }),
+    coverImage: text("cover_image"),
     authorId: uuid("author_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
@@ -1156,8 +1156,8 @@ export const blogSeriesRelations = relations(blogSeries, ({ one, many }) => ({
 export const blogSeriesPosts = pgTable(
   "blog_series_post",
   {
-    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
-    seriesId: integer("series_id")
+    id: uuid("id").primaryKey().defaultRandom(),
+    seriesId: uuid("series_id")
       .notNull()
       .references(() => blogSeries.id, { onDelete: "cascade" }),
     postId: uuid("post_id")

@@ -3,23 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  ChevronRight,
-  Menu,
-  X,
-  LayoutDashboard,
-  FileText,
-  FolderOpen,
-  Users,
-  Clock,
-  Rocket,
-  Mail,
-  ShoppingBag,
-  Shield,
-  Flag,
-  ActivitySquare,
-} from "lucide-react";
+import { ChevronRight, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { adminLinks } from "./admin-links";
 
 const breadcrumbMap: Record<string, string> = {
   "/admin": "Dashboard",
@@ -29,20 +15,6 @@ const breadcrumbMap: Record<string, string> = {
   "/admin/categories": "Categorias",
   "/admin/users": "Utilizadores",
 };
-
-const adminLinks = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { href: "/admin/blog", label: "Blog Posts", icon: FileText, exact: true },
-  { href: "/admin/blog/pending", label: "Pendentes", icon: Clock },
-  { href: "/admin/showcase", label: "Showcase", icon: Rocket },
-  { href: "/admin/newsletter", label: "Newsletter", icon: Mail },
-  { href: "/admin/store", label: "Loja", icon: ShoppingBag },
-  { href: "/admin/role-requests", label: "Pedidos de Role", icon: Shield },
-  { href: "/admin/reports", label: "Denúncias", icon: Flag },
-  { href: "/admin/audit-log", label: "Auditoria", icon: ActivitySquare },
-  { href: "/admin/categories", label: "Categorias", icon: FolderOpen },
-  { href: "/admin/users", label: "Utilizadores", icon: Users },
-];
 
 export function AdminHeader() {
   const pathname = usePathname();
@@ -111,10 +83,7 @@ export function AdminHeader() {
         <nav className="md:hidden border-t border-primary/10 bg-[#0e0e0e]/95 backdrop-blur-xl max-h-[calc(100vh-64px)] overflow-y-auto">
           <div className="flex flex-col px-6 py-4 gap-1">
             {adminLinks.map((link) => {
-              const active = isActive(
-                link.href,
-                "exact" in link ? (link as { exact?: boolean }).exact : undefined,
-              );
+              const active = isActive(link.href, link.exact);
               const Icon = link.icon;
               return (
                 <Link

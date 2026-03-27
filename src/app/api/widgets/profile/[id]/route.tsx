@@ -17,6 +17,19 @@ function escapeXml(str: string): string {
     .replace(/'/g, "&apos;");
 }
 
+async function fetchImageAsDataUri(url: string): Promise<string | null> {
+  try {
+    const res = await fetch(url, { next: { revalidate: 3600 } });
+    if (!res.ok) return null;
+    const contentType = res.headers.get("content-type") || "image/png";
+    const buffer = await res.arrayBuffer();
+    const base64 = Buffer.from(buffer).toString("base64");
+    return `data:${contentType};base64,${base64}`;
+  } catch {
+    return null;
+  }
+}
+
 function renderProfileSvg(data: {
   displayName: string;
   level: number;
@@ -122,6 +135,9 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     const badgeCount = badgeResult?.count ?? 0;
     const levelName = LEVEL_NAMES[user.level] ?? `LVL ${user.level}`;
 
+    // Convert avatar to inline data URI so it works when SVG is loaded via <img>
+    const avatarDataUri = user.image ? await fetchImageAsDataUri(user.image) : null;
+
     return new Response(
       renderProfileSvg({
         displayName: user.displayName || user.discordUsername || "VibeTuga User",
@@ -129,7 +145,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
         levelName,
         xpPoints: user.xpPoints,
         badgeCount,
-        avatarUrl: user.image,
+        avatarUrl: avatarDataUri,
       }),
       { status: 200, headers: CACHE_HEADERS },
     );

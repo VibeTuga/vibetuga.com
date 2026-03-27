@@ -13,7 +13,11 @@ export const metadata = {
 };
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const [session, storeEnabled] = await Promise.all([auth(), isFeatureEnabled("store_enabled")]);
+  const [session, storeEnabled, premiumEnabled] = await Promise.all([
+    auth(),
+    isFeatureEnabled("store_enabled"),
+    isFeatureEnabled("premium_enabled"),
+  ]);
 
   if (!session?.user) {
     redirect("/login");
@@ -23,7 +27,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
-      <DashboardNav canSell={canSell} storeEnabled={storeEnabled} />
+      <DashboardNav canSell={canSell} storeEnabled={storeEnabled} premiumEnabled={premiumEnabled} />
       <main className="flex-1 min-w-0 max-w-[1200px] mx-auto px-6 py-8 w-full">
         <PageFadeIn>{children}</PageFadeIn>
       </main>

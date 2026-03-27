@@ -49,6 +49,8 @@ export function Header({ user, features, liveStream }: HeaderProps) {
   const navLinks = allNavLinks.filter((link) => {
     if (link.href === "/store" && features?.storeEnabled === false) return false;
     if (link.href === "/challenges" && features?.challengesEnabled === false) return false;
+    if (link.href === "/pricing" && features?.premiumEnabled === false) return false;
+    if (link.href === "/events" && features?.eventsEnabled === false) return false;
     return true;
   });
 

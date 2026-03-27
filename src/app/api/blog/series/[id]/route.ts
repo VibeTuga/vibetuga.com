@@ -9,10 +9,7 @@ type RouteContext = { params: Promise<{ id: string }> };
 export async function GET(_request: Request, context: RouteContext) {
   try {
     const { id } = await context.params;
-    const seriesId = parseInt(id, 10);
-    if (isNaN(seriesId)) {
-      return NextResponse.json({ error: "ID inválido" }, { status: 400 });
-    }
+    const seriesId = id;
 
     const [series] = await db
       .select({
@@ -76,10 +73,7 @@ export async function PATCH(request: Request, context: RouteContext) {
 
   try {
     const { id } = await context.params;
-    const seriesId = parseInt(id, 10);
-    if (isNaN(seriesId)) {
-      return NextResponse.json({ error: "ID inválido" }, { status: 400 });
-    }
+    const seriesId = id;
 
     const [series] = await db
       .select({ id: blogSeries.id, authorId: blogSeries.authorId })
@@ -159,10 +153,7 @@ export async function DELETE(_request: Request, context: RouteContext) {
 
   try {
     const { id } = await context.params;
-    const seriesId = parseInt(id, 10);
-    if (isNaN(seriesId)) {
-      return NextResponse.json({ error: "ID inválido" }, { status: 400 });
-    }
+    const seriesId = id;
 
     const [series] = await db
       .select({ id: blogSeries.id, authorId: blogSeries.authorId })
