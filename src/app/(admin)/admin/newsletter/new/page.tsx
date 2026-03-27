@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft, Save } from "lucide-react";
+import { MarkdownEditor } from "@/components/shared/MarkdownEditor";
 
 export default function NewCampaignPage() {
   const router = useRouter();
@@ -83,13 +84,11 @@ export default function NewCampaignPage() {
           <label className="block font-mono text-[10px] uppercase tracking-widest text-white/40 mb-2">
             Conteúdo *
           </label>
-          <textarea
+          <MarkdownEditor
             value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder="Escreve o conteúdo da campanha aqui. Suporta texto simples ou HTML básico."
+            onChange={setContent}
             rows={16}
-            required
-            className="w-full bg-surface-container-lowest border border-white/10 focus:border-primary/50 text-sm py-3 px-4 text-white placeholder:text-white/20 font-mono outline-none transition-all resize-y"
+            placeholder="Escreve o conteúdo da campanha aqui. Suporta Markdown."
           />
         </div>
 

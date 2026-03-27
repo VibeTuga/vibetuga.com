@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2, Pencil, Calendar, X } from "lucide-react";
+import { MarkdownEditor } from "@/components/shared/MarkdownEditor";
 
 interface EventRow {
   id: string;
@@ -208,11 +209,10 @@ export function EventsManager({ initialEvents }: { initialEvents: EventRow[] }) 
               <label className="block text-[10px] font-mono uppercase text-white/40 mb-1">
                 Descrição
               </label>
-              <textarea
+              <MarkdownEditor
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(description) => setFormData({ ...formData, description })}
                 rows={3}
-                className="w-full px-3 py-2 bg-surface-container-high border border-white/10 rounded text-sm text-white placeholder:text-white/20 focus:border-primary/50 focus:outline-none resize-none"
                 placeholder="Descrição do evento"
               />
             </div>
