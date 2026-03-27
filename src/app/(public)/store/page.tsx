@@ -3,6 +3,8 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
+import { notFound } from "next/navigation";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 import { getApprovedProducts, getFeaturedCollections } from "@/lib/db/queries/store";
 import { ProductCard } from "@/components/store/ProductCard";
 import { Pagination } from "@/components/blog/Pagination";
@@ -35,6 +37,8 @@ type SearchParams = Promise<{
 }>;
 
 export default async function StorePage({ searchParams }: { searchParams: SearchParams }) {
+  if (!(await isFeatureEnabled("store_enabled"))) notFound();
+
   const params = await searchParams;
   const page = Math.max(1, parseInt(params.page ?? "1", 10) || 1);
 

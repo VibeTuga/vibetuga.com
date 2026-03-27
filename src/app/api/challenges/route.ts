@@ -3,8 +3,13 @@ import { db } from "@/lib/db";
 import { challenges, challengeEntries, users } from "@/lib/db/schema";
 import { eq, desc, sql, and } from "drizzle-orm";
 import { auth } from "@/lib/auth";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 
 export async function GET(request: NextRequest) {
+  if (!(await isFeatureEnabled("challenges_enabled"))) {
+    return NextResponse.json({ error: "Feature disabled" }, { status: 404 });
+  }
+
   const { searchParams } = new URL(request.url);
   const status = searchParams.get("status");
 
@@ -39,6 +44,10 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: Request) {
+  if (!(await isFeatureEnabled("challenges_enabled"))) {
+    return NextResponse.json({ error: "Feature disabled" }, { status: 404 });
+  }
+
   try {
     const session = await auth();
     if (!session?.user?.id) {

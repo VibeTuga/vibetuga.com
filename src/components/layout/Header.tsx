@@ -12,13 +12,14 @@ import type { SessionUser } from "@/components/layout/UserMenu";
 import { NotificationBell } from "@/components/shared/NotificationBell";
 import { MessageBadge } from "@/components/shared/MessageBadge";
 import { cn } from "@/lib/utils";
+import type { EnabledFeatures } from "@/lib/feature-gate";
 
 const SearchDialog = dynamic(
   () => import("@/components/shared/SearchDialog").then((m) => m.SearchDialog),
   { ssr: false },
 );
 
-const navLinks = [
+const allNavLinks = [
   { href: "/", label: "Home" },
   { href: "/blog", label: "Blog" },
   { href: "/showcase", label: "Showcase" },
@@ -28,9 +29,20 @@ const navLinks = [
   { href: "/store", label: "Store" },
 ] as const;
 
-export function Header({ user }: { user?: SessionUser | null }) {
+interface HeaderProps {
+  user?: SessionUser | null;
+  features?: Partial<EnabledFeatures>;
+}
+
+export function Header({ user, features }: HeaderProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const navLinks = allNavLinks.filter((link) => {
+    if (link.href === "/store" && features?.storeEnabled === false) return false;
+    if (link.href === "/challenges" && features?.challengesEnabled === false) return false;
+    return true;
+  });
 
   function isActive(href: string) {
     if (href === "/") return pathname === "/";

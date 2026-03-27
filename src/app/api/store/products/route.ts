@@ -3,10 +3,15 @@ import { db } from "@/lib/db";
 import { storeProducts, storeReviews, users } from "@/lib/db/schema";
 import { eq, desc, and, or, count, sql, ilike } from "drizzle-orm";
 import { auth } from "@/lib/auth";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 
 const PRODUCTS_PER_PAGE = 12;
 
 export async function GET(request: Request) {
+  if (!(await isFeatureEnabled("store_enabled"))) {
+    return NextResponse.json({ error: "Feature disabled" }, { status: 404 });
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const productType = searchParams.get("type");
@@ -86,6 +91,10 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  if (!(await isFeatureEnabled("store_enabled"))) {
+    return NextResponse.json({ error: "Feature disabled" }, { status: 404 });
+  }
+
   const session = await auth();
 
   if (!session?.user) {

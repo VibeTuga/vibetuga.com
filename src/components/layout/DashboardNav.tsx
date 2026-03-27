@@ -91,11 +91,19 @@ const navGroups: NavGroup[] = [
   },
 ];
 
-export function DashboardNav({ canSell }: { canSell: boolean }) {
+interface DashboardNavProps {
+  canSell: boolean;
+  storeEnabled?: boolean;
+}
+
+export function DashboardNav({ canSell, storeEnabled = true }: DashboardNavProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const visibleGroups = navGroups.filter((g) => !g.sellerOnly || canSell);
+  const visibleGroups = navGroups.filter((g) => {
+    if (g.sellerOnly && (!canSell || !storeEnabled)) return false;
+    return true;
+  });
 
   function isActive(href: string, exact?: boolean) {
     if (exact) return pathname === href;

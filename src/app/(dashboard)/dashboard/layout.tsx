@@ -1,6 +1,7 @@
 import dynamic from "next/dynamic";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 import { DashboardNav } from "@/components/layout/DashboardNav";
 
 const PageFadeIn = dynamic(() =>
@@ -12,7 +13,7 @@ export const metadata = {
 };
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const session = await auth();
+  const [session, storeEnabled] = await Promise.all([auth(), isFeatureEnabled("store_enabled")]);
 
   if (!session?.user) {
     redirect("/login");
@@ -22,7 +23,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
-      <DashboardNav canSell={canSell} />
+      <DashboardNav canSell={canSell} storeEnabled={storeEnabled} />
       <main className="flex-1 min-w-0 max-w-[1200px] mx-auto px-6 py-8 w-full">
         <PageFadeIn>{children}</PageFadeIn>
       </main>
