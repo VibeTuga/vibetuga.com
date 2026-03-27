@@ -5,6 +5,7 @@ import Image from "next/image";
 import { getContributors, getMonthlyHighlights } from "@/lib/db/queries/contributors";
 import { getContributorsPageJsonLd } from "@/lib/jsonld";
 import { VerifiedBadge } from "@/components/shared/VerifiedBadge";
+import { auth } from "@/lib/auth";
 
 export const revalidate = 60;
 
@@ -84,7 +85,13 @@ function formatXP(xp: number): string {
 // ─── page ───────────────────────────────────────────────────
 
 export default async function ContributorsPage() {
-  const [contributors, highlights] = await Promise.all([getContributors(), getMonthlyHighlights()]);
+  const [contributors, highlights, session] = await Promise.all([
+    getContributors(),
+    getMonthlyHighlights(),
+    auth().catch(() => null),
+  ]);
+
+  const isContributor = session?.user && contributors.some((c) => c.id === session.user.id);
 
   const jsonLd = getContributorsPageJsonLd();
 
@@ -280,22 +287,24 @@ export default async function ContributorsPage() {
         )}
       </section>
 
-      {/* ── CTA Section ── */}
-      <section className="bg-surface-container-low border border-white/5 p-8 md:p-12 text-center">
-        <h2 className="font-headline text-3xl font-bold tracking-tight mb-3">
-          Queres ser contribuidor?
-        </h2>
-        <p className="text-white/50 text-sm max-w-md mx-auto mb-8">
-          Contribui para a comunidade através de posts, projetos, mentoria ou código. Pede o upgrade
-          do teu role e junta-te ao programa.
-        </p>
-        <Link
-          href="/dashboard/settings"
-          className="inline-block bg-primary text-on-primary font-label text-xs font-bold uppercase tracking-widest px-8 py-3 hover:shadow-[0_0_20px_rgba(161,255,194,0.3)] active:scale-95 transition-all"
-        >
-          Pedir Role de Contribuidor
-        </Link>
-      </section>
+      {/* ── CTA Section (hidden for existing contributors) ── */}
+      {!isContributor && (
+        <section className="bg-surface-container-low border border-white/5 p-8 md:p-12 text-center">
+          <h2 className="font-headline text-3xl font-bold tracking-tight mb-3">
+            Queres ser contribuidor?
+          </h2>
+          <p className="text-white/50 text-sm max-w-md mx-auto mb-8">
+            Contribui para a comunidade através de posts, projetos, mentoria ou código. Pede o
+            upgrade do teu role e junta-te ao programa.
+          </p>
+          <Link
+            href="/dashboard/settings"
+            className="inline-block bg-primary text-on-primary font-label text-xs font-bold uppercase tracking-widest px-8 py-3 hover:shadow-[0_0_20px_rgba(161,255,194,0.3)] active:scale-95 transition-all"
+          >
+            Pedir Role de Contribuidor
+          </Link>
+        </section>
+      )}
     </div>
   );
 }
