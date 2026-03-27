@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Save, ArrowLeft, Clock, Calendar } from "lucide-react";
 import Link from "next/link";
 import { ImageUpload } from "@/components/shared/ImageUpload";
+import { MarkdownEditor } from "@/components/shared/MarkdownEditor";
 import { RevisionHistory } from "@/components/blog/RevisionHistory";
 import { useAutosave, getLocalDraft, clearLocalDraft } from "@/hooks/useAutosave";
 
@@ -254,13 +255,11 @@ export function BlogPostForm({
             <label className="block text-[10px] font-mono uppercase tracking-widest text-white/40 mb-2">
               Conteúdo
             </label>
-            <textarea
+            <MarkdownEditor
               value={form.content}
-              onChange={(e) => setForm((prev) => ({ ...prev, content: e.target.value }))}
-              required
+              onChange={(content) => setForm((prev) => ({ ...prev, content }))}
               rows={20}
-              className="w-full bg-surface-container-lowest border border-white/10 px-4 py-3 text-sm text-white font-mono placeholder:text-white/20 focus:ring-1 focus:ring-tertiary focus:border-tertiary outline-none transition-all resize-y"
-              placeholder="Escreve o conteúdo do artigo aqui... (Tiptap editor será adicionado mais tarde)"
+              placeholder="Escreve o conteúdo do artigo aqui em Markdown..."
             />
           </div>
         </div>

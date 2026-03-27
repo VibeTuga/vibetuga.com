@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Upload } from "lucide-react";
 import { FileUpload } from "@/components/shared/FileUpload";
+import { MarkdownEditor } from "@/components/shared/MarkdownEditor";
 
 export function ProductUpdateForm({ productId }: { productId: string }) {
   const router = useRouter();
@@ -78,14 +79,11 @@ export function ProductUpdateForm({ productId }: { productId: string }) {
         <label className="block text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2">
           Changelog *
         </label>
-        <textarea
+        <MarkdownEditor
           value={changelog}
-          onChange={(e) => setChangelog(e.target.value)}
+          onChange={setChangelog}
           placeholder="Descreve as alterações desta versão..."
-          required
-          maxLength={5000}
           rows={5}
-          className="w-full px-4 py-3 bg-surface-container-lowest text-white text-sm border border-white/5 rounded focus:border-tertiary focus:outline-none transition-colors placeholder:text-white/20 resize-y"
         />
       </div>
 

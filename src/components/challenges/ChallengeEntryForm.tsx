@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Send } from "lucide-react";
+import { MarkdownEditor } from "@/components/shared/MarkdownEditor";
 
 export function ChallengeEntryForm({ challengeId }: { challengeId: number }) {
   const [submissionUrl, setSubmissionUrl] = useState("");
@@ -76,12 +77,11 @@ export function ChallengeEntryForm({ challengeId }: { challengeId: number }) {
           <label className="block text-xs font-mono text-white/40 mb-1.5">
             Descrição (opcional)
           </label>
-          <textarea
+          <MarkdownEditor
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Breve descrição do teu projeto..."
+            onChange={setDescription}
             rows={3}
-            className="w-full px-4 py-2.5 bg-surface-container-low border border-white/10 rounded text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-primary/40 transition-colors resize-none"
+            placeholder="Breve descrição do teu projeto..."
           />
         </div>
 

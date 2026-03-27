@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Plus, Trophy, Users, Crown } from "lucide-react";
+import { MarkdownEditor } from "@/components/shared/MarkdownEditor";
 
 interface ChallengeRow {
   id: number;
@@ -178,12 +179,10 @@ export function ChallengesManager({
             <label className="block text-xs font-mono text-white/40 mb-1.5">
               Descrição * (Markdown)
             </label>
-            <textarea
-              required
-              rows={6}
+            <MarkdownEditor
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full px-4 py-2.5 bg-surface-container-low border border-white/10 rounded text-sm text-white font-mono focus:outline-none focus:border-primary/40 resize-y"
+              onChange={(description) => setFormData({ ...formData, description })}
+              rows={6}
             />
           </div>
 
