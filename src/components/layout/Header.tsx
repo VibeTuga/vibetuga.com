@@ -5,7 +5,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Video } from "lucide-react";
 import { Logo } from "@/components/shared/Logo";
 import { SearchTrigger } from "@/components/shared/SearchDialog";
 import { UserMenu, MobileUserMenu } from "@/components/layout/UserMenu";
@@ -15,6 +15,7 @@ import { MessageBadge } from "@/components/shared/MessageBadge";
 import { LanguageToggle } from "@/components/shared/LanguageToggle";
 import { cn } from "@/lib/utils";
 import type { EnabledFeatures } from "@/lib/feature-gate";
+import type { LiveStreamInfo } from "./HeaderServer";
 
 const SearchDialog = dynamic(
   () => import("@/components/shared/SearchDialog").then((m) => m.SearchDialog),
@@ -27,6 +28,7 @@ const allNavLinks = [
   { href: "/showcase", labelKey: "showcase" },
   { href: "/challenges", labelKey: "challenges" },
   { href: "/events", labelKey: "events" },
+  { href: "/streams", labelKey: "streams" },
   { href: "/leaderboard", labelKey: "leaderboard" },
   { href: "/contributors", labelKey: "contributors" },
   { href: "/store", labelKey: "store" },
@@ -36,9 +38,10 @@ const allNavLinks = [
 interface HeaderProps {
   user?: SessionUser | null;
   features?: Partial<EnabledFeatures>;
+  liveStream?: LiveStreamInfo;
 }
 
-export function Header({ user, features }: HeaderProps) {
+export function Header({ user, features, liveStream }: HeaderProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const t = useTranslations("nav");
@@ -79,6 +82,20 @@ export function Header({ user, features }: HeaderProps) {
 
         {/* Right side: lang + search + auth area + mobile toggle */}
         <div className="flex items-center gap-4">
+          {liveStream && (
+            <Link
+              href="/streams"
+              className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 bg-red-500/15 border border-red-500/30 rounded-full text-[11px] font-mono uppercase text-red-400 hover:bg-red-500/25 transition-colors"
+              title={liveStream.title}
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+              </span>
+              <Video size={12} />
+              AO VIVO
+            </Link>
+          )}
           <LanguageToggle className="hidden sm:flex" />
           <SearchTrigger />
           <SearchDialog />
@@ -129,6 +146,22 @@ export function Header({ user, features }: HeaderProps) {
                 {t(link.labelKey)}
               </Link>
             ))}
+
+            {/* Mobile live indicator */}
+            {liveStream && (
+              <Link
+                href="/streams"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-2 py-3 text-red-400 font-mono text-sm uppercase"
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+                </span>
+                <Video size={14} />
+                AO VIVO — {liveStream.title}
+              </Link>
+            )}
 
             {/* Mobile language toggle */}
             <div className="py-3 sm:hidden">

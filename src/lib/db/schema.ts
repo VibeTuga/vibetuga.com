@@ -1520,6 +1520,42 @@ export const featureFlags = pgTable(
   (t) => [index("feature_flag_key_idx").on(t.key)],
 );
 
+// ─── Stream Schedule ─────────────────────────────────────
+
+export const streamPlatformEnum = pgEnum("stream_platform", ["twitch", "youtube"]);
+
+export const streamSchedule = pgTable(
+  "stream_schedule",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    platform: streamPlatformEnum("platform").notNull(),
+    title: varchar("title", { length: 300 }).notNull(),
+    description: text("description"),
+    scheduledAt: timestamp("scheduled_at", { mode: "date" }).notNull(),
+    duration: integer("duration"),
+    vodUrl: text("vod_url"),
+    thumbnailUrl: text("thumbnail_url"),
+    isLive: boolean("is_live").default(false).notNull(),
+    createdBy: uuid("created_by").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [
+    index("stream_schedule_scheduled_at_idx").on(t.scheduledAt),
+    index("stream_schedule_is_live_idx").on(t.isLive),
+    index("stream_schedule_platform_idx").on(t.platform),
+  ],
+);
+
+export const streamScheduleRelations = relations(streamSchedule, ({ one }) => ({
+  creator: one(users, {
+    fields: [streamSchedule.createdBy],
+    references: [users.id],
+  }),
+}));
+
 // ─── Stripe Webhook Events (Idempotency) ─────────────────
 
 export const stripeWebhookEvents = pgTable(

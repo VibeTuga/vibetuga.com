@@ -1,10 +1,21 @@
 import { auth } from "@/lib/auth";
 import { getEnabledFeatures } from "@/lib/feature-gate";
+import { getLiveStream } from "@/lib/db/queries/streams";
 import { Header } from "./Header";
 import type { SessionUser } from "./UserMenu";
 
+export type LiveStreamInfo = {
+  id: string;
+  platform: "twitch" | "youtube";
+  title: string;
+} | null;
+
 export async function HeaderServer() {
-  const [session, features] = await Promise.all([auth(), getEnabledFeatures()]);
+  const [session, features, liveStream] = await Promise.all([
+    auth(),
+    getEnabledFeatures(),
+    getLiveStream(),
+  ]);
 
   const user: SessionUser | null = session?.user
     ? {
@@ -16,5 +27,5 @@ export async function HeaderServer() {
       }
     : null;
 
-  return <Header user={user} features={features} />;
+  return <Header user={user} features={features} liveStream={liveStream} />;
 }
