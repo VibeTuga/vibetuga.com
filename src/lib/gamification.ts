@@ -131,6 +131,11 @@ export async function checkAndAwardBadges(userId: string): Promise<void> {
     .from(xpEvents)
     .where(and(eq(xpEvents.userId, userId), eq(xpEvents.action, "blog_post_published")));
 
+  const referralCount = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(xpEvents)
+    .where(and(eq(xpEvents.userId, userId), eq(xpEvents.action, "referred_user")));
+
   const stats = {
     xpPoints: user.xpPoints,
     level: user.level,
@@ -138,6 +143,7 @@ export async function checkAndAwardBadges(userId: string): Promise<void> {
     comments: Number(commentCount[0]?.count ?? 0),
     projects: Number(projectCount[0]?.count ?? 0),
     posts: Number(postCount[0]?.count ?? 0),
+    referrals: Number(referralCount[0]?.count ?? 0),
   };
 
   const toAward: string[] = [];
@@ -162,6 +168,7 @@ interface UserStats {
   comments: number;
   projects: number;
   posts: number;
+  referrals: number;
 }
 
 function qualifiesForBadge(slug: string, stats: UserStats): boolean {
@@ -180,6 +187,8 @@ function qualifiesForBadge(slug: string, stats: UserStats): boolean {
       return stats.level >= 5;
     case "level-10":
       return stats.level >= 10;
+    case "referral-king":
+      return stats.referrals >= 5;
     default:
       return false;
   }

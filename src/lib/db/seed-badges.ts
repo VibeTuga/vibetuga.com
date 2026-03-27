@@ -74,6 +74,14 @@ const BADGES = [
     criteria: "Atingir nível 10",
     xpReward: 500,
   },
+  {
+    name: "Referral King",
+    slug: "referral-king",
+    description: "Trouxe 5 ou mais membros para a comunidade",
+    icon: "🔗",
+    criteria: "5 ou mais referências completadas",
+    xpReward: 100,
+  },
 ];
 
 export async function seedBadges() {
