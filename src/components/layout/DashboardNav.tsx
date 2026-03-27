@@ -9,6 +9,7 @@ import {
   Bookmark,
   BookOpen,
   Code,
+  CreditCard,
   FileText,
   Heart,
   Home,
@@ -61,6 +62,7 @@ const navGroups: NavGroup[] = [
     label: "Compras",
     items: [
       { href: "/dashboard/my-purchases", label: "Minhas Compras", icon: ShoppingBag },
+      { href: "/dashboard/subscription", label: "Subscrição", icon: CreditCard },
       { href: "/dashboard/wishlist", label: "Lista de Desejos", icon: Heart },
       { href: "/dashboard/collections", label: "Coleções", icon: Bookmark },
     ],
