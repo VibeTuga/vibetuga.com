@@ -169,6 +169,13 @@
       "when": 1774610384680,
       "tag": "0023_luxuriant_dazzler",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1774828800000,
+      "tag": "0025_stream_schedule",
+      "breakpoints": true
     }
   ]
 }

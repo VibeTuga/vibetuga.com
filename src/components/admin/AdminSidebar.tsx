@@ -22,6 +22,7 @@ import {
   Calendar,
   BarChart3,
   ToggleRight,
+  Video,
 } from "lucide-react";
 import { Logo } from "@/components/shared/Logo";
 import { cn } from "@/lib/utils";
@@ -40,6 +41,7 @@ const adminLinks: readonly {
   { href: "/admin/challenges", label: "Desafios", icon: Trophy },
   { href: "/admin/contributors", label: "Contribuidores", icon: Heart },
   { href: "/admin/events", label: "Eventos", icon: Calendar },
+  { href: "/admin/streams", label: "Streams", icon: Video },
   { href: "/admin/analytics", label: "Analíticas", icon: BarChart3 },
   { href: "/admin/store", label: "Loja", icon: ShoppingBag },
   { href: "/admin/collections", label: "Coleções", icon: Library },
