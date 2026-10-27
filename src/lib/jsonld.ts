@@ -1,3 +1,14 @@
+/** Serialize JSON-LD for an HTML script element without allowing script breakouts. */
+export function safeJsonLd(value: object): string {
+  // JSON escaping preserves the data while keeping HTML parser delimiters inert.
+  return JSON.stringify(value)
+    .replace(/</g, "\\u003c")
+    .replace(/>/g, "\\u003e")
+    .replace(/&/g, "\\u0026")
+    .replace(/\u2028/g, "\\u2028")
+    .replace(/\u2029/g, "\\u2029");
+}
+
 const SITE_URL = "https://vibetuga.com";
 
 // ─── Organization ──────────────────────────────────────────────────────────────

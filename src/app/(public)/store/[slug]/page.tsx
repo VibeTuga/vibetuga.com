@@ -13,7 +13,7 @@ import { BuyButton } from "@/components/store/BuyButton";
 import { WishlistButton } from "@/components/store/WishlistButton";
 import { ProductReviews } from "@/components/store/ProductReviews";
 import { ReportButton } from "@/components/shared/ReportButton";
-import { getProductJsonLd } from "@/lib/jsonld";
+import { getProductJsonLd, safeJsonLd } from "@/lib/jsonld";
 import { auth } from "@/lib/auth";
 import { ExternalLink, Package } from "lucide-react";
 
@@ -127,7 +127,7 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
     <div className="max-w-5xl mx-auto px-6 py-8">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(getProductJsonLd(product)) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(getProductJsonLd(product)) }}
       />
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 mb-8 text-xs font-mono text-white/40">

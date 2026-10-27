@@ -13,7 +13,7 @@ import { MarkdownContent } from "@/components/blog/MarkdownContent";
 import { ReportButton } from "@/components/shared/ReportButton";
 import { ShareButton } from "@/components/blog/ShareButton";
 import { TableOfContents } from "@/components/blog/TableOfContents";
-import { getArticleJsonLd } from "@/lib/jsonld";
+import { getArticleJsonLd, safeJsonLd } from "@/lib/jsonld";
 import { BarChart3 } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { getSeriesForPost } from "@/lib/db/queries/series";
@@ -82,7 +82,7 @@ export default async function BlogPostPage({ params }: Props) {
         <article className="max-w-[800px] w-full">
           <script
             type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(getArticleJsonLd(post)) }}
+            dangerouslySetInnerHTML={{ __html: safeJsonLd(getArticleJsonLd(post)) }}
           />
           <ViewTracker postId={post.id} />
 

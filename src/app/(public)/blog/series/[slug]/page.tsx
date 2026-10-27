@@ -1,3 +1,4 @@
+import { safeJsonLd } from "@/lib/jsonld";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -59,7 +60,7 @@ export default async function SeriesDetailPage({ params }: Props) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
+          __html: safeJsonLd({
             "@context": "https://schema.org",
             "@type": "ItemList",
             name: series.title,

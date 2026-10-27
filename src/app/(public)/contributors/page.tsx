@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { getContributors, getMonthlyHighlights } from "@/lib/db/queries/contributors";
-import { getContributorsPageJsonLd } from "@/lib/jsonld";
+import { getContributorsPageJsonLd, safeJsonLd } from "@/lib/jsonld";
 import { VerifiedBadge } from "@/components/shared/VerifiedBadge";
 import { auth } from "@/lib/auth";
 
@@ -97,10 +97,7 @@ export default async function ContributorsPage() {
 
   return (
     <div className="max-w-[1200px] mx-auto px-4 md:px-12 py-8 min-h-screen">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
 
       {/* ── Hero Section ── */}
       <section className="mb-16">

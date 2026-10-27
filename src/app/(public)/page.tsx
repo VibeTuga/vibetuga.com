@@ -11,7 +11,7 @@ import {
 } from "@/lib/db/queries/homepage";
 import { getLevelName } from "@/lib/db/queries/profile";
 import { formatDatePT } from "@/lib/blog-utils";
-import { getOrganizationJsonLd, getWebSiteJsonLd } from "@/lib/jsonld";
+import { getOrganizationJsonLd, getWebSiteJsonLd, safeJsonLd } from "@/lib/jsonld";
 
 const AnimateIn = dynamic(() => import("@/components/shared/AnimateIn").then((m) => m.AnimateIn));
 
@@ -537,7 +537,7 @@ export default function HomePage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify([getOrganizationJsonLd(), getWebSiteJsonLd()]),
+          __html: safeJsonLd([getOrganizationJsonLd(), getWebSiteJsonLd()]),
         }}
       />
       <HeroSection />
